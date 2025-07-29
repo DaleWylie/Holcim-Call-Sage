@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Holcim Call Sage',
-  description: 'AI-Powered Quality Assistant for IT Service Desks',
+  description: 'AI-Powered Quality Assistant for Holcim',
 };
 
 export default function RootLayout({

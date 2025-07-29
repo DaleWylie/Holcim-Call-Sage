@@ -105,7 +105,7 @@ export default function CallReviewForm() {
           Holcim Call Sage
         </CardTitle>
         <CardDescription>
-          AI-Powered Quality Assistant for IT Service Desks
+          AI-Powered Quality Assistant for Holcim
         </CardDescription>
       </CardHeader>
       <CardContent className="p-6 sm:p-8 space-y-8">
@@ -135,7 +135,7 @@ export default function CallReviewForm() {
           <Textarea
             id="callTranscript"
             className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base"
-            rows={15}
+            rows={8}
             value={callTranscript}
             onChange={(e) => setCallTranscript(e.target.value)}
             placeholder="Paste your Genesys Cloud call transcript here... (Optional if uploading WAV file)"
