@@ -10,14 +10,14 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle } from 'lucide-react';
 
 const defaultScoringMatrix = `{
-  "1. Greeting & Introduction": "Assesses how the call was initiated: Greeted caller professionally and warmly, introduced self by name and team/department, asked for and confirmed caller’s name and/or account/ID politely. For this criterion, consider the sentiment and clear intent of the agent's opening remarks, even if specific words (like their name) are not perfectly transcribed. (0-5)",
-  "2. Communication Style": "Evaluates the analyst's verbal communication: Maintained a positive, professional tone of voice; spoke clearly and at an appropriate pace; avoided jargon and used language appropriate to caller’s understanding; demonstrated active listening (e.g., verbal nods, paraphrasing). (0-5)",
-  "3. Issue Handling & Clarity": "Focuses on problem diagnosis and information delivery: Asked relevant, probing questions to understand the issue; repeated or summarized issue back to confirm understanding; showed ownership and confidence in addressing the issue; provided clear instructions or updates on what is being done. (0-5)",
-  "4. Hold Procedure": "Checks adherence to hold protocols: Asked permission before placing the caller on hold; explained the reason for the hold; thanked the caller when returning from hold; updated caller on progress when returning. (0-5)",
-  "5. Professionalism & Empathy": "Assesses interpersonal skills and emotional intelligence: Displayed empathy and patience throughout the call; handled frustration or difficult behavior appropriately; did not interrupt or speak over the caller. (0-5)",
-  "6. Resolution & Next Steps": "Evaluates problem resolution and future actions: Clearly explained the resolution or next steps; verified if the issue was fully resolved to the caller's satisfaction; offered additional help before closing the call. (0-5)",
-  "7. Call Closure": "Reviews the call wrap-up: Summarized the call or resolution; closed the call politely and professionally; used caller’s name during wrap-up. (0-5)",
-  "8. Compliance & System Use": "Checks adherence to internal procedures and documentation: Logged or updated the ticket appropriately during/after call; followed internal procedures, security/compliance checks. (0-5)"
+  "1. Greeting & Introduction": "Greeted the caller professionally and warmly, introduced self by name and team/department, asked for and confirmed the caller’s name and/or account/ID politely. For this criterion, consider the sentiment and clear intent of the agent's opening remarks, even if specific words (like their name) are not perfectly transcribed. (0-5)",
+  "2. Communication Style": "Maintained a positive, professional tone of voice; spoke clearly and at an appropriate pace; avoided jargon and used language appropriate to caller’s understanding; demonstrated active listening (e.g., verbal nods, paraphrasing). (0-5)",
+  "3. Issue Handling & Clarity": "Asked relevant, probing questions to understand the issue; repeated or summarised issue back to confirm understanding; showed ownership and confidence in addressing the issue; provided clear instructions or updates on what is being done. (0-5)",
+  "4. Hold Procedure": "Asked permission before placing the caller on hold; explained the reason for the hold; thanked the caller when returning from hold; updated caller on progress when returning. (0-5)",
+  "5. Professionalism & Empathy": "Displayed empathy and patience throughout the call; handled frustration or difficult behaviour appropriately; did not interrupt or speak over the caller. (0-5)",
+  "6. Resolution & Next Steps": "Clearly explained the resolution or next steps; verified if the issue was fully resolved to the caller's satisfaction; offered additional help before closing the call. (0-5)",
+  "7. Call Closure": "Summarised the call or resolution; closed the call politely and professionally; used caller’s name during wrap-up. (0-5)",
+  "8. Compliance & System Use": "Checked adherence to internal procedures and documentation: Logged or updated the ticket appropriately during/after call; followed internal procedures, security/compliance checks. (0-5)"
 }`;
 
 export default function CallReviewForm() {
@@ -113,7 +113,7 @@ export default function CallReviewForm() {
         </p>
       </div>
 
-      <div className="text-center">
+      <div className="text-centre">
         <Button
           onClick={generateReview}
           className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-auto py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -148,7 +148,7 @@ export default function CallReviewForm() {
             {review}
           </pre>
           <p className="text-sm text-muted-foreground mt-4">
-            This review is generated by AI and should be used as an assistant tool. Always apply human judgment.
+            This review is generated by AI and should be used as an assistant tool. Always apply human judgement.
           </p>
         </div>
       )}

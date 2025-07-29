@@ -42,10 +42,10 @@ The scoring scale is as follows:
 1 – Not Demonstrated: Missed or handled poorly.
 
 Please note: The provided call transcript includes initial metadata from Genesys.
-**Crucially, extract the agent\'s name from the initial metadata (e.g., \'Jo Read • joined\') and use it for the \'Analyst Name/ID\' in the review.**
-The other metadata (locale, wait time, dialect, program, transcriber) should be disregarded for the purpose of scoring the call content.
+**Crucially, extract the agent's name from the initial metadata (e.g., 'Jo Read • joined') and use it for the 'Analyst Name/ID' in the review.**
+The other metadata (locale, wait time, dialect, programme, transcriber) should be disregarded for the purpose of scoring the call content.
 
-Finally, provide an overall summary of the call\'s performance and suggest 2-3 actionable areas for improvement.
+Finally, provide an overall summary of the call's performance and suggest 2-3 actionable areas for improvement.
 
 ---
 Call Scoring Matrix:
@@ -61,7 +61,7 @@ Please provide the review in the following structured format:
 **Call Review - [Analyst Name/ID extracted from metadata, otherwise General Review]**
 
 **Quick Overview Score:**
-[A single, concise overall score (e.g., Average Score: X/5 or Overall Rating: Good/Excellent/Needs Improvement) and a very brief, one-sentence summary of the call\'s performance.]
+[A single, concise overall score (e.g., Average Score: X/5 or Overall Rating: Good/Excellent/Needs Improvement) and a very brief, one-sentence summary of the call's performance.]
 
 **Scores:**
 - [Criterion 1 Name]: [Score]/5 - [Justification]
@@ -69,7 +69,7 @@ Please provide the review in the following structured format:
 ...
 
 **Overall Summary:**
-[Concise summary of the call\'s performance, highlighting key strengths and weaknesses.]
+[Concise summary of the call's performance, highlighting key strengths and weaknesses.]
 
 **Areas for Improvement:**
 1. [Actionable suggestion 1]
