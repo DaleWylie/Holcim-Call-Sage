@@ -117,7 +117,7 @@ export default function CallReviewForm() {
           <Textarea
             id="scoringMatrix"
             className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out font-mono text-sm text-left"
-            rows={10}
+            rows={7}
             value={scoringMatrix}
             onChange={(e) => setScoringMatrix(e.target.value)}
             placeholder={`{\n  "Criterion Name": "Description of what to score (0-5)",\n  "Another Criterion": "Another description"\n}`}
