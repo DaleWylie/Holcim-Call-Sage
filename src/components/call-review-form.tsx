@@ -101,7 +101,7 @@ export default function CallReviewForm() {
   return (
     <Card className="w-full max-w-4xl shadow-xl">
       <CardHeader className="text-center">
-        <CardTitle className="text-3xl font-bold text-foreground font-headline">
+        <CardTitle className="text-3xl font-bold text-[hsl(var(--foreground))] font-headline">
           Holcim Call Sage
         </CardTitle>
         <CardDescription>
