@@ -1,0 +1,157 @@
+"use client";
+
+import React, { useState } from 'react';
+import { generateNonBiasedReview } from '@/ai/flows/generate-non-biased-review';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle } from 'lucide-react';
+
+const defaultScoringMatrix = `{
+  "1. Greeting & Introduction": "Assesses how the call was initiated: Greeted caller professionally and warmly, introduced self by name and team/department, asked for and confirmed caller’s name and/or account/ID politely. For this criterion, consider the sentiment and clear intent of the agent's opening remarks, even if specific words (like their name) are not perfectly transcribed. (0-5)",
+  "2. Communication Style": "Evaluates the analyst's verbal communication: Maintained a positive, professional tone of voice; spoke clearly and at an appropriate pace; avoided jargon and used language appropriate to caller’s understanding; demonstrated active listening (e.g., verbal nods, paraphrasing). (0-5)",
+  "3. Issue Handling & Clarity": "Focuses on problem diagnosis and information delivery: Asked relevant, probing questions to understand the issue; repeated or summarized issue back to confirm understanding; showed ownership and confidence in addressing the issue; provided clear instructions or updates on what is being done. (0-5)",
+  "4. Hold Procedure": "Checks adherence to hold protocols: Asked permission before placing the caller on hold; explained the reason for the hold; thanked the caller when returning from hold; updated caller on progress when returning. (0-5)",
+  "5. Professionalism & Empathy": "Assesses interpersonal skills and emotional intelligence: Displayed empathy and patience throughout the call; handled frustration or difficult behavior appropriately; did not interrupt or speak over the caller. (0-5)",
+  "6. Resolution & Next Steps": "Evaluates problem resolution and future actions: Clearly explained the resolution or next steps; verified if the issue was fully resolved to the caller's satisfaction; offered additional help before closing the call. (0-5)",
+  "7. Call Closure": "Reviews the call wrap-up: Summarized the call or resolution; closed the call politely and professionally; used caller’s name during wrap-up. (0-5)",
+  "8. Compliance & System Use": "Checks adherence to internal procedures and documentation: Logged or updated the ticket appropriately during/after call; followed internal procedures, security/compliance checks. (0-5)"
+}`;
+
+export default function CallReviewForm() {
+  const [scoringMatrix, setScoringMatrix] = useState(defaultScoringMatrix);
+  const [callTranscript, setCallTranscript] = useState('');
+  const [review, setReview] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const generateReview = async () => {
+    setIsLoading(true);
+    setReview('');
+    setError('');
+
+    try {
+      try {
+        JSON.parse(scoringMatrix);
+      } catch (jsonError) {
+        setError('Invalid JSON in Scoring Matrix. Please ensure it is correctly formatted.');
+        setIsLoading(false);
+        return;
+      }
+
+      if (!callTranscript.trim()) {
+        setError('Call Transcript cannot be empty.');
+        setIsLoading(false);
+        return;
+      }
+
+      const result = await generateNonBiasedReview({
+        scoringMatrix: scoringMatrix,
+        callTranscript: callTranscript,
+      });
+      
+      if (result.review) {
+        setReview(result.review);
+      } else {
+        setError('No review content received from the AI. Please try again.');
+      }
+
+    } catch (err: any) {
+      console.error("Error generating review:", err);
+      setError(`Failed to generate review: ${err.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="bg-card p-6 sm:p-8 rounded-xl shadow-xl w-full max-w-4xl space-y-8">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-foreground font-headline">
+          Holcim Call Sage
+        </h1>
+        <p className="text-muted-foreground mt-2">
+          AI-Powered Quality Assistant for IT Service Desks
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        <Label htmlFor="scoringMatrix" className="text-lg font-semibold text-foreground flex items-center gap-2">
+          <Binary className="h-5 w-5" />
+          1. Define Call Scoring Matrix (JSON format)
+        </Label>
+        <Textarea
+          id="scoringMatrix"
+          className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out font-mono text-sm"
+          rows={10}
+          value={scoringMatrix}
+          onChange={(e) => setScoringMatrix(e.target.value)}
+          placeholder={`{\n  "Criterion Name": "Description of what to score (0-5)",\n  "Another Criterion": "Another description"\n}`}
+        />
+        <p className="text-sm text-muted-foreground">
+          Provide your scoring criteria. The AI will use this to score the call.
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        <Label htmlFor="callTranscript" className="text-lg font-semibold text-foreground flex items-center gap-2">
+          <ClipboardPaste className="h-5 w-5" />
+          2. Input Call Transcript (from Genesys Cloud)
+        </Label>
+        <Textarea
+          id="callTranscript"
+          className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base"
+          rows={15}
+          value={callTranscript}
+          onChange={(e) => setCallTranscript(e.target.value)}
+          placeholder="Paste your Genesys Cloud call transcript here..."
+        />
+        <p className="text-sm text-muted-foreground">
+          Ensure the transcript is complete and includes both agent and customer dialogue.
+        </p>
+      </div>
+
+      <div className="text-center">
+        <Button
+          onClick={generateReview}
+          className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-auto py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isLoading || !callTranscript.trim()}
+        >
+          {isLoading ? (
+            <span className="flex items-center justify-center">
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Generating Review...
+            </span>
+          ) : (
+            'Generate Non-Bias Review'
+          )}
+        </Button>
+      </div>
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {review && (
+        <div className="bg-gray-50/50 dark:bg-background/50 p-6 rounded-lg border border-border shadow-inner">
+          <h2 className="text-2xl font-bold text-foreground mb-4 font-headline flex items-center gap-2">
+            <Sparkles className="h-6 w-6 text-accent" />
+            Generated Review
+          </h2>
+          <pre className="whitespace-pre-wrap font-body text-sm text-foreground">
+            {review}
+          </pre>
+          <p className="text-sm text-muted-foreground mt-4">
+            This review is generated by AI and should be used as an assistant tool. Always apply human judgment.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
