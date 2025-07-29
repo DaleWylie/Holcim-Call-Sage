@@ -14,7 +14,10 @@ const GenerateNonBiasedReviewInputSchema = z.object({
   scoringMatrix: z
     .string()
     .describe('A JSON string representing the scoring matrix for the call review.'),
-  callTranscript: z.string().describe('The transcript of the call to be reviewed.'),
+  callTranscript: z.string().describe('The transcript of the call to be reviewed. This may be empty if an audio file is provided.'),
+  audioRecording: z.string().optional().describe(
+    "A recording of the call, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:audio/wav;base64,<encoded_data>'. The AI will transcribe this audio if provided."
+  ),
 });
 export type GenerateNonBiasedReviewInput = z.infer<typeof GenerateNonBiasedReviewInputSchema>;
 
@@ -32,7 +35,9 @@ const prompt = ai.definePrompt({
   input: {schema: GenerateNonBiasedReviewInputSchema},
   output: {schema: GenerateNonBiasedReviewOutputSchema},
   prompt: `You are a non-biased Quality Management Assistant for an IT Service Desk.
-Your task is to review a call transcript and score the analyst based on the provided scoring matrix.
+Your task is to review a call and score the analyst based on the provided scoring matrix.
+If an audio recording is provided, you must first transcribe it to get the call transcript. If both an audio recording and a text transcript are provided, the audio recording is the primary source of truth. If only a text transcript is provided, use that.
+
 For each criterion, assign a score from 0 to 5 and provide a brief justification based on the transcript.
 The scoring scale is as follows:
 5 – Excellent: Consistently demonstrated with high quality.
@@ -52,8 +57,13 @@ Call Scoring Matrix:
 {{{scoringMatrix}}}
 
 ---
-Call Transcript:
+Call Transcript (use if no audio provided):
 {{{callTranscript}}}
+---
+Call Audio (transcribe this if present):
+{{#if audioRecording}}
+{{media url=audioRecording}}
+{{/if}}
 
 ---
 Please provide the review in the following structured format:

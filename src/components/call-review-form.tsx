@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { generateNonBiasedReview } from '@/ai/flows/generate-non-biased-review';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle } from 'lucide-react';
+import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Badge } from './ui/badge';
 
 const defaultScoringMatrix = `{
   "1. Greeting & Introduction": "Greeted the caller professionally and warmly, introduced self by name and team/department, asked for and confirmed the caller’s name and/or account/ID politely. For this criterion, consider the sentiment and clear intent of the agent's opening remarks, even if specific words (like their name) are not perfectly transcribed. (0-5)",
@@ -26,6 +28,28 @@ export default function CallReviewForm() {
   const [review, setReview] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type === "audio/wav") {
+      setAudioFile(file);
+      setError('');
+    } else {
+      setAudioFile(null);
+      setError('Please select a valid .wav file.');
+    }
+  };
+
+  const fileToDataUri = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
 
   const generateReview = async () => {
     setIsLoading(true);
@@ -41,15 +65,21 @@ export default function CallReviewForm() {
         return;
       }
 
-      if (!callTranscript.trim()) {
-        setError('Call Transcript cannot be empty.');
+      if (!callTranscript.trim() && !audioFile) {
+        setError('Either Call Transcript or a WAV file is required.');
         setIsLoading(false);
         return;
+      }
+      
+      let audioDataUri: string | undefined = undefined;
+      if (audioFile) {
+        audioDataUri = await fileToDataUri(audioFile);
       }
 
       const result = await generateNonBiasedReview({
         scoringMatrix: scoringMatrix,
         callTranscript: callTranscript,
+        audioRecording: audioDataUri,
       });
       
       if (result.review) {
@@ -65,6 +95,8 @@ export default function CallReviewForm() {
       setIsLoading(false);
     }
   };
+
+  const canGenerate = !isLoading && (!!callTranscript.trim() || !!audioFile);
 
   return (
     <div className="bg-card p-6 sm:p-8 rounded-xl shadow-xl w-full max-w-4xl space-y-8">
@@ -106,18 +138,55 @@ export default function CallReviewForm() {
           rows={15}
           value={callTranscript}
           onChange={(e) => setCallTranscript(e.target.value)}
-          placeholder="Paste your Genesys Cloud call transcript here..."
+          placeholder="Paste your Genesys Cloud call transcript here... (Optional if uploading WAV file)"
         />
         <p className="text-sm text-muted-foreground">
-          Ensure the transcript is complete and includes both agent and customer dialogue.
+          Ensure the transcript is complete. This is optional if you provide a WAV file.
         </p>
       </div>
+
+      <div className="text-center font-bold text-muted-foreground">OR</div>
+
+      <div className="space-y-4">
+        <Label htmlFor="audioFile" className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <FileAudio className="h-5 w-5" />
+            3. Upload Call Recording (.wav file)
+        </Label>
+        <Input
+            id="audioFile"
+            type="file"
+            accept="audio/wav"
+            onChange={handleFileChange}
+            ref={fileInputRef}
+            className="hidden"
+        />
+        <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+            Select .wav file
+        </Button>
+        {audioFile && (
+            <div className="flex items-center gap-2 mt-2">
+                <Badge variant="secondary">{audioFile.name}</Badge>
+                <Button variant="ghost" size="icon" onClick={() => {
+                  setAudioFile(null);
+                  if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                  }
+                }}>
+                    <X className="h-4 w-4" />
+                </Button>
+            </div>
+        )}
+        <p className="text-sm text-muted-foreground">
+            Alternatively, upload the call recording for direct analysis.
+        </p>
+      </div>
+
 
       <div className="text-centre">
         <Button
           onClick={generateReview}
           className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-auto py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={isLoading || !callTranscript.trim()}
+          disabled={!canGenerate}
         >
           {isLoading ? (
             <span className="flex items-center justify-center">
