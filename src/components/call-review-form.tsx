@@ -313,7 +313,7 @@ export default function CallReviewForm() {
                 <p>{getErrorMessage()}</p>
                 <Collapsible open={showErrorDetails} onOpenChange={setShowErrorDetails}>
                   <CollapsibleTrigger asChild>
-                    <Button variant="link" className="p-0 h-auto text-destructive-foreground/80 font-normal">
+                    <Button variant="link" className="p-0 h-auto font-normal">
                       Show Details <ChevronDown className={`ml-1 h-4 w-4 transition-transform ${showErrorDetails ? 'rotate-180' : ''}`} />
                     </Button>
                   </CollapsibleTrigger>
