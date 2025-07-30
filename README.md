@@ -1,4 +1,4 @@
-# Holcim Call Sage
+# Holcim Call Sage (v1.0)
 
 **AI-Powered Quality Assistant for Holcim**
 
@@ -13,27 +13,34 @@ Holcim Call Sage is an internal tool designed to assist in the quality managemen
 -   **Transcript & Audio Input**: Users can either paste a call transcript directly (e.g., from Genesys Cloud) or upload a `.wav` audio recording for the AI to transcribe and analyze.
 -   **Analyst Identification**: The AI is instructed to intelligently extract the analyst's name from call metadata, ensuring accurate reporting even if the name is not clearly captured in the dialogue.
 -   **Structured Feedback**: The output includes a clear breakdown of scores for each criterion, a concise summary, and actionable areas for improvement, making it easy to digest and act upon.
+-   **PDF Export**: The final, human-verified review can be exported as a professional PDF document, including the checker's name and the date of review.
 
 ## How to Use the Application
 
 1.  **Define the Call Scoring Matrix**:
-    -   On the left side of the screen, you will find the scoring criteria in an accordion-style list.
+    -   On the left side of the screen, you will find the scoring criteria.
     -   You can click on any criterion to expand it and edit its name and description.
     -   Click the **"Add Criterion"** button to add a new item to the list.
     -   Click the trash can icon next to a criterion to delete it (a confirmation will be required).
 
 2.  **Provide the Call Data**:
-    -   On the right side of the screen, you have two options for input:
-        -   **Option A: Paste Transcript**: Copy the call transcript from its source (e.g., Genesys Cloud) and paste it into the "Input Call Transcript" text area.
+    -   On the right side of the screen, fill in the required details:
+    -   **Interaction ID**: Enter the unique identifier for the call (e.g., from Genesys Cloud). This is a mandatory field.
+    -   **Agent Name (Optional)**: Provide the agent's name if you want to ensure it's captured correctly. Otherwise, the AI will attempt to extract it.
+    -   **Input Call Transcript OR Upload Audio**:
+        -   **Option A: Paste Transcript**: Copy the call transcript from its source and paste it into the "Input Call Transcript" text area.
         -   **Option B: Upload Audio**: Click the "Select .wav file" button to upload a call recording. The AI will handle the transcription automatically.
     -   *Note: If a `.wav` file is uploaded, it will take priority, and any text in the transcript box will be disregarded.*
 
 3.  **Generate the Review**:
     -   Click the **"Generate Call Review"** button at the bottom.
-    -   The button will become active once either a transcript or a `.wav` file has been provided. A loading indicator will show that the analysis is in progress.
+    -   The button will become active once an Interaction ID and either a transcript or a `.wav` file have been provided. A loading indicator will show that the analysis is in progress.
 
-4.  **View the Results**:
-    -   Once the AI has completed its analysis, the generated review will appear at the bottom of the page, formatted for clarity and easy reading.
+4.  **Verify and Print the Review**:
+    -   Once the AI has completed its analysis, the generated review will appear at the bottom of the page.
+    -   Review the generated scores and summaries. You can click the pencil icon next to any score to amend it if necessary.
+    -   In the "Checked By" section at the bottom of the review, enter your name.
+    -   Click the **"Print to PDF"** button to save a final, verified copy of the report.
 
 ## Technical Stack
 
