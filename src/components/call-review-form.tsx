@@ -122,7 +122,7 @@ export default function CallReviewForm() {
       }, {} as Record<string, string>);
 
       const result = await generateNonBiasedReview({
-        agentName: agentName,
+        agentName: agentName.trim() || undefined,
         scoringMatrix: JSON.stringify(matrixForAI, null, 2),
         callTranscript: callTranscript,
         audioRecording: audioDataUri,
