@@ -23,6 +23,7 @@ import type { GenerateNonBiasedReviewOutput } from "@/ai/flows/generate-non-bias
 import { CheckCircle2, ListChecks, Printer, Sparkles, Target, Pencil, Check, X, UserCheck, Calendar } from "lucide-react"
 import { cn, getScoreColor } from "@/lib/utils";
 import { Badge } from "./ui/badge";
+import { Separator } from "./ui/separator";
 
 interface ReviewDisplayProps {
   review: GenerateNonBiasedReviewOutput
@@ -35,7 +36,6 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
   const [isPrinting, setIsPrinting] = React.useState(false);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState<string | number>('');
-  const [openAccordionItems, setOpenAccordionItems] = useState<string[]>([]);
   const [checkerName, setCheckerName] = useState('');
   
   const interactionId = review.interactionId || '';
@@ -69,76 +69,69 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
   };
   
   const handlePrint = async () => {
-    if (!reviewRef.current) return;
-    setIsPrinting(true);
+    const mainElement = reviewRef.current;
+    if (!mainElement) return;
 
-    // Ensure all accordions are open for accurate rendering
-    const allItemIds = review.scores.map((_, index) => `item-${index}`);
-    setOpenAccordionItems(allItemIds);
-    await new Promise(resolve => setTimeout(resolve, 100)); // Short delay for re-render
+    setIsPrinting(true);
 
     const pdf = new jsPDF({
       orientation: 'p',
-      unit: 'pt', // Use points as units
+      unit: 'pt',
       format: 'a4'
     });
-
+    
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
-    const margin = 20; // 20pt margin
+    const margin = 20;
     const contentWidth = pdfWidth - margin * 2;
     let yPos = margin;
 
     const addElementToPdf = async (element: HTMLElement) => {
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        onclone: (doc) => {
-          const clonedElement = doc.getElementById(element.id);
-          if (clonedElement) {
-             const actionButtons = clonedElement.querySelectorAll('.action-button');
-             actionButtons.forEach(button => (button as HTMLElement).style.display = 'none');
-             
-             // For the "Checked By" card, hide the input and show the static text
-             const checkerInput = clonedElement.querySelector<HTMLInputElement>('#checkerName');
-             if (checkerInput) checkerInput.style.display = 'none';
+        // Temporarily modify the DOM for printing
+        const actionButtons = element.querySelectorAll('.action-button');
+        actionButtons.forEach(button => (button as HTMLElement).style.display = 'none');
+        const checkerInput = element.querySelector<HTMLInputElement>('#checkerName');
+        if (checkerInput) checkerInput.style.display = 'none';
+        const checkerText = element.querySelector<HTMLParagraphElement>('#checkerNameDisplay');
+        if (checkerText) checkerText.style.display = 'block';
 
-             const checkerText = clonedElement.querySelector<HTMLParagraphElement>('#checkerNameDisplay');
-             if(checkerText) checkerText.style.display = 'block';
-          }
+        const canvas = await html2canvas(element, {
+            scale: 2,
+            useCORS: true,
+        });
+
+        // Restore the DOM
+        actionButtons.forEach(button => (button as HTMLElement).style.display = '');
+        if (checkerInput) checkerInput.style.display = '';
+        if (checkerText) checkerText.style.display = 'none';
+
+        const imgData = canvas.toDataURL('image/png');
+        const imgHeight = (canvas.height * contentWidth) / canvas.width;
+
+        if (yPos + imgHeight > pdfHeight - margin) {
+            pdf.addPage();
+            yPos = margin;
         }
-      });
 
-      const imgData = canvas.toDataURL('image/png');
-      const imgHeight = (canvas.height * contentWidth) / canvas.width;
-
-      if (yPos + imgHeight > pdfHeight - margin) {
-        pdf.addPage();
-        yPos = margin;
-      }
-
-      pdf.addImage(imgData, 'PNG', margin, yPos, contentWidth, imgHeight);
-      yPos += imgHeight + 10; // Add some padding after each section
+        pdf.addImage(imgData, 'PNG', margin, yPos, contentWidth, imgHeight);
+        yPos += imgHeight + 10;
     };
 
+
     try {
-      // Add each card/section sequentially
-      const elementsToPrint = reviewRef.current.querySelectorAll<HTMLElement>('[data-printable-section]');
+        const sections = mainElement.querySelectorAll<HTMLElement>('[data-printable-section]');
+        for (const section of Array.from(sections)) {
+            await addElementToPdf(section);
+        }
 
-      for (const element of Array.from(elementsToPrint)) {
-        await addElementToPdf(element);
-      }
-
-      // Save the PDF
-      const safeAgentName = review.agentName.replace(/\s+/g, '-');
-      const safeInteractionId = interactionId.replace(/\s+/g, '');
-      pdf.save(`${safeAgentName}_${safeInteractionId}.pdf`);
+        const safeAgentName = review.agentName.replace(/\s+/g, '-');
+        const safeInteractionId = interactionId.replace(/\s+/g, '');
+        pdf.save(`${safeAgentName}_${safeInteractionId}.pdf`);
 
     } catch (error) {
-      console.error("Failed to generate PDF:", error);
+        console.error("Failed to generate PDF:", error);
     } finally {
-      setIsPrinting(false);
-      setOpenAccordionItems([]); // Collapse accordions after printing
+        setIsPrinting(false);
     }
   };
 
@@ -189,68 +182,69 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
             </div>
           </CardHeader>
           <CardContent>
-            <Accordion type="multiple" value={openAccordionItems} onValueChange={setOpenAccordionItems} className="w-full">
-              {review.scores.map((item, index) => (
-                <AccordionItem value={`item-${index}`} key={index}>
-                  <div className="flex w-full items-center gap-2 py-2">
-                      <div
-                        className={cn(
-                          'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white',
-                          getScoreColor(item.score)
-                        )}
-                      >
-                        {item.score.toFixed(1)}
-                      </div>
-                      <AccordionTrigger className="flex-1 justify-start pr-2 text-left no-underline hover:no-underline">
-                          <span className="font-medium">{item.criterion}</span>
-                      </AccordionTrigger>
-                      <div className="action-button flex items-center gap-2 ml-4 shrink-0">
-                      {editingField === `score-${index}` ? (
-                        <>
-                          <Input
-                            type="number"
-                            value={tempValue}
-                            onChange={(e) => setTempValue(e.target.value)}
-                            className="w-20 h-8 text-center"
-                            min={0}
-                            max={5}
-                            step={0.1}
-                            autoFocus
-                          />
-                          <Button
-                            size="icon"
-                            className="h-8 w-8 bg-green-500 hover:bg-green-600"
-                            onClick={() => handleSave(`score-${index}`)}
-                          >
-                            <Check className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8"
-                            onClick={handleCancel}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </>
-                      ) : (
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8"
-                          onClick={() => handleEditClick(`score-${index}`, item.score)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      )}
+            <div className="space-y-4">
+                {review.scores.map((item, index) => (
+                    <div key={index} className="space-y-2">
+                        <div className="flex w-full items-center gap-2 py-2">
+                            <div
+                                className={cn(
+                                'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white',
+                                getScoreColor(item.score)
+                                )}
+                            >
+                                {item.score.toFixed(1)}
+                            </div>
+                            <div className="flex-1">
+                                <span className="font-medium">{item.criterion}</span>
+                            </div>
+                            <div className="action-button flex items-center gap-2 ml-4 shrink-0">
+                                {editingField === `score-${index}` ? (
+                                <>
+                                    <Input
+                                        type="number"
+                                        value={tempValue}
+                                        onChange={(e) => setTempValue(e.target.value)}
+                                        className="w-20 h-8 text-center"
+                                        min={0}
+                                        max={5}
+                                        step={0.1}
+                                        autoFocus
+                                    />
+                                    <Button
+                                    size="icon"
+                                    className="h-8 w-8 bg-green-500 hover:bg-green-600"
+                                    onClick={() => handleSave(`score-${index}`)}
+                                    >
+                                    <Check className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8"
+                                    onClick={handleCancel}
+                                    >
+                                    <X className="h-4 w-4" />
+                                    </Button>
+                                </>
+                                ) : (
+                                <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8"
+                                    onClick={() => handleEditClick(`score-${index}`, item.score)}
+                                >
+                                    <Pencil className="h-4 w-4" />
+                                </Button>
+                                )}
+                            </div>
+                        </div>
+                        <div className="pl-12">
+                            <p className="text-sm text-muted-foreground">{item.justification}</p>
+                        </div>
+                        {index < review.scores.length - 1 && <Separator className="mt-4" />}
                     </div>
-                  </div>
-                  <AccordionContent className="pl-12">
-                    <p className="text-sm text-muted-foreground">{item.justification}</p>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+                ))}
+            </div>
           </CardContent>
         </Card>
 
@@ -324,5 +318,3 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
     </div>
   )
 }
-
-    
