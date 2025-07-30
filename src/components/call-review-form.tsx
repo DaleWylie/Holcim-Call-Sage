@@ -248,7 +248,7 @@ export default function CallReviewForm() {
                         rows={7}
                         value={callTranscript}
                         onChange={(e) => setCallTranscript(e.target.value)}
-                        placeholder="Paste the complete transcript here... This is not required if you are providing a .wav file."
+                        placeholder="Paste your call complete transcript here... This is not required if you are providing a .wav file below."
                     />
                 </div>
 
