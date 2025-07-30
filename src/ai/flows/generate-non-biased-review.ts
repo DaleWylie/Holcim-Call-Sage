@@ -129,10 +129,31 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
     inputSchema: GenerateNonBiasedReviewInputSchema,
     outputSchema: GenerateNonBiasedReviewOutputSchema,
   },
-  async input => {
-    // gemini-1.5-flash has transcription capabilities and can handle both audio and text inputs.
+  async (input) => {
     const model = googleAI.model('gemini-1.5-flash');
-    const {output} = await prompt({model}, input);
-    return output!;
+    const maxRetries = 3;
+    let attempt = 0;
+
+    while (attempt < maxRetries) {
+      try {
+        const { output } = await prompt({ model }, input);
+        return output!;
+      } catch (err: any) {
+        attempt++;
+        const errorMessage = err.message || '';
+        const isOverloaded = errorMessage.includes('503') || errorMessage.toLowerCase().includes('overloaded');
+        
+        if (isOverloaded && attempt < maxRetries) {
+          console.log(`Attempt ${attempt} failed due to model overload. Retrying in ${attempt * 2} seconds...`);
+          await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+        } else {
+          // If it's not an overload error or we've run out of retries, throw the error
+          throw err;
+        }
+      }
+    }
+    // This part should not be reachable, but is here for type safety.
+    // It would only be reached if the loop completes without returning or throwing.
+    throw new Error('Failed to generate review after multiple attempts.');
   }
 );
