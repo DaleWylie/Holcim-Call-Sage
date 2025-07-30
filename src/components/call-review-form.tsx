@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, Plus, Trash2, Settings, ChevronDown } from 'lucide-react';
+import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, Plus, Trash2, Settings, ChevronDown, User } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from './ui/badge';
 import { ReviewDisplay } from './review-display';
@@ -45,6 +45,7 @@ type ScoringItem = {
 
 export default function CallReviewForm() {
   const [scoringMatrix, setScoringMatrix] = useState<ScoringItem[]>(defaultScoringMatrix);
+  const [agentName, setAgentName] = useState('');
   const [callTranscript, setCallTranscript] = useState('');
   const [review, setReview] = useState<GenerateNonBiasedReviewOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -121,6 +122,7 @@ export default function CallReviewForm() {
       }, {} as Record<string, string>);
 
       const result = await generateNonBiasedReview({
+        agentName: agentName,
         scoringMatrix: JSON.stringify(matrixForAI, null, 2),
         callTranscript: callTranscript,
         audioRecording: audioDataUri,
@@ -219,6 +221,23 @@ export default function CallReviewForm() {
             {/* Right Column */}
             <div className="md:w-1/2 space-y-4 md:border-l md:pl-8 border-border">
                 <div className="space-y-4 text-center">
+                    <Label htmlFor="agentName" className="text-lg font-semibold text-foreground flex items-center justify-center gap-2">
+                      <User className="h-5 w-5" />
+                      Agent Name (Optional)
+                    </Label>
+                    <Input
+                        id="agentName"
+                        className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
+                        value={agentName}
+                        onChange={(e) => setAgentName(e.target.value)}
+                        placeholder="e.g., John Smith"
+                    />
+                    <p className="text-sm text-muted-foreground">
+                        Provide the agent's name to override automatic extraction.
+                    </p>
+                </div>
+
+                <div className="space-y-4 text-center">
                     <Label htmlFor="callTranscript" className="text-lg font-semibold text-foreground flex items-center justify-center gap-2">
                         <ClipboardPaste className="h-5 w-5" />
                         2. Input Call Transcript
@@ -226,7 +245,7 @@ export default function CallReviewForm() {
                     <Textarea
                         id="callTranscript"
                         className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-left"
-                        rows={12}
+                        rows={10}
                         value={callTranscript}
                         onChange={(e) => setCallTranscript(e.target.value)}
                         placeholder="Paste your Genesys Cloud call transcript here... (Disregarded if uploading WAV file)"

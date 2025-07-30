@@ -13,6 +13,10 @@ import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 
 const GenerateNonBiasedReviewInputSchema = z.object({
+  agentName: z
+    .string()
+    .optional()
+    .describe('An optional, manually provided name for the call analyst. If provided, this name MUST be used.'),
   scoringMatrix: z
     .string()
     .describe('A JSON string representing the scoring matrix for the call review.'),
@@ -39,7 +43,7 @@ const ScoreItemSchema = z.object({
 const GenerateNonBiasedReviewOutputSchema = z.object({
   analystName: z
     .string()
-    .describe("The name of the analyst extracted from the call metadata."),
+    .describe("The name of the analyst. Use the manually provided agent name if available, otherwise extract it from the call metadata."),
   quickScore: z
     .string()
     .describe(
@@ -90,14 +94,17 @@ The scoring scale is as follows:
 2 – Needs Improvement: Partially done or lacked quality.
 1 – Not Demonstrated: Missed or handled poorly.
 
-Please note: The provided call transcript includes initial metadata from Genesys.
-**Crucially, you must extract the analyst's name from the initial metadata (e.g., from a line like 'Jo Read • joined') and use this as the definitive source for the 'analystName' field in the output.** This is more reliable than names mentioned in the dialogue.
+**Analyst Name Priority:**
+1.  **If an 'agentName' is provided in the input, you MUST use it** as the definitive source for the 'analystName' field in the output. This overrides all other methods.
+2.  If 'agentName' is NOT provided, you must extract the analyst's name from the initial transcript metadata (e.g., from a line like 'Jo Read • joined'). This is the fallback method.
 The other metadata (locale, wait time, dialect, programme, transcriber) should be disregarded for the purpose of scoring the call content.
 
 **Language Requirement:** All output text, including justifications, summaries, and areas for improvement, MUST be in British English (e.g., use 'centre', 'colour', 'behaviour' instead of 'center', 'color', 'behavior').
 
 Finally, provide an overall summary of the call's performance and suggest 2-3 actionable areas for improvement.
 
+---
+Analyst Name (use this if provided): {{agentName}}
 ---
 Call Scoring Matrix:
 {{{scoringMatrix}}}
