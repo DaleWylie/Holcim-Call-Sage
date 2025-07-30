@@ -167,13 +167,13 @@ export default function CallReviewForm() {
         <div className="flex flex-col md:flex-row gap-8">
             {/* Left Column */}
             <div className="md:w-1/2 space-y-4">
-              <Label htmlFor="scoringMatrix" className="text-lg font-semibold text-foreground flex items-center justify-center gap-2">
+              <Label htmlFor="scoringMatrix" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
                 <Binary className="h-5 w-5" />
                 1. Define Call Scoring Matrix
               </Label>
               <Accordion type="multiple" className="w-full" defaultValue={scoringMatrix.map(item => item.id)}>
                 {scoringMatrix.map((item) => (
-                  <AccordionItem value={item.id} key={item.id}>
+                  <AccordionItem value={item.id} key={item.id} className="py-0">
                     <div className="flex items-center w-full group">
                       <AccordionTrigger className="flex-1 hover:no-underline pr-4 py-2">
                         <span className='font-semibold text-foreground truncate'>{item.criterion}</span>
@@ -220,7 +220,7 @@ export default function CallReviewForm() {
             {/* Right Column */}
             <div className="md:w-1/2 space-y-4 md:border-l md:pl-8 border-border">
                 <div className="space-y-4 text-center">
-                    <Label htmlFor="agentName" className="text-lg font-semibold text-foreground flex items-center justify-center gap-2">
+                    <Label htmlFor="agentName" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
                       <User className="h-5 w-5" />
                       Agent Name (Optional)
                     </Label>
@@ -237,7 +237,7 @@ export default function CallReviewForm() {
                 </div>
 
                 <div className="space-y-4 text-center">
-                    <Label htmlFor="callTranscript" className="text-lg font-semibold text-foreground flex items-center justify-center gap-2">
+                    <Label htmlFor="callTranscript" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
                         <ClipboardPaste className="h-5 w-5" />
                         2. Input Call Transcript
                     </Label>
@@ -257,7 +257,7 @@ export default function CallReviewForm() {
                 <div className="text-center font-bold text-muted-foreground">OR</div>
                 
                 <div className="space-y-4 text-center">
-                    <Label htmlFor="audioFile" className="text-lg font-semibold text-foreground flex items-center justify-center gap-2">
+                    <Label htmlFor="audioFile" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
                         <FileAudio className="h-5 w-5" />
                         3. Upload Call Recording
                     </Label>
@@ -308,17 +308,17 @@ export default function CallReviewForm() {
         </div>
         
         {error && (
-            <div className="mt-6 text-center">
+            <div className="mt-6 flex justify-center">
                 <Alert variant="destructive" className="inline-flex flex-col items-center text-center">
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Error Generating Review</AlertTitle>
-                    <AlertDescription>
+                    <AlertDescription className="text-center">
                         <p>The AI model failed to generate a review. This can happen if the service is overloaded or if there's an issue with the input provided.</p>
                         <button onClick={() => setShowErrorDetails(!showErrorDetails)} className="text-primary underline mt-2">
                             {showErrorDetails ? 'Hide Details' : 'Show Details'}
                         </button>
                         {showErrorDetails && (
-                            <pre className="mt-2 text-primary whitespace-pre-wrap font-mono text-xs bg-destructive/10 p-2 rounded-md">
+                            <pre className="mt-2 whitespace-pre-wrap font-mono text-xs bg-destructive/10 p-2 rounded-md text-primary">
                                 {error}
                             </pre>
                         )}
