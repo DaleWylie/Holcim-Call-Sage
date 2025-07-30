@@ -253,7 +253,7 @@ export default function CallReviewForm() {
                         className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
                         value={interactionId}
                         onChange={(e) => setInteractionId(e.target.value)}
-                        placeholder="e.g. 123456789"
+                        placeholder="e.g. f81d4fae-7dec-11d0-a765-00a0c91e6bf6"
                     />
                 </div>
 
