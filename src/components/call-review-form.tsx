@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, Plus, Trash2, Settings, User, ChevronDown } from 'lucide-react';
+import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, Plus, Trash2, User, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from './ui/badge';
 import { ReviewDisplay } from './review-display';
@@ -22,7 +22,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { SettingsDialog } from './settings-dialog';
 import { generateNonBiasedReview, GenerateNonBiasedReviewOutput } from '@/ai/flows/generate-non-biased-review';
 import { useToast } from '@/hooks/use-toast';
 
@@ -67,7 +66,6 @@ export default function CallReviewForm() {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [criterionToDelete, setCriterionToDelete] = useState<string | null>(null);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [review, setReview] = useState<GenerateNonBiasedReviewOutput | null>(null);
@@ -145,12 +143,6 @@ export default function CallReviewForm() {
     <>
     <div className="w-full max-w-6xl">
     <Card className="shadow-xl relative">
-       <div className="absolute top-4 right-4">
-          <Button variant="ghost" size="icon" onClick={() => setIsSettingsOpen(true)}>
-            <Settings className="h-5 w-5" />
-            <span className="sr-only">Settings</span>
-          </Button>
-        </div>
       <CardHeader className="text-center">
         <CardTitle className="text-4xl font-extrabold text-primary font-headline">
           Holcim Call Sage
@@ -171,8 +163,9 @@ export default function CallReviewForm() {
                 {scoringMatrix.map((item) => (
                    <AccordionItem value={item.id} key={item.id}>
                     <div className="flex items-center w-full gap-2">
-                      <AccordionTrigger className="flex-1 py-2 text-left pr-2">
+                       <AccordionTrigger className="flex-1 py-2 text-left pr-2 justify-between">
                           <span className='font-semibold text-foreground truncate group-hover:underline'>{item.criterion}</span>
+                          <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
                       </AccordionTrigger>
                       <Button
                         variant="ghost"
@@ -334,7 +327,6 @@ export default function CallReviewForm() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <SettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
     </>
   );
 }
