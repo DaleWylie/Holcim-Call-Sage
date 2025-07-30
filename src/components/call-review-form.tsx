@@ -157,7 +157,7 @@ export default function CallReviewForm() {
     }
   };
 
-  const canGenerate = !isLoading && (!!callTranscript.trim() || !!audioFile);
+  const canGenerate = !isLoading && !!interactionId.trim() && (!!callTranscript.trim() || !!audioFile);
 
   return (
     <>
