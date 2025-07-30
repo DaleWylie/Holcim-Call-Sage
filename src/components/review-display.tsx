@@ -21,92 +21,48 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { GenerateNonBiasedReviewOutput } from "@/ai/flows/generate-non-biased-review"
-import { CheckCircle2, ListChecks, Printer, Sparkles, Target, Pencil } from "lucide-react"
-import { cn } from "@/lib/utils";
+import { CheckCircle2, ListChecks, Printer, Sparkles, Target, Pencil, Check, X } from "lucide-react"
+import { cn, getScoreColor } from "@/lib/utils";
+import { Badge } from "./ui/badge";
 
 interface ReviewDisplayProps {
   review: GenerateNonBiasedReviewOutput
   setReview: React.Dispatch<React.SetStateAction<GenerateNonBiasedReviewOutput | null>>;
 }
 
-const EditableField = ({ value, onSave, multiline = false, type = 'text' }: { value: string | number, onSave: (newValue: string) => void, multiline?: boolean, type?: string }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [currentValue, setCurrentValue] = useState(value);
-  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    if (isEditing) {
-      inputRef.current?.focus();
-    }
-  }, [isEditing]);
-
-  const handleSave = () => {
-    onSave(String(currentValue));
-    setIsEditing(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !multiline) {
-      handleSave();
-    }
-    if (e.key === 'Escape') {
-      setCurrentValue(value);
-      setIsEditing(false);
-    }
-  };
-
-  if (isEditing) {
-    const commonProps = {
-      ref: inputRef as any,
-      value: currentValue,
-      onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setCurrentValue(e.target.value),
-      onBlur: handleSave,
-      onKeyDown: handleKeyDown,
-      className: "text-base p-1 h-auto w-full border-primary bg-background shadow-none focus-visible:ring-1 focus-visible:ring-ring"
-    };
-    return multiline ? (
-      <Textarea {...commonProps} rows={4} />
-    ) : (
-      <Input {...commonProps} type={type} />
-    );
-  }
-
-  return (
-    <div onClick={() => setIsEditing(true)} className={cn("hover:bg-muted/50 p-1 rounded cursor-pointer", multiline ? "min-h-[100px]" : "min-h-[2.5rem] flex items-center")}>
-        {value}
-        <Pencil className="h-3 w-3 ml-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-    </div>
-  );
-};
-
 
 export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
   const reviewRef = useRef<HTMLDivElement>(null);
   const [isPrinting, setIsPrinting] = React.useState(false);
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [tempValue, setTempValue] = useState<string | number>('');
 
-  const handleFieldChange = (field: keyof GenerateNonBiasedReviewOutput, value: string) => {
-    setReview(prev => prev ? { ...prev, [field]: value } : null);
+  const handleEditClick = (field: string, currentValue: string | number) => {
+    setEditingField(field);
+    setTempValue(currentValue);
   };
 
-  const handleScoreChange = (index: number, field: 'score' | 'justification' | 'criterion', value: string) => {
-    setReview(prev => {
-      if (!prev) return null;
-      const newScores = [...prev.scores];
-      const scoreItem = { ...newScores[index], [field]: field === 'score' ? Number(value) : value };
-      newScores[index] = scoreItem;
-      return { ...prev, scores: newScores };
-    });
+  const handleSave = (field: string) => {
+    const [type, index] = field.split('-');
+
+    if (type === 'analystName') {
+      setReview(prev => prev ? { ...prev, analystName: String(tempValue) } : null);
+    } else if (type === 'score') {
+      const scoreIndex = parseInt(index, 10);
+      setReview(prev => {
+        if (!prev) return null;
+        const newScores = [...prev.scores];
+        newScores[scoreIndex] = { ...newScores[scoreIndex], score: Number(tempValue) };
+        return { ...prev, scores: newScores };
+      });
+    }
+    setEditingField(null);
   };
-
-  const handleImprovementChange = (index: number, value: string) => {
-    setReview(prev => {
-      if (!prev) return null;
-      const newImprovements = [...prev.areasForImprovement];
-      newImprovements[index] = value;
-      return { ...prev, areasForImprovement: newImprovements };
-    })
-  }
-
+  
+  const handleCancel = () => {
+    setEditingField(null);
+  };
+  
   const handlePrint = async () => {
     if (!reviewRef.current) return;
     setIsPrinting(true);
@@ -114,7 +70,14 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
     try {
         const canvas = await html2canvas(reviewRef.current, {
             scale: 2, // Improves quality
+            // Ensure that the icons and colors are rendered correctly
+            onclone: (document) => {
+              // Hide edit/save/cancel buttons during print
+               const actionButtons = document.querySelectorAll('.action-button');
+               actionButtons.forEach(button => (button as HTMLElement).style.display = 'none');
+            }
         });
+
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF({
             orientation: 'p',
@@ -125,7 +88,6 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
         pdf.save(`review-${review.analystName.replace(/\s+/g, '-')}.pdf`);
     } catch (error) {
         console.error("Failed to generate PDF:", error);
-        // You might want to show an error to the user here
     } finally {
         setIsPrinting(false);
     }
@@ -139,27 +101,40 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
             <Sparkles className="h-6 w-6 text-accent" />
             Generated Review
           </h2>
-          { /* This button is positioned absolutely relative to the parent div, so it's not part of the PDF print area */ }
         </div>
 
         <Card className="mb-6">
           <CardHeader>
-            <Label className="text-sm font-medium text-muted-foreground">Analyst Name</Label>
-            <div className="text-2xl font-bold group">
-                <EditableField value={review.analystName} onSave={(val) => handleFieldChange('analystName', val)} />
-            </div>
-
-            <Label className="text-sm font-medium text-muted-foreground pt-2">Quick Summary</Label>
-             <div className="text-muted-foreground group">
-                <EditableField value={review.quickSummary} onSave={(val) => handleFieldChange('quickSummary', val)} />
+            <div className="flex justify-between items-start">
+              <div>
+                <Label className="text-sm font-medium text-muted-foreground">Analyst Name</Label>
+                {editingField === 'analystName' ? (
+                  <div className="flex items-center gap-2 mt-1">
+                    <Input 
+                      value={tempValue} 
+                      onChange={(e) => setTempValue(e.target.value)} 
+                      className="text-2xl font-bold p-1 h-auto"
+                      autoFocus
+                    />
+                    <Button size="icon" className="h-8 w-8 bg-green-500 hover:bg-green-600 action-button" onClick={() => handleSave('analystName')}><Check className="h-4 w-4"/></Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8 action-button" onClick={handleCancel}><X className="h-4 w-4"/></Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-2xl font-bold">{review.analystName}</h3>
+                    <Button size="icon" variant="ghost" className="h-8 w-8 action-button" onClick={() => handleEditClick('analystName', review.analystName)}><Pencil className="h-4 w-4"/></Button>
+                  </div>
+                )}
+                
+                <Label className="text-sm font-medium text-muted-foreground pt-4 block">Quick Summary</Label>
+                <p className="text-muted-foreground">{review.quickSummary}</p>
+              </div>
+              <div className="text-right">
+                <Label className="text-sm font-medium">Quick Score</Label>
+                <Badge variant="secondary" className="text-lg font-bold ml-2">{review.quickScore}</Badge>
+              </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2 group">
-              <Label className="text-sm font-medium">Quick Score:</Label>
-              <EditableField value={review.quickScore} onSave={(val) => handleFieldChange('quickScore', val)} />
-            </div>
-          </CardContent>
         </Card>
 
         <Card className="mb-6">
@@ -174,18 +149,36 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
               {review.scores.map((item, index) => (
                 <AccordionItem value={`item-${index}`} key={index}>
                   <AccordionTrigger>
-                    <div className="flex items-center gap-4 w-full group">
-                      <div className="w-16 h-8 text-center" onClick={(e) => e.stopPropagation()}>
-                        <EditableField value={item.score} type="number" onSave={(val) => handleScoreChange(index, 'score', val)} />
-                      </div>
-                      <div className="flex-1 text-left font-medium p-1 h-auto" onClick={(e) => e.stopPropagation()}>
-                        <EditableField value={item.criterion} onSave={(val) => handleScoreChange(index, 'criterion', val)} />
-                      </div>
+                    <div className="flex items-center gap-4 w-full">
+                      {editingField === `score-${index}` ? (
+                          <div className="flex items-center gap-2">
+                              <Input 
+                                type="number"
+                                value={tempValue}
+                                onChange={e => setTempValue(e.target.value)}
+                                className="w-20 h-8 text-center"
+                                min={0} max={5}
+                                autoFocus
+                              />
+                              <Button size="icon" className="h-8 w-8 bg-green-500 hover:bg-green-600 action-button" onClick={() => handleSave(`score-${index}`)}><Check className="h-4 w-4" /></Button>
+                              <Button size="icon" variant="ghost" className="h-8 w-8 action-button" onClick={handleCancel}><X className="h-4 w-4" /></Button>
+                          </div>
+                      ) : (
+                         <div className="flex items-center gap-2">
+                            <div className={cn(
+                                "w-12 h-12 flex items-center justify-center rounded-full text-white font-bold text-lg",
+                                getScoreColor(item.score)
+                            )}>
+                                {item.score}
+                            </div>
+                             <Button size="icon" variant="ghost" className="h-8 w-8 action-button" onClick={() => handleEditClick(`score-${index}`, item.score)}><Pencil className="h-4 w-4"/></Button>
+                         </div>
+                      )}
+                      <span className="flex-1 text-left font-medium">{item.criterion}</span>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="pl-4 group">
-                    <Label className="font-semibold text-muted-foreground">Justification</Label>
-                    <EditableField value={item.justification} onSave={(val) => handleScoreChange(index, 'justification', val)} multiline />
+                  <AccordionContent className="pl-4">
+                    <p className="text-sm text-muted-foreground">{item.justification}</p>
                   </AccordionContent>
                 </AccordionItem>
               ))}
@@ -200,8 +193,8 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
               <CardTitle className="text-xl">Overall Summary</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="group">
-            <EditableField value={review.overallSummary} onSave={(val) => handleFieldChange('overallSummary', val)} multiline />
+          <CardContent>
+            <p className="text-base whitespace-pre-wrap">{review.overallSummary}</p>
           </CardContent>
         </Card>
 
@@ -213,13 +206,11 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <ul className="list-disc pl-5 space-y-2">
               {review.areasForImprovement.map((item, index) => (
-                <div key={index} className="group">
-                    <EditableField value={item} onSave={(val) => handleImprovementChange(index, val)} multiline />
-                </div>
+                <li key={index} className="text-base">{item}</li>
               ))}
-            </div>
+            </ul>
           </CardContent>
         </Card>
 
