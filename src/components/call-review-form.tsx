@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, Plus, Trash2, Settings, ChevronDown, User } from 'lucide-react';
+import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, Plus, Trash2, Settings, User } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from './ui/badge';
 import { ReviewDisplay } from './review-display';
@@ -93,7 +93,11 @@ export default function CallReviewForm() {
       console.error(e);
       let errorMessage = "An unexpected error occurred.";
       if (e.message) {
-        errorMessage = e.message;
+        if (e.message.includes('overloaded')) {
+            errorMessage = "The AI service is currently overloaded. Please try again in a few moments."
+        } else {
+            errorMessage = e.message;
+        }
       }
       setError(errorMessage);
        toast({
@@ -172,15 +176,21 @@ export default function CallReviewForm() {
               </Label>
               <Accordion type="multiple" className="w-full">
                 {scoringMatrix.map((item) => (
-                  <AccordionItem value={item.id} key={item.id} className="py-0">
-                    <div className="flex items-center w-full group">
-                      <AccordionTrigger className="flex-1 hover:no-underline pr-4 py-2 text-left">
-                        <span className='font-semibold text-foreground truncate'>{item.criterion}</span>
-                      </AccordionTrigger>
-                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive hover:bg-transparent rounded-full mr-2 shrink-0" onClick={() => setCriterionToDelete(item.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                  <AccordionItem value={item.id} key={item.id}>
+                    <AccordionTrigger className="flex-1 justify-between hover:no-underline pr-2 py-2 text-left">
+                        <span className='font-semibold text-foreground truncate group-hover:underline'>{item.criterion}</span>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="text-muted-foreground hover:text-destructive hover:bg-transparent rounded-full shrink-0" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCriterionToDelete(item.id);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </AccordionTrigger>
                     <AccordionContent>
                       <div className="space-y-2 p-2">
                         <div className="space-y-1">
@@ -351,5 +361,3 @@ export default function CallReviewForm() {
     </>
   );
 }
-
-    
