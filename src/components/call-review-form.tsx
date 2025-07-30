@@ -157,7 +157,7 @@ export default function CallReviewForm() {
                 <Binary className="h-5 w-5" />
                 1. Define Call Scoring Matrix
               </Label>
-              <Accordion type="single" collapsible className="w-full" defaultValue="item-0">
+              <Accordion type="single" collapsible className="w-full">
                 {scoringMatrix.map((item, index) => (
                   <AccordionItem value={`item-${index}`} key={item.id}>
                     <AccordionTrigger className="hover:no-underline">
@@ -216,7 +216,7 @@ export default function CallReviewForm() {
                         rows={12}
                         value={callTranscript}
                         onChange={(e) => setCallTranscript(e.target.value)}
-                        placeholder="Paste your Genesys Cloud call transcript here... (Optional if uploading WAV file)"
+                        placeholder="Paste your Genesys Cloud call transcript here... (Disregarded if uploading WAV file)"
                     />
                      <p className="text-sm text-muted-foreground">
                         Ensure the transcript is complete. This is optional if you provide a WAV file.
@@ -311,4 +311,5 @@ export default function CallReviewForm() {
     </>
   );
 }
+
 
