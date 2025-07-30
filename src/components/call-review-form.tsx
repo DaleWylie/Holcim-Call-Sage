@@ -1,6 +1,7 @@
+
 "use client";
 
-import React, { useState, useRef, useId } from 'react';
+import React, { useState, useRef } from 'react';
 import { generateNonBiasedReview, GenerateNonBiasedReviewOutput } from '@/ai/flows/generate-non-biased-review';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +13,16 @@ import { Input } from '@/components/ui/input';
 import { Badge } from './ui/badge';
 import { ReviewDisplay } from './review-display';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const defaultScoringMatrix = [
   { id: "1", criterion: "1. Greeting & Introduction", description: "Greeted the caller professionally and warmly, introduced self by name and team/department, asked for and confirmed the caller’s name and/or account/ID politely. For this criterion, consider the sentiment and clear intent of the agent's opening remarks, even if specific words (like their name) are not perfectly transcribed. (0-5)" },
@@ -38,6 +49,8 @@ export default function CallReviewForm() {
   const [error, setError] = useState('');
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [criterionToDelete, setCriterionToDelete] = useState<string | null>(null);
+
 
   const handleMatrixChange = (id: string, field: 'criterion' | 'description', value: string) => {
     setScoringMatrix(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
@@ -52,8 +65,11 @@ export default function CallReviewForm() {
     setScoringMatrix(prev => [...prev, newItem]);
   };
   
-  const removeMatrixItem = (id: string) => {
-    setScoringMatrix(prev => prev.filter(item => item.id !== id));
+  const confirmRemoveItem = () => {
+    if (criterionToDelete) {
+      setScoringMatrix(prev => prev.filter(item => item.id !== criterionToDelete));
+      setCriterionToDelete(null);
+    }
   };
 
 
@@ -122,7 +138,8 @@ export default function CallReviewForm() {
   const canGenerate = !isLoading && (!!callTranscript.trim() || !!audioFile);
 
   return (
-    <Card className="w-full max-w-4xl shadow-xl">
+    <>
+    <Card className="w-full max-w-6xl shadow-xl">
       <CardHeader className="text-center">
         <CardTitle className="text-3xl font-bold text-[#1d4370] font-headline">
           Holcim Call Sage
@@ -132,113 +149,118 @@ export default function CallReviewForm() {
         </CardDescription>
       </CardHeader>
       <CardContent className="p-6 sm:p-8 space-y-8">
-        <div className="space-y-4">
-          <Label htmlFor="scoringMatrix" className="text-lg font-semibold text-foreground flex items-center justify-center gap-2">
-            <Binary className="h-5 w-5" />
-            1. Define Call Scoring Matrix
-          </Label>
-          <Accordion type="single" collapsible className="w-full" defaultValue="item-0">
-            {scoringMatrix.map((item, index) => (
-              <AccordionItem value={`item-${index}`} key={item.id}>
-                <AccordionTrigger className="hover:no-underline">
-                  <div className='flex items-center justify-between w-full'>
-                    <span className='font-semibold text-foreground truncate pr-4'>{item.criterion}</span>
-                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={(e) => { e.stopPropagation(); removeMatrixItem(item.id); }}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-3 p-2">
-                    <div className="space-y-1">
-                      <Label htmlFor={`criterion-${item.id}`}>Criterion Name</Label>
-                      <Input 
-                        id={`criterion-${item.id}`} 
-                        value={item.criterion} 
-                        onChange={(e) => handleMatrixChange(item.id, 'criterion', e.target.value)}
-                        className="font-semibold"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Label htmlFor={`description-${item.id}`}>Description</Label>
-                      <Textarea 
-                        id={`description-${item.id}`} 
-                        value={item.description}
-                        onChange={(e) => handleMatrixChange(item.id, 'description', e.target.value)}
-                        rows={3}
-                      />
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-          <div className="text-center mt-4">
-            <Button variant="outline" onClick={addMatrixItem}>
-              <Plus className="mr-2 h-4 w-4" /> Add Criterion
-            </Button>
-          </div>
-          <p className="text-sm text-muted-foreground text-center">
-            Provide your scoring criteria. The AI will use this to score the call.
-          </p>
-        </div>
-
-        <div className="space-y-4 text-center">
-          <Label htmlFor="callTranscript" className="text-lg font-semibold text-foreground flex items-center justify-center gap-2">
-            <ClipboardPaste className="h-5 w-5" />
-            2. Input Call Transcript (from Genesys Cloud)
-          </Label>
-          <Textarea
-            id="callTranscript"
-            className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-left"
-            rows={4}
-            value={callTranscript}
-            onChange={(e) => setCallTranscript(e.target.value)}
-            placeholder="Paste your Genesys Cloud call transcript here... (Optional if uploading WAV file)"
-          />
-          <p className="text-sm text-muted-foreground">
-            Ensure the transcript is complete. This is optional if you provide a WAV file.
-          </p>
-        </div>
-
-        <div className="text-center font-bold text-muted-foreground">OR</div>
-
-        <div className="space-y-4 text-center">
-          <Label htmlFor="audioFile" className="text-lg font-semibold text-foreground flex items-center justify-center gap-2">
-              <FileAudio className="h-5 w-5" />
-              3. Upload Call Recording (.wav file)
-          </Label>
-          <Input
-              id="audioFile"
-              type="file"
-              accept="audio/wav"
-              onChange={handleFileChange}
-              ref={fileInputRef}
-              className="hidden"
-          />
-          <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
-              Select .wav file
-          </Button>
-          {audioFile && (
-              <div className="flex items-center justify-center gap-2 mt-2">
-                  <Badge variant="secondary">{audioFile.name}</Badge>
-                  <Button variant="ghost" size="icon" onClick={() => {
-                    setAudioFile(null);
-                    if (fileInputRef.current) {
-                      fileInputRef.current.value = '';
-                    }
-                  }}>
-                      <X className="h-4 w-4" />
-                  </Button>
+        <div className="flex flex-col md:flex-row gap-8">
+            {/* Left Column */}
+            <div className="md:w-1/2 space-y-4">
+              <Label htmlFor="scoringMatrix" className="text-lg font-semibold text-foreground flex items-center justify-center gap-2">
+                <Binary className="h-5 w-5" />
+                1. Define Call Scoring Matrix
+              </Label>
+              <Accordion type="single" collapsible className="w-full" defaultValue="item-0">
+                {scoringMatrix.map((item, index) => (
+                  <AccordionItem value={`item-${index}`} key={item.id}>
+                    <AccordionTrigger className="hover:no-underline">
+                      <div className='flex items-center justify-between w-full'>
+                        <span className='font-semibold text-foreground truncate pr-4'>{item.criterion}</span>
+                        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={(e) => { e.stopPropagation(); setCriterionToDelete(item.id); }}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-3 p-2">
+                        <div className="space-y-1">
+                          <Label htmlFor={`criterion-${item.id}`}>Criterion Name</Label>
+                          <Input 
+                            id={`criterion-${item.id}`} 
+                            value={item.criterion} 
+                            onChange={(e) => handleMatrixChange(item.id, 'criterion', e.target.value)}
+                            className="font-semibold"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor={`description-${item.id}`}>Description</Label>
+                          <Textarea 
+                            id={`description-${item.id}`} 
+                            value={item.description}
+                            onChange={(e) => handleMatrixChange(item.id, 'description', e.target.value)}
+                            rows={3}
+                          />
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+              <div className="text-center mt-4">
+                <Button variant="outline" onClick={addMatrixItem}>
+                  <Plus className="mr-2 h-4 w-4" /> Add Criterion
+                </Button>
               </div>
-          )}
-          <p className="text-sm text-muted-foreground">
-              Alternatively, upload the call recording for direct analysis.
-          </p>
+              <p className="text-sm text-muted-foreground text-center">
+                Provide your scoring criteria. The AI will use this to score the call.
+              </p>
+            </div>
+
+            {/* Right Column */}
+            <div className="md:w-1/2 space-y-4">
+                <div className="space-y-4 text-center">
+                    <Label htmlFor="callTranscript" className="text-lg font-semibold text-foreground flex items-center justify-center gap-2">
+                        <ClipboardPaste className="h-5 w-5" />
+                        2. Input Call Transcript
+                    </Label>
+                    <Textarea
+                        id="callTranscript"
+                        className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-left"
+                        rows={6}
+                        value={callTranscript}
+                        onChange={(e) => setCallTranscript(e.target.value)}
+                        placeholder="Paste your Genesys Cloud call transcript here... (Optional if uploading WAV file)"
+                    />
+                     <p className="text-sm text-muted-foreground">
+                        Ensure the transcript is complete. This is optional if you provide a WAV file.
+                    </p>
+                </div>
+
+                <div className="text-center font-bold text-muted-foreground">OR</div>
+                
+                <div className="space-y-4 text-center">
+                    <Label htmlFor="audioFile" className="text-lg font-semibold text-foreground flex items-center justify-center gap-2">
+                        <FileAudio className="h-5 w-5" />
+                        3. Upload Call Recording
+                    </Label>
+                    <Input
+                        id="audioFile"
+                        type="file"
+                        accept="audio/wav"
+                        onChange={handleFileChange}
+                        ref={fileInputRef}
+                        className="hidden"
+                    />
+                    <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+                        Select .wav file
+                    </Button>
+                    {audioFile && (
+                        <div className="flex items-center justify-center gap-2 mt-2">
+                            <Badge variant="secondary">{audioFile.name}</Badge>
+                            <Button variant="ghost" size="icon" onClick={() => {
+                                setAudioFile(null);
+                                if (fileInputRef.current) {
+                                fileInputRef.current.value = '';
+                                }
+                            }}>
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    )}
+                    <p className="text-sm text-muted-foreground">
+                        Alternatively, upload the call recording for direct analysis.
+                    </p>
+                </div>
+            </div>
         </div>
 
-
-        <div className="text-center">
+        <div className="text-center pt-6">
           <Button
             onClick={generateReview}
             className="bg-[#1d4370] hover:bg-[#1d4370]/90 text-white font-bold h-auto py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -250,7 +272,10 @@ export default function CallReviewForm() {
                 Generating Review...
               </span>
             ) : (
-              'Generate Non-Bias Review'
+                <>
+                <Sparkles className="mr-2 h-5 w-5" />
+                Generate Non-Bias Review
+                </>
             )}
           </Button>
         </div>
@@ -268,5 +293,20 @@ export default function CallReviewForm() {
         )}
       </CardContent>
     </Card>
+     <AlertDialog open={!!criterionToDelete} onOpenChange={(isOpen) => !isOpen && setCriterionToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the scoring criterion.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setCriterionToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRemoveItem}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
