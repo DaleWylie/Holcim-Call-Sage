@@ -175,7 +175,7 @@ export default function CallReviewForm() {
                 {scoringMatrix.map((item) => (
                   <AccordionItem value={item.id} key={item.id}>
                     <div className="flex items-center w-full group">
-                      <AccordionTrigger className="flex-1 hover:no-underline pr-4">
+                      <AccordionTrigger className="flex-1 hover:no-underline pr-4 py-2">
                         <span className='font-semibold text-foreground truncate'>{item.criterion}</span>
                       </AccordionTrigger>
                       <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive mr-2" onClick={() => setCriterionToDelete(item.id)}>
@@ -183,7 +183,7 @@ export default function CallReviewForm() {
                       </Button>
                     </div>
                     <AccordionContent>
-                      <div className="space-y-3 p-2">
+                      <div className="space-y-2 p-2">
                         <div className="space-y-1">
                           <Label htmlFor={`criterion-${item.id}`}>Criterion Name</Label>
                           <Input 
@@ -207,12 +207,12 @@ export default function CallReviewForm() {
                   </AccordionItem>
                 ))}
               </Accordion>
-              <div className="text-center mt-4">
+              <div className="text-center mt-2">
                 <Button onClick={addMatrixItem} className="bg-primary hover:bg-primary/90 text-primary-foreground">
                   <Plus className="mr-2 h-4 w-4" /> Add Criterion
                 </Button>
               </div>
-              <p className="text-sm text-muted-foreground text-center">
+              <p className="text-xs text-muted-foreground text-center">
                 Provide your scoring criteria. The AI will use this to score the call.
               </p>
             </div>
@@ -229,7 +229,7 @@ export default function CallReviewForm() {
                         className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
                         value={agentName}
                         onChange={(e) => setAgentName(e.target.value)}
-                        placeholder="e.g., John Smith"
+                        placeholder="e.g., Scott Chegg"
                     />
                     <p className="text-sm text-muted-foreground">
                         Provide the agent's name to override automatic extraction.
@@ -308,21 +308,23 @@ export default function CallReviewForm() {
         </div>
         
         {error && (
-            <Alert variant="destructive" className="mt-6">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error Generating Review</AlertTitle>
-                <AlertDescription>
-                    <p>The AI model failed to generate a review. This can happen if the service is overloaded or if there's an issue with the input provided.</p>
-                     <button onClick={() => setShowErrorDetails(!showErrorDetails)} className="text-primary underline mt-2">
-                        {showErrorDetails ? 'Hide Details' : 'Show Details'}
-                    </button>
-                    {showErrorDetails && (
-                        <pre className="mt-2 text-primary whitespace-pre-wrap font-mono text-xs bg-destructive-foreground/10 p-2 rounded-md">
-                            {error}
-                        </pre>
-                    )}
-                </AlertDescription>
-            </Alert>
+            <div className="mt-6 text-center">
+                <Alert variant="destructive" className="inline-flex flex-col items-center text-center">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Error Generating Review</AlertTitle>
+                    <AlertDescription>
+                        <p>The AI model failed to generate a review. This can happen if the service is overloaded or if there's an issue with the input provided.</p>
+                        <button onClick={() => setShowErrorDetails(!showErrorDetails)} className="text-primary underline mt-2">
+                            {showErrorDetails ? 'Hide Details' : 'Show Details'}
+                        </button>
+                        {showErrorDetails && (
+                            <pre className="mt-2 text-primary whitespace-pre-wrap font-mono text-xs bg-destructive/10 p-2 rounded-md">
+                                {error}
+                            </pre>
+                        )}
+                    </AlertDescription>
+                </Alert>
+            </div>
         )}
         
         {review && !isLoading && (
