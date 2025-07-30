@@ -91,21 +91,21 @@ export default function CallReviewForm() {
       setReview(result);
     } catch (e: any) {
       console.error(e);
-      let errorMessage = "An unexpected error occurred.";
-      if (e.message) {
-        if (e.message.includes('overloaded')) {
-            errorMessage = "The AI service is currently overloaded. Please try again in a few moments."
-        } else if (e.message.includes('AI_FLOW_FAILED')) {
-            errorMessage = "The AI failed to generate a review after multiple attempts. This might be due to a temporary service issue or a problem with the provided input. Please try again shortly."
-        } else {
-            errorMessage = e.message;
-        }
+      let errorMessage = "An unexpected error occurred. Please check the console for details.";
+      if (e instanceof Error) {
+          if (e.message.includes('overloaded')) {
+              errorMessage = "The AI service is currently overloaded. Please try again in a few moments."
+          } else if (e.message.includes('AI_FLOW_FAILED')) {
+              errorMessage = "The AI failed to generate a review after multiple attempts. This could be due to a temporary service issue or a problem with the provided input. Please try again shortly."
+          } else {
+              errorMessage = e.message;
+          }
       }
       setError(errorMessage);
        toast({
         variant: "destructive",
         title: "Error Generating Review",
-        description: "Please check your settings or try again later.",
+        description: "An issue occurred while generating the review. Please try again later.",
       });
     } finally {
       setIsLoading(false);
@@ -181,8 +181,10 @@ export default function CallReviewForm() {
                   <AccordionItem value={item.id} key={item.id}>
                     <div className="flex items-center w-full gap-2">
                       <AccordionTrigger className="flex-1 py-2 text-left pr-2">
-                        <span className='font-semibold text-foreground truncate group-hover:underline'>{item.criterion}</span>
-                        <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 ml-auto group-data-[state=open]:rotate-180" />
+                        <div className="flex-1 flex justify-between items-center">
+                          <span className='font-semibold text-foreground truncate group-hover:underline'>{item.criterion}</span>
+                          <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 ml-auto group-data-[state=open]:rotate-180" />
+                        </div>
                       </AccordionTrigger>
                       <Button 
                         variant="ghost" 
