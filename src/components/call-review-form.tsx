@@ -87,7 +87,7 @@ export default function CallReviewForm() {
       });
 
       setReview(result);
-    } catch (e: any) {
+    } catch (e) {
       console.error(e);
       const errorMessage = e instanceof Error ? e.message : "An unexpected error occurred. Please try again.";
       setError(errorMessage);
@@ -161,11 +161,10 @@ export default function CallReviewForm() {
               </Label>
               <Accordion type="multiple" className="w-full">
                 {scoringMatrix.map((item) => (
-                   <AccordionItem value={item.id} key={item.id}>
+                  <AccordionItem value={item.id} key={item.id}>
                     <div className="flex items-center w-full gap-2">
-                       <AccordionTrigger className="flex-1 py-2 text-left pr-2 justify-between">
-                          <span className='font-semibold text-foreground truncate group-hover:underline'>{item.criterion}</span>
-                          <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+                      <AccordionTrigger className="flex-1 py-2 text-left pr-2">
+                        <span className='font-semibold text-foreground truncate group-hover:underline'>{item.criterion}</span>
                       </AccordionTrigger>
                       <Button
                         variant="ghost"
@@ -330,3 +329,5 @@ export default function CallReviewForm() {
     </>
   );
 }
+
+    
