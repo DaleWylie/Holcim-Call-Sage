@@ -8,16 +8,24 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 
 const GenerateNonBiasedReviewInputSchema = z.object({
   scoringMatrix: z
     .string()
     .describe('A JSON string representing the scoring matrix for the call review.'),
-  callTranscript: z.string().describe('The transcript of the call to be reviewed. This may be empty if an audio file is provided.'),
-  audioRecording: z.string().optional().describe(
-    "A recording of the call, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:audio/wav;base64,<encoded_data>'. The AI will transcribe this audio if provided."
-  ),
+  callTranscript: z
+    .string()
+    .describe(
+      'The transcript of the call to be reviewed. This may be empty if an audio file is provided.'
+    ),
+  audioRecording: z
+    .string()
+    .optional()
+    .describe(
+      "A recording of the call, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:audio/wav;base64,<encoded_data>'. The AI will transcribe this audio if provided."
+    ),
 });
 export type GenerateNonBiasedReviewInput = z.infer<typeof GenerateNonBiasedReviewInputSchema>;
 
@@ -26,7 +34,9 @@ const GenerateNonBiasedReviewOutputSchema = z.object({
 });
 export type GenerateNonBiasedReviewOutput = z.infer<typeof GenerateNonBiasedReviewOutputSchema>;
 
-export async function generateNonBiasedReview(input: GenerateNonBiasedReviewInput): Promise<GenerateNonBiasedReviewOutput> {
+export async function generateNonBiasedReview(
+  input: GenerateNonBiasedReviewInput
+): Promise<GenerateNonBiasedReviewOutput> {
   return generateNonBiasedReviewFlow(input);
 }
 
@@ -95,7 +105,11 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
     outputSchema: GenerateNonBiasedReviewOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    let model = googleAI.model('gemini-1.5-flash');
+    if (input.audioRecording) {
+      model = googleAI.model('gemini-2.0-flash-preview');
+    }
+    const {output} = await prompt({model}, input);
     return output!;
   }
 );

@@ -85,12 +85,12 @@ export default function CallReviewForm() {
       if (result.review) {
         setReview(result.review);
       } else {
-        setError('No review content received from the AI. Please try again.');
+        setError('No review content received from the AI. This might be due to an issue with the AI service or the input provided. Please try again.');
       }
 
     } catch (err: any) {
       console.error("Error generating review:", err);
-      setError(`Failed to generate review: ${err.message}`);
+      setError(`Failed to generate review. The AI service may be temporarily unavailable or the request may have failed. Please try again later. Error: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
