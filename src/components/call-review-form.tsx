@@ -142,7 +142,8 @@ export default function CallReviewForm() {
 
   return (
     <>
-    <Card className="w-full max-w-6xl shadow-xl relative">
+    <div className="w-full max-w-6xl">
+    <Card className="shadow-xl relative">
        <div className="absolute top-4 right-4">
           <Button variant="ghost" size="icon" onClick={() => setIsSettingsOpen(true)}>
             <Settings className="h-5 w-5" />
@@ -283,7 +284,7 @@ export default function CallReviewForm() {
             ) : (
                 <>
                 <Sparkles className="mr-2 h-5 w-5" />
-                Generate Non-Bias Review
+                Generate Call Review
                 </>
             )}
           </Button>
@@ -302,6 +303,10 @@ export default function CallReviewForm() {
         )}
       </CardContent>
     </Card>
+    <footer className="text-center mt-8 text-sm text-muted-foreground">
+        <p>This application was created by Dale Wylie. Intended purpose is to be used as an AI assistant to help with Call Quality Managment and provides a rigid, non-bias review on defined voice calls and transcripts. As with all AI tools, human qualification is required. Use responsibly.</p>
+    </footer>
+    </div>
      <AlertDialog open={!!criterionToDelete} onOpenChange={(isOpen) => !isOpen && setCriterionToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
