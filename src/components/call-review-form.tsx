@@ -142,6 +142,8 @@ export default function CallReviewForm() {
 
   const canGenerate = !isLoading && (!!callTranscript.trim() || !!audioFile);
 
+  const isModelOverloadedError = error.includes('503') || error.toLowerCase().includes('overloaded');
+
   return (
     <>
     <div className="w-full max-w-6xl">
@@ -153,7 +155,7 @@ export default function CallReviewForm() {
           </Button>
         </div>
       <CardHeader className="text-center">
-        <CardTitle className="text-4xl font-extrabold text-[#1d4370] font-headline">
+        <CardTitle className="text-4xl font-extrabold text-primary font-headline">
           Holcim Call Sage
         </CardTitle>
         <CardDescription>
@@ -171,7 +173,7 @@ export default function CallReviewForm() {
               <Accordion type="multiple" className="w-full">
                 {scoringMatrix.map((item) => (
                   <AccordionItem value={item.id} key={item.id}>
-                    <div className="flex items-center w-full">
+                    <div className="flex items-center w-full group">
                       <AccordionTrigger className="flex-1 hover:no-underline pr-4">
                         <span className='font-semibold text-foreground truncate'>{item.criterion}</span>
                       </AccordionTrigger>
@@ -205,7 +207,7 @@ export default function CallReviewForm() {
                 ))}
               </Accordion>
               <div className="text-center mt-4">
-                <Button onClick={addMatrixItem} className="bg-[#1d4370] hover:bg-[#1d4370]/90 text-white">
+                <Button onClick={addMatrixItem} className="bg-primary hover:bg-primary/90 text-primary-foreground">
                   <Plus className="mr-2 h-4 w-4" /> Add Criterion
                 </Button>
               </div>
@@ -249,7 +251,7 @@ export default function CallReviewForm() {
                         ref={fileInputRef}
                         className="hidden"
                     />
-                    <Button onClick={() => fileInputRef.current?.click()} className="bg-[#1d4370] hover:bg-[#1d4370]/90 text-white">
+                    <Button onClick={() => fileInputRef.current?.click()} className="bg-primary hover:bg-primary/90 text-primary-foreground">
                         Select .wav file
                     </Button>
                     {audioFile && (
@@ -278,7 +280,11 @@ export default function CallReviewForm() {
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Error Generating Review</AlertTitle>
               <AlertDescription>
-                <p>An unexpected error occurred. Please check your inputs or try again later.</p>
+                <p>
+                  {isModelOverloadedError
+                    ? "The AI model is currently busy. Please try again in a few moments."
+                    : "An unexpected error occurred. Please check your inputs or try again later."}
+                </p>
                 <Collapsible open={showErrorDetails} onOpenChange={setShowErrorDetails}>
                   <CollapsibleTrigger asChild>
                     <Button variant="link" className="p-0 h-auto text-destructive-foreground/80 font-normal">
@@ -297,7 +303,7 @@ export default function CallReviewForm() {
 
           <Button
             onClick={generateReview}
-            className="bg-[#1d4370] hover:bg-[#1d4370]/90 text-white font-bold h-auto py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-auto py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={!canGenerate}
           >
             {isLoading ? (
@@ -342,3 +348,5 @@ export default function CallReviewForm() {
     </>
   );
 }
+
+    
