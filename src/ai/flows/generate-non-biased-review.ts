@@ -32,7 +32,7 @@ export type GenerateNonBiasedReviewInput = z.infer<typeof GenerateNonBiasedRevie
 const ScoreItemSchema = z.object({
   criterion: z.string().describe('The name of the criterion being scored.'),
   score: z.number().describe('The score given for the criterion (0-5).'),
-  justification: z.string().describe('The justification for the given score.'),
+  justification: z.string().describe('A detailed justification for the given score, referencing specific examples or phrases from the call transcript to support the rating.'),
 });
 
 const GenerateNonBiasedReviewOutputSchema = z.object({
@@ -77,7 +77,7 @@ const prompt = ai.definePrompt({
 Your task is to review a call and score the analyst based on the provided scoring matrix, returning the output as a JSON object.
 If an audio recording is provided, you must first transcribe it to get the call transcript. If both an audio recording and a text transcript are provided, the audio recording is the primary source of truth. If only a text transcript is provided, use that.
 
-For each criterion, assign a score from 0 to 5 and provide a brief justification based on the transcript.
+For each criterion, assign a score from 0 to 5. Provide a detailed justification for each score, quoting or referencing specific phrases or moments from the call transcript to support your reasoning.
 The scoring scale is as follows:
 5 – Excellent: Consistently demonstrated with high quality.
 4 – Good: Done well with minor opportunities for improvement.
