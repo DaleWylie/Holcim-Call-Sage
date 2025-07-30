@@ -246,7 +246,7 @@ export default function CallReviewForm() {
                 <div className="space-y-4 text-center">
                     <Label htmlFor="interactionId" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
                         <Fingerprint className="h-5 w-5" />
-                        Interaction ID (Optional)
+                        Interaction ID
                     </Label>
                     <Input
                         id="interactionId"
