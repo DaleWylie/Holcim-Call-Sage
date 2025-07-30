@@ -94,8 +94,9 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
     const model = googleAI.model('gemini-1.5-flash');
 
     const maxRetries = 3;
-    let attempt = 0;
-    while (attempt < maxRetries) {
+    let lastError: any = null;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
         const { output } = await nonBiasedReviewPrompt(input, { model });
         
@@ -103,23 +104,24 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
         if (output) {
             return output;
         }
-
         // If output is null, it's a valid attempt but we should retry.
         console.log(`AI returned empty output, attempt ${attempt + 1} of ${maxRetries}. Retrying...`);
+        lastError = new Error('AI returned empty output.');
 
       } catch (err: any) {
-        if (err.message.includes('503') || err.message.includes('overloaded')) {
-          console.log(`Model is overloaded, retrying in ${attempt * 2} seconds...`);
-          await new Promise(resolve => setTimeout(resolve, attempt * 2000));
-        } else {
-          // For other errors, we still want to retry a few times as they might be transient.
-          console.error(`An error occurred on attempt ${attempt + 1}:`, err);
+        lastError = err;
+        console.error(`An error occurred on attempt ${attempt + 1}:`, err.message);
+        if (attempt < maxRetries - 1) {
+          // Implement exponential backoff: 1s, 4s, 9s
+          const delay = Math.pow(attempt + 1, 2) * 1000;
+          console.log(`Retrying in ${delay / 1000} seconds...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
-      attempt++;
     }
     
     // If we've exhausted retries and still have no output, throw a specific error.
-    throw new Error('AI_FLOW_FAILED: The AI flow failed to produce a valid review after multiple attempts.');
+    console.error('AI flow failed after all retries. Last error:', lastError);
+    throw new Error('AI_FLOW_FAILED: The AI flow failed to produce a valid review after multiple attempts. The service may be temporarily unavailable. Please try again later.');
   }
 );
