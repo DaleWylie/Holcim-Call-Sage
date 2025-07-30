@@ -154,33 +154,56 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                 <AccordionItem value={`item-${index}`} key={index}>
                   <div className="flex justify-between items-center w-full gap-2">
                     <div className="flex items-center gap-4 flex-1">
-                        <div className={cn(
-                            "w-8 h-8 flex items-center justify-center rounded-full text-white font-bold text-sm shrink-0",
-                            getScoreColor(item.score)
-                        )}>
-                            {item.score}/5
-                        </div>
-                        <AccordionTrigger className="flex-1 py-2 pr-2 justify-start no-underline hover:no-underline">
-                            <span className="text-left font-medium">{item.criterion}</span>
-                        </AccordionTrigger>
+                      <div
+                        className={cn(
+                          'w-8 h-8 flex items-center justify-center rounded-full text-white font-bold text-sm shrink-0',
+                          getScoreColor(item.score)
+                        )}
+                      >
+                        {item.score}/5
+                      </div>
+                      <AccordionTrigger className="flex-1 py-2 pr-2 justify-start no-underline hover:no-underline">
+                        <span className="text-left font-medium">{item.criterion}</span>
+                      </AccordionTrigger>
                     </div>
                     <div className="flex items-center gap-2 ml-4 shrink-0">
-                        {editingField === `score-${index}` ? (
-                            <>
-                                <Input 
-                                    type="number"
-                                    value={tempValue}
-                                    onChange={e => setTempValue(e.target.value)}
-                                    className="w-20 h-8 text-center action-button"
-                                    min={0} max={5}
-                                    autoFocus
-                                />
-                                <Button size="icon" className="h-8 w-8 bg-green-500 hover:bg-green-600 action-button" onClick={() => handleSave(`score-${index}`)}><Check className="h-4 w-4" /></Button>
-                                <Button size="icon" variant="ghost" className="h-8 w-8 action-button" onClick={handleCancel}><X className="h-4 w-4" /></Button>
-                            </>
-                        ) : (
-                            <Button size="icon" variant="ghost" className="h-8 w-8 action-button" onClick={() => handleEditClick(`score-${index}`, item.score)}><Pencil className="h-4 w-4"/></Button>
-                        )}
+                      {editingField === `score-${index}` ? (
+                        <>
+                          <Input
+                            type="number"
+                            value={tempValue}
+                            onChange={(e) => setTempValue(e.target.value)}
+                            className="w-20 h-8 text-center action-button"
+                            min={0}
+                            max={5}
+                            autoFocus
+                          />
+                          <Button
+                            size="icon"
+                            className="h-8 w-8 bg-green-500 hover:bg-green-600 action-button"
+                            onClick={() => handleSave(`score-${index}`)}
+                          >
+                            <Check className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 action-button"
+                            onClick={handleCancel}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 action-button"
+                          onClick={() => handleEditClick(`score-${index}`, item.score)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                   <AccordionContent className="pl-16">
