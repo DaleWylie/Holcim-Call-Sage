@@ -177,7 +177,7 @@ export default function CallReviewForm() {
                       <AccordionTrigger className="flex-1 hover:no-underline pr-4 py-2">
                         <span className='font-semibold text-foreground truncate'>{item.criterion}</span>
                       </AccordionTrigger>
-                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive mr-2" onClick={() => setCriterionToDelete(item.id)}>
+                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive hover:bg-transparent rounded-full mr-2" onClick={() => setCriterionToDelete(item.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -243,7 +243,7 @@ export default function CallReviewForm() {
                     <Textarea
                         id="callTranscript"
                         className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-left"
-                        rows={10}
+                        rows={7}
                         value={callTranscript}
                         onChange={(e) => setCallTranscript(e.target.value)}
                         placeholder="Paste your Genesys Cloud call transcript here... (Disregarded if uploading WAV file)"
