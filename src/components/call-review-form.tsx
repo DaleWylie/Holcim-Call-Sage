@@ -23,6 +23,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { SettingsDialog } from './settings-dialog';
+import { generateNonBiasedReview, GenerateNonBiasedReviewOutput } from '@/ai/flows/generate-non-biased-review';
+import { useToast } from '@/hooks/use-toast';
 
 const defaultScoringMatrix = [
   { id: "1", criterion: "1. Greeting & Introduction", description: "Greeted the caller professionally and warmly, introduced self by name and team/department, asked for and confirmed the caller’s name and/or account/ID politely. For this criterion, consider the sentiment and clear intent of the agent's opening remarks, even if specific words (like their name) are not perfectly transcribed. (0-5)" },
@@ -41,6 +43,23 @@ type ScoringItem = {
   description: string;
 };
 
+// Helper to convert a File to a Base64 Data URI
+const fileToDataUri = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        resolve(reader.result);
+      } else {
+        reject(new Error('Failed to read file as Data URI'));
+      }
+    };
+    reader.onerror = (error) => reject(error);
+    reader.readAsDataURL(file);
+  });
+};
+
+
 export default function CallReviewForm() {
   const [scoringMatrix, setScoringMatrix] = useState<ScoringItem[]>(defaultScoringMatrix);
   const [agentName, setAgentName] = useState('');
@@ -49,6 +68,44 @@ export default function CallReviewForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [criterionToDelete, setCriterionToDelete] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [review, setReview] = useState<GenerateNonBiasedReviewOutput | null>(null);
+  const [showErrorDetails, setShowErrorDetails] = useState(false);
+  const { toast } = useToast();
+
+  const handleGenerateReview = async () => {
+    setIsLoading(true);
+    setError(null);
+    setReview(null);
+    
+    try {
+      const audioDataUri = audioFile ? await fileToDataUri(audioFile) : undefined;
+      
+      const result = await generateNonBiasedReview({
+        scoringMatrix,
+        agentName: agentName.trim() || undefined,
+        callTranscript: callTranscript.trim() || undefined,
+        audioDataUri,
+      });
+
+      setReview(result);
+    } catch (e: any) {
+      console.error(e);
+      let errorMessage = "An unexpected error occurred.";
+      if (e.message) {
+        errorMessage = e.message;
+      }
+      setError(errorMessage);
+       toast({
+        variant: "destructive",
+        title: "Error Generating Review",
+        description: "Please check your settings or try again later.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
 
   const handleMatrixChange = (id: string, field: 'criterion' | 'description', value: string) => {
@@ -78,10 +135,15 @@ export default function CallReviewForm() {
       setAudioFile(file);
     } else {
       setAudioFile(null);
+      toast({
+        variant: "destructive",
+        title: "Invalid File Type",
+        description: "Please select a .wav file.",
+      });
     }
   };
 
-  const canGenerate = !!callTranscript.trim() || !!audioFile;
+  const canGenerate = !isLoading && (!!callTranscript.trim() || !!audioFile);
 
   return (
     <>
@@ -109,7 +171,7 @@ export default function CallReviewForm() {
                 <Binary className="h-5 w-5" />
                 1. Define Call Scoring Matrix
               </Label>
-              <Accordion type="multiple" className="w-full">
+              <Accordion type="multiple" className="w-full" defaultValue={scoringMatrix.map(item => item.id)}>
                 {scoringMatrix.map((item) => (
                   <AccordionItem value={item.id} key={item.id}>
                     <div className="flex items-center w-full group">
@@ -231,15 +293,43 @@ export default function CallReviewForm() {
         </div>
 
         <div className="space-y-4 pt-6 text-center">
-          <Button
+           <Button
+            onClick={handleGenerateReview}
+            disabled={!canGenerate}
             className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-auto py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={true}
-            title="AI functionality is currently disabled."
           >
-            <Sparkles className="mr-2 h-5 w-5" />
-            Generate Call Review
+            {isLoading ? (
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            ) : (
+              <Sparkles className="mr-2 h-5 w-5" />
+            )}
+            {isLoading ? 'Generating...' : 'Generate Call Review'}
           </Button>
         </div>
+        
+        {error && (
+            <Alert variant="destructive" className="mt-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error Generating Review</AlertTitle>
+                <AlertDescription>
+                    <p>The AI model failed to generate a review. This can happen if the service is overloaded or if there's an issue with the input provided.</p>
+                     <button onClick={() => setShowErrorDetails(!showErrorDetails)} className="text-primary underline mt-2">
+                        {showErrorDetails ? 'Hide Details' : 'Show Details'}
+                    </button>
+                    {showErrorDetails && (
+                        <pre className="mt-2 text-primary whitespace-pre-wrap font-mono text-xs bg-destructive-foreground/10 p-2 rounded-md">
+                            {error}
+                        </pre>
+                    )}
+                </AlertDescription>
+            </Alert>
+        )}
+        
+        {review && !isLoading && (
+            <div className="mt-8">
+                <ReviewDisplay review={review} setReview={setReview} />
+            </div>
+        )}
 
       </CardContent>
     </Card>
