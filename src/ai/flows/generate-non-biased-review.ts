@@ -130,7 +130,15 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
     outputSchema: GenerateNonBiasedReviewOutputSchema,
   },
   async (input) => {
-    const model = googleAI.model('gemini-1.5-flash');
+    let model;
+    if (input.audioRecording) {
+      // Use a multimodal model for audio processing.
+      model = googleAI.model('gemini-1.5-flash');
+    } else {
+      // Use a powerful text-only model for transcript analysis.
+      model = googleAI.model('gemini-pro');
+    }
+    
     const maxRetries = 3;
     let attempt = 0;
 
