@@ -71,7 +71,6 @@ export default function CallReviewForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [review, setReview] = useState<GenerateNonBiasedReviewOutput | null>(null);
-  const [showErrorDetails, setShowErrorDetails] = useState(false);
   const { toast } = useToast();
 
   const handleGenerateReview = async () => {
@@ -171,7 +170,7 @@ export default function CallReviewForm() {
                 <Binary className="h-5 w-5" />
                 1. Define Call Scoring Matrix
               </Label>
-              <Accordion type="multiple" className="w-full" defaultValue={scoringMatrix.map(item => item.id)}>
+              <Accordion type="multiple" className="w-full">
                 {scoringMatrix.map((item) => (
                   <AccordionItem value={item.id} key={item.id} className="py-0">
                     <div className="flex items-center w-full group">
@@ -185,7 +184,7 @@ export default function CallReviewForm() {
                     <AccordionContent>
                       <div className="space-y-2 p-2">
                         <div className="space-y-1">
-                          <Label htmlFor={`criterion-${item.id}`}>Criterion Name</Label>
+                          <Label htmlFor={`criterion-${item.id}`} className="text-primary">Criterion Name</Label>
                           <Input 
                             id={`criterion-${item.id}`} 
                             value={item.criterion} 
@@ -194,7 +193,7 @@ export default function CallReviewForm() {
                           />
                         </div>
                         <div className="space-y-1">
-                          <Label htmlFor={`description-${item.id}`}>Description</Label>
+                          <Label htmlFor={`description-${item.id}`} className="text-primary">Description</Label>
                           <Textarea 
                             id={`description-${item.id}`} 
                             value={item.description}
@@ -229,7 +228,7 @@ export default function CallReviewForm() {
                         className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
                         value={agentName}
                         onChange={(e) => setAgentName(e.target.value)}
-                        placeholder="e.g., Scott Chegg"
+                        placeholder="e.g. Scott Chegg"
                     />
                     <p className="text-sm text-muted-foreground">
                         Provide the agent's name to override automatic extraction.
@@ -314,14 +313,9 @@ export default function CallReviewForm() {
                     <AlertTitle>Error Generating Review</AlertTitle>
                     <AlertDescription className="text-center">
                         <p>The AI model failed to generate a review. This can happen if the service is overloaded or if there's an issue with the input provided.</p>
-                        <button onClick={() => setShowErrorDetails(!showErrorDetails)} className="text-primary underline mt-2">
-                            {showErrorDetails ? 'Hide Details' : 'Show Details'}
-                        </button>
-                        {showErrorDetails && (
-                            <pre className="mt-2 whitespace-pre-wrap font-mono text-xs bg-destructive/10 p-2 rounded-md text-primary">
-                                {error}
-                            </pre>
-                        )}
+                        <pre className="mt-2 whitespace-pre-wrap font-mono text-xs bg-destructive/10 p-2 rounded-md text-primary">
+                            {error}
+                        </pre>
                     </AlertDescription>
                 </Alert>
             </div>
