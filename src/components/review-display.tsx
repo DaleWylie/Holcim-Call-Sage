@@ -52,7 +52,12 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
         if (!prev) return null;
         const newScores = [...prev.scores];
         newScores[scoreIndex] = { ...newScores[scoreIndex], score: Number(tempValue) };
-        return { ...prev, scores: newScores };
+        
+        // Recalculate quick score
+        const totalScore = newScores.reduce((acc, s) => acc + s.score, 0);
+        const newQuickScore = totalScore / newScores.length;
+
+        return { ...prev, scores: newScores, quickScore: newQuickScore };
       });
     }
     setEditingField(null);
@@ -148,10 +153,10 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
               {review.scores.map((item, index) => (
                 <AccordionItem value={`item-${index}`} key={index}>
                     <div className="flex justify-between items-center w-full">
-                        <AccordionTrigger className="flex-1">
+                        <AccordionTrigger className="flex-1 py-2 pr-2">
                             <div className="flex items-center gap-4 w-full">
                                 <div className={cn(
-                                    "w-10 h-10 flex items-center justify-center rounded-full text-white font-bold text-base",
+                                    "w-8 h-8 flex items-center justify-center rounded-full text-white font-bold text-sm",
                                     getScoreColor(item.score)
                                 )}>
                                     {item.score}/5
