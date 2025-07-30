@@ -37,7 +37,8 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
   const [tempValue, setTempValue] = useState<string | number>('');
   const [openAccordionItems, setOpenAccordionItems] = useState<string[]>([]);
   const [checkerName, setCheckerName] = useState('');
-  const [interactionId, setInteractionId] = useState(review.interactionId || '');
+  
+  const interactionId = review.interactionId || '';
 
   const handleEditClick = (field: string, currentValue: string | number) => {
     setEditingField(field);
@@ -267,7 +268,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="checkerName">Your Name</Label>
                         <Input 
@@ -277,16 +278,6 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                             onChange={(e) => setCheckerName(e.target.value)}
                             className="action-button"
                         />
-                    </div>
-                    <div className="space-y-2">
-                       <Label htmlFor="finalInteractionId">Interaction ID</Label>
-                       <Input
-                         id="finalInteractionId"
-                         placeholder="Enter Interaction ID"
-                         value={interactionId}
-                         onChange={(e) => setInteractionId(e.target.value)}
-                         className="action-button"
-                       />
                     </div>
                 </div>
                  <div className="mt-6 text-center">
