@@ -93,35 +93,21 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
     // We use gemini-1.5-flash as it's fast, cost-effective, and supports multimodal input (audio/text).
     const model = googleAI.model('gemini-1.5-flash');
 
-    const maxRetries = 3;
-    let lastError: any = null;
-
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-      try {
-        const { output } = await nonBiasedReviewPrompt(input, { model });
-        
-        // Explicitly check if the output is valid before returning.
-        if (output) {
-            return output;
-        }
-        // If output is null, it's a valid attempt but we should retry.
-        console.log(`AI returned empty output, attempt ${attempt + 1} of ${maxRetries}. Retrying...`);
-        lastError = new Error('AI returned empty output.');
-
-      } catch (err: any) {
-        lastError = err;
-        console.error(`An error occurred on attempt ${attempt + 1}:`, err.message);
-        if (attempt < maxRetries - 1) {
-          // Implement exponential backoff: 1s, 4s, 9s
-          const delay = Math.pow(attempt + 1, 2) * 1000;
-          console.log(`Retrying in ${delay / 1000} seconds...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
-        }
+    try {
+      const { output } = await nonBiasedReviewPrompt(input, { model });
+      
+      if (output) {
+          return output;
       }
+      
+      // If the AI returns a null/undefined output without throwing, we'll treat it as an error.
+      throw new Error('The AI service returned an empty or invalid response.');
+
+    } catch (err: any) {
+      console.error(`AI flow failed:`, err);
+      // Re-throw a new error with a clear message for the frontend to handle.
+      // This helps abstract the backend details from the UI error message.
+      throw new Error(`AI_REQUEST_FAILED: The AI service was unable to process the request. The service may be busy or unavailable. Please wait a moment and try again. Raw error: ${err.message}`);
     }
-    
-    // If we've exhausted retries and still have no output, throw a specific error.
-    console.error('AI flow failed after all retries. Last error:', lastError);
-    throw new Error('AI_FLOW_FAILED: The AI flow failed to produce a valid review after multiple attempts. The service may be temporarily unavailable. Please try again later.');
   }
 );

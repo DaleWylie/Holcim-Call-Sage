@@ -22,6 +22,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+
 import { generateNonBiasedReview, GenerateNonBiasedReviewOutput } from '@/ai/flows/generate-non-biased-review';
 import { useToast } from '@/hooks/use-toast';
 
@@ -41,6 +47,13 @@ type ScoringItem = {
   criterion: string;
   description: string;
 };
+
+type ErrorState = {
+  title: string;
+  message: string;
+  details?: string;
+};
+
 
 // Helper to convert a File to a Base64 Data URI
 const fileToDataUri = (file: File): Promise<string> => {
@@ -67,7 +80,7 @@ export default function CallReviewForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [criterionToDelete, setCriterionToDelete] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ErrorState | null>(null);
   const [review, setReview] = useState<GenerateNonBiasedReviewOutput | null>(null);
   const { toast } = useToast();
 
@@ -89,20 +102,18 @@ export default function CallReviewForm() {
       setReview(result);
     } catch (e) {
       console.error(e);
-      let errorMessage = "An unexpected error occurred. Please try again.";
-      if (e instanceof Error) {
-          if (e.message.startsWith('AI_FLOW_FAILED')) {
-              errorMessage = "The AI service is currently busy or unavailable. The system tried multiple times without success. Please wait a moment and try again.";
-          } else {
-              errorMessage = e.message;
-          }
-      }
-      setError(errorMessage);
-       toast({
-        variant: "destructive",
+      let errorState: ErrorState = {
         title: "Error Generating Review",
-        description: errorMessage,
-      });
+        message: "An unexpected error occurred. Please try again.",
+        details: e instanceof Error ? e.message : String(e),
+      };
+
+      if (e instanceof Error && e.message.startsWith('AI_REQUEST_FAILED')) {
+          errorState.message = "The AI service failed to respond. This might be due to high demand or a temporary issue. Please wait a moment and try again.";
+          errorState.details = e.message;
+      }
+      
+      setError(errorState);
     } finally {
       setIsLoading(false);
     }
@@ -170,17 +181,17 @@ export default function CallReviewForm() {
                 {scoringMatrix.map((item) => (
                   <AccordionItem value={item.id} key={item.id}>
                     <div className="flex items-center w-full gap-2">
-                      <AccordionTrigger className="flex-1 py-2 text-left pr-2">
-                        <span className='font-semibold text-foreground truncate group-hover:underline'>{item.criterion}</span>
-                      </AccordionTrigger>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-muted-foreground hover:text-destructive hover:bg-transparent rounded-full shrink-0"
-                        onClick={() => setCriterionToDelete(item.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                        <AccordionTrigger className="flex-1 py-2 text-left pr-2">
+                            <span className='font-semibold text-foreground truncate group-hover:underline'>{item.criterion}</span>
+                        </AccordionTrigger>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-muted-foreground hover:text-destructive hover:bg-transparent rounded-full shrink-0"
+                            onClick={() => setCriterionToDelete(item.id)}
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
                     </div>
                     <AccordionContent>
                       <div className="space-y-2 p-2">
@@ -296,15 +307,27 @@ export default function CallReviewForm() {
         </div>
         
         {error && (
-            <div className="mt-6 flex justify-center">
-                <Alert variant="destructive" className="inline-flex flex-col items-center text-center">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Error Generating Review</AlertTitle>
-                    <AlertDescription className="text-center">
-                        <p>{error}</p>
-                    </AlertDescription>
-                </Alert>
-            </div>
+          <div className="mt-6 flex justify-center">
+            <Alert variant="destructive" className="w-full max-w-lg">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>{error.title}</AlertTitle>
+              <AlertDescription>
+                {error.message}
+                {error.details && (
+                  <Collapsible className="mt-4">
+                    <CollapsibleTrigger asChild>
+                       <Button variant="link" className="p-0 h-auto text-destructive">Show details</Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <p className="text-xs font-mono bg-red-100 dark:bg-red-900/50 p-2 rounded mt-2">
+                        {error.details}
+                      </p>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+              </AlertDescription>
+            </Alert>
+          </div>
         )}
         
         {review && !isLoading && (
@@ -336,7 +359,3 @@ export default function CallReviewForm() {
     </>
   );
 }
-
-    
-
-    
