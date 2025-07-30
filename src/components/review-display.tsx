@@ -270,7 +270,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
             <CardContent>
                 <div className="grid grid-cols-1 gap-4">
                     <div className="space-y-2">
-                        <Label htmlFor="checkerName">Your Name</Label>
+                        <Label htmlFor="checkerName" className="action-button">Your Name</Label>
                         <Input 
                             id="checkerName" 
                             placeholder="Enter your name to enable printing"
@@ -278,10 +278,11 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                             onChange={(e) => setCheckerName(e.target.value)}
                             className="action-button"
                         />
+                         {isPrinting && <p className="font-semibold">{checkerName}</p>}
                     </div>
                 </div>
                  <div className="mt-6 text-center">
-                    <Button onClick={handlePrint} disabled={isPrinting || !checkerName.trim() || !interactionId.trim()} className="bg-primary hover:bg-primary/90 text-primary-foreground action-button">
+                    <Button onClick={handlePrint} disabled={isPrinting || !checkerName.trim()} className="bg-primary hover:bg-primary/90 text-primary-foreground action-button">
                         <Printer className="mr-2 h-4 w-4" />
                         {isPrinting ? "Printing..." : "Print to PDF"}
                     </Button>
