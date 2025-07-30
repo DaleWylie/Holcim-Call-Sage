@@ -1,4 +1,5 @@
 import { config } from 'dotenv';
 config();
 
-import '@/ai/flows/generate-non-biased-review.ts';
+// All flows must be imported here
+// e.g. import '@/ai/flows/generate-non-biased-review.ts';

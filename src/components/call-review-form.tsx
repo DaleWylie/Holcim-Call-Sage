@@ -2,7 +2,6 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
-import { generateNonBiasedReview, GenerateNonBiasedReviewOutput } from '@/ai/flows/generate-non-biased-review';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -24,7 +23,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { SettingsDialog } from './settings-dialog';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 
 const defaultScoringMatrix = [
   { id: "1", criterion: "1. Greeting & Introduction", description: "Greeted the caller professionally and warmly, introduced self by name and team/department, asked for and confirmed the caller’s name and/or account/ID politely. For this criterion, consider the sentiment and clear intent of the agent's opening remarks, even if specific words (like their name) are not perfectly transcribed. (0-5)" },
@@ -47,10 +45,6 @@ export default function CallReviewForm() {
   const [scoringMatrix, setScoringMatrix] = useState<ScoringItem[]>(defaultScoringMatrix);
   const [agentName, setAgentName] = useState('');
   const [callTranscript, setCallTranscript] = useState('');
-  const [review, setReview] = useState<GenerateNonBiasedReviewOutput | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [showErrorDetails, setShowErrorDetails] = useState(false);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [criterionToDelete, setCriterionToDelete] = useState<string | null>(null);
@@ -82,80 +76,12 @@ export default function CallReviewForm() {
     const file = event.target.files?.[0];
     if (file && file.type === "audio/wav") {
       setAudioFile(file);
-      setError('');
     } else {
       setAudioFile(null);
-      setError('Please select a valid .wav file.');
     }
   };
 
-  const fileToDataUri = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const generateReview = async () => {
-    setIsLoading(true);
-    setReview(null);
-    setError('');
-    setShowErrorDetails(false);
-
-    try {
-      if (!callTranscript.trim() && !audioFile) {
-        setError('Either Call Transcript or a WAV file is required.');
-        setIsLoading(false);
-        return;
-      }
-      
-      let audioDataUri: string | undefined = undefined;
-      if (audioFile) {
-        audioDataUri = await fileToDataUri(audioFile);
-      }
-      
-      const matrixForAI = scoringMatrix.reduce((obj, item) => {
-        obj[item.criterion] = item.description;
-        return obj;
-      }, {} as Record<string, string>);
-
-      const result = await generateNonBiasedReview({
-        agentName: agentName.trim() || undefined,
-        scoringMatrix: JSON.stringify(matrixForAI, null, 2),
-        callTranscript: callTranscript,
-        audioRecording: audioDataUri,
-      });
-      
-      if (result) {
-        setReview(result);
-      } else {
-        setError('No review content received from the AI. This might be due to an issue with the AI service or the input provided. Please try again.');
-      }
-
-    } catch (err: any) {
-      console.error("Error generating review:", err);
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const canGenerate = !isLoading && (!!callTranscript.trim() || !!audioFile);
-  const isQuotaError = error.includes('429');
-  const isModelOverloadedError = !isQuotaError && (error.includes('503') || error.toLowerCase().includes('overloaded'));
-
-
-  const getErrorMessage = () => {
-    if (isQuotaError) {
-      return "You have exceeded your API quota. Please check your plan or API key in settings.";
-    }
-    if (isModelOverloadedError) {
-      return "The AI model is currently busy. Please try again in a few moments.";
-    }
-    return "An unexpected error occurred. Please check your inputs or try again later.";
-  }
+  const canGenerate = !!callTranscript.trim() || !!audioFile;
 
   return (
     <>
@@ -305,42 +231,16 @@ export default function CallReviewForm() {
         </div>
 
         <div className="space-y-4 pt-6 text-center">
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error Generating Review</AlertTitle>
-              <AlertDescription>
-                <p>{getErrorMessage()}</p>
-                 <pre className="mt-2 rounded-md bg-muted/20 p-3 font-mono text-xs text-primary overflow-auto whitespace-pre-wrap">
-                    {error}
-                </pre>
-              </AlertDescription>
-            </Alert>
-          )}
-
           <Button
-            onClick={generateReview}
             className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-auto py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!canGenerate}
+            disabled={true}
+            title="AI functionality is currently disabled."
           >
-            {isLoading ? (
-              <span className="flex items-center justify-center">
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Generating Review...
-              </span>
-            ) : (
-                <>
-                <Sparkles className="mr-2 h-5 w-5" />
-                Generate Call Review
-                </>
-            )}
+            <Sparkles className="mr-2 h-5 w-5" />
+            Generate Call Review
           </Button>
         </div>
 
-
-        {review && (
-          <ReviewDisplay review={review} setReview={setReview} />
-        )}
       </CardContent>
     </Card>
     <footer className="text-center mt-8 text-sm text-muted-foreground">
@@ -365,5 +265,3 @@ export default function CallReviewForm() {
     </>
   );
 }
-
-    
