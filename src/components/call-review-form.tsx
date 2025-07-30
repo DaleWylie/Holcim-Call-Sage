@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useRef } from 'react';
@@ -141,7 +142,7 @@ export default function CallReviewForm() {
     <>
     <Card className="w-full max-w-6xl shadow-xl">
       <CardHeader className="text-center">
-        <CardTitle className="text-3xl font-bold text-[#1d4370] font-headline">
+        <CardTitle className="text-4xl font-extrabold text-[#1d4370] font-headline">
           Holcim Call Sage
         </CardTitle>
         <CardDescription>
@@ -212,7 +213,7 @@ export default function CallReviewForm() {
                     <Textarea
                         id="callTranscript"
                         className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-left"
-                        rows={6}
+                        rows={12}
                         value={callTranscript}
                         onChange={(e) => setCallTranscript(e.target.value)}
                         placeholder="Paste your Genesys Cloud call transcript here... (Optional if uploading WAV file)"
@@ -310,3 +311,4 @@ export default function CallReviewForm() {
     </>
   );
 }
+

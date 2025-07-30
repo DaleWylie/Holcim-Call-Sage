@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI agent for generating non-biased reviews of call transcripts based on a scoring matrix.
@@ -75,7 +76,11 @@ const prompt = ai.definePrompt({
   output: {schema: GenerateNonBiasedReviewOutputSchema},
   prompt: `You are a non-biased Quality Management Assistant for an IT Service Desk.
 Your task is to review a call and score the analyst based on the provided scoring matrix, returning the output as a JSON object.
-If an audio recording is provided, you must first transcribe it to get the call transcript. If both an audio recording and a text transcript are provided, the audio recording is the primary source of truth. If only a text transcript is provided, use that.
+
+**Important Instructions on Input:**
+- If an audio recording is provided, you **must** transcribe it to get the call transcript. This audio recording is the primary source of truth.
+- If both an audio recording and a text transcript are provided, **disregard the text transcript** and use the audio recording exclusively.
+- If only a text transcript is provided, use that for your analysis.
 
 For each criterion, assign a score from 0 to 5. Provide a detailed justification for each score, quoting or referencing specific phrases or moments from the call transcript to support your reasoning.
 The scoring scale is as follows:
@@ -96,10 +101,10 @@ Call Scoring Matrix:
 {{{scoringMatrix}}}
 
 ---
-Call Transcript (use if no audio provided):
+Call Transcript (use ONLY if no audio is provided):
 {{{callTranscript}}}
 ---
-Call Audio (transcribe this if present):
+Call Audio (transcribe this if present, it is the priority):
 {{#if audioRecording}}
 {{media url=audioRecording}}
 {{/if}}
@@ -128,3 +133,4 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
     return output!;
   }
 );
+
