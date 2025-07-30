@@ -87,8 +87,6 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
             onclone: (document) => {
                const actionButtons = document.querySelectorAll('.action-button');
                actionButtons.forEach(button => (button as HTMLElement).style.display = 'none');
-               const debugInfo = document.querySelectorAll('.debug-info');
-               debugInfo.forEach(info => (info as HTMLElement).style.display = 'none');
             }
         });
 
@@ -214,11 +212,6 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                   </div>
                   <AccordionContent className="pl-12">
                     <p className="text-sm text-muted-foreground">{item.justification}</p>
-                    <div className="debug-info mt-4 p-2 bg-slate-200 dark:bg-slate-700 rounded-md border border-slate-300">
-                        <h4 className="font-bold text-xs">Debugging Info:</h4>
-                        <p className="text-xs font-mono">Raw Score: {item.score}</p>
-                        <p className="text-xs font-mono">Returned Class: {getScoreColor(item.score)}</p>
-                    </div>
                   </AccordionContent>
                 </AccordionItem>
               ))}
