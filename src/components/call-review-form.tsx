@@ -205,7 +205,7 @@ export default function CallReviewForm() {
                 ))}
               </Accordion>
               <div className="text-center mt-4">
-                <Button variant="outline" onClick={addMatrixItem}>
+                <Button onClick={addMatrixItem} className="bg-[#1d4370] hover:bg-[#1d4370]/90 text-white">
                   <Plus className="mr-2 h-4 w-4" /> Add Criterion
                 </Button>
               </div>
@@ -249,7 +249,7 @@ export default function CallReviewForm() {
                         ref={fileInputRef}
                         className="hidden"
                     />
-                    <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+                    <Button onClick={() => fileInputRef.current?.click()} className="bg-[#1d4370] hover:bg-[#1d4370]/90 text-white">
                         Select .wav file
                     </Button>
                     {audioFile && (
