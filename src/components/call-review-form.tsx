@@ -89,7 +89,14 @@ export default function CallReviewForm() {
       setReview(result);
     } catch (e) {
       console.error(e);
-      const errorMessage = e instanceof Error ? e.message : "An unexpected error occurred. Please try again.";
+      let errorMessage = "An unexpected error occurred. Please try again.";
+      if (e instanceof Error) {
+          if (e.message.startsWith('AI_FLOW_FAILED')) {
+              errorMessage = "The AI service is currently busy or unavailable. The system tried multiple times without success. Please wait a moment and try again.";
+          } else {
+              errorMessage = e.message;
+          }
+      }
       setError(errorMessage);
        toast({
         variant: "destructive",
@@ -329,5 +336,7 @@ export default function CallReviewForm() {
     </>
   );
 }
+
+    
 
     
