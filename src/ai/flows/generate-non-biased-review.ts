@@ -36,7 +36,7 @@ const GenerateNonBiasedReviewOutputSchema = z.object({
   scores: z.array(z.object({
     criterion: z.string().describe('The specific criterion being scored, matching one from the input matrix.'),
     score: z.number().min(0).max(5).describe('The score given for this criterion, as a number from 0 to 5.'),
-    justification: z.string().describe('A detailed justification for why the score was given, referencing parts of the call transcript.'),
+    justification: z.string().describe('A detailed justification for why the score was given, referencing parts of the call transcript. Do not include the score number in this justification text.'),
   })).describe('A detailed breakdown of scores for each criterion from the input matrix.'),
   overallSummary: z.string().describe('A detailed overall summary of the call, highlighting strengths and weaknesses of the agent.'),
   areasForImprovement: z.array(z.string()).describe('A list of specific, actionable suggestions for the agent to improve.'),
@@ -61,10 +61,11 @@ const nonBiasedReviewPrompt = ai.definePrompt({
     **Instructions:**
     1.  **Analyze the Interaction**: Carefully review the provided call data. If an audio file is provided, it is the primary source; transcribe and analyze it. If only a transcript is provided, use that.
     2.  **Identify the Analyst**: If the agent's name is provided as 'agentName', use it. Otherwise, deduce the analyst's name from the context of the conversation (e.g., from their introduction).
-    3.  **Score the Call**: Use the provided scoring matrix to evaluate the analyst's performance. For each criterion in the matrix, provide a score as a number from 0 to 5 and a detailed justification for your score, quoting or referencing specific parts of the conversation. Ensure every score is a valid number.
-    4.  **Calculate Quick Score**: Calculate the average of all the individual scores and set it as the 'quickScore'. This can be a decimal.
-    5.  **Summarize**: Provide a concise "quick summary" and a more "overall summary" of the interaction.
-    6.  **Provide Feedback**: List actionable "areas for improvement".
+    3.  **Score the Call**: Use the provided scoring matrix to evaluate the analyst's performance. For each criterion in the matrix, provide a score as a number from 0 to 5 and a detailed justification.
+    4.  **Justification Rule**: The 'justification' text must explain the reasoning for the score by referencing specific parts of the conversation. It must NOT include the score number itself (e.g., do not write "Score: 4/5" in the justification).
+    5.  **Calculate Quick Score**: Calculate the average of all the individual scores and set it as the 'quickScore'. This can be a decimal.
+    6.  **Summarize**: Provide a concise "quick summary" and a more "overall summary" of the interaction.
+    7.  **Provide Feedback**: List actionable "areas for improvement".
 
     **Scoring Matrix to Use:**
     {{#each scoringMatrix}}

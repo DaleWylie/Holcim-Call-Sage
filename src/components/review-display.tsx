@@ -35,6 +35,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
   const [isPrinting, setIsPrinting] = React.useState(false);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState<string | number>('');
+  const [openAccordionItems, setOpenAccordionItems] = useState<string[]>([]);
 
   const handleEditClick = (field: string, currentValue: string | number) => {
     setEditingField(field);
@@ -69,12 +70,18 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
   
   const handlePrint = async () => {
     if (!reviewRef.current) return;
+    
+    // Expand all accordion items for printing
+    const allItemIds = review.scores.map((_, index) => `item-${index}`);
+    setOpenAccordionItems(allItemIds);
     setIsPrinting(true);
+
+    // Allow time for accordions to expand before capturing
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     try {
         const canvas = await html2canvas(reviewRef.current, {
             scale: 2, // Improves quality
-            // Ensure that the icons and colors are rendered correctly
             onclone: (document) => {
               // Hide edit/save/cancel buttons during print
                const actionButtons = document.querySelectorAll('.action-button');
@@ -93,6 +100,8 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
     } catch (error) {
         console.error("Failed to generate PDF:", error);
     } finally {
+        // Collapse accordions back and reset printing state
+        setOpenAccordionItems([]);
         setIsPrinting(false);
     }
   };
@@ -149,7 +158,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
             </div>
           </CardHeader>
           <CardContent>
-            <Accordion type="multiple" className="w-full">
+            <Accordion type="multiple" value={openAccordionItems} onValueChange={setOpenAccordionItems} className="w-full">
               {review.scores.map((item, index) => (
                 <AccordionItem value={`item-${index}`} key={index}>
                   <div className="flex w-full items-center gap-2 py-2">
@@ -164,7 +173,6 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                       <AccordionTrigger className="flex-1 justify-start pr-2 text-left no-underline hover:no-underline">
                           <span className="font-medium">{item.criterion}</span>
                       </AccordionTrigger>
-
                       <div className="flex items-center gap-2 ml-4 shrink-0">
                       {editingField === `score-${index}` ? (
                         <>
