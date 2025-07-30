@@ -81,7 +81,8 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
         const element = reviewRef.current;
         const canvas = await html2canvas(element, {
             scale: 2,
-            scrollY: -window.scrollY,
+            windowWidth: element.scrollWidth,
+            windowHeight: element.scrollHeight,
             onclone: (document) => {
                const actionButtons = document.querySelectorAll('.action-button');
                actionButtons.forEach(button => (button as HTMLElement).style.display = 'none');
@@ -269,7 +270,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                             onChange={(e) => setCheckerName(e.target.value)}
                             className="action-button"
                         />
-                         {!isPrinting && <p className="font-semibold">{checkerName}</p>}
+                         {isPrinting && <p className="font-semibold">{checkerName}</p>}
                     </div>
                 </div>
                  <div className="mt-6 text-center">
