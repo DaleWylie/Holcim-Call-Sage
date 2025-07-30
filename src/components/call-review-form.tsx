@@ -174,10 +174,10 @@ export default function CallReviewForm() {
                 {scoringMatrix.map((item) => (
                   <AccordionItem value={item.id} key={item.id} className="py-0">
                     <div className="flex items-center w-full group">
-                      <AccordionTrigger className="flex-1 hover:no-underline pr-4 py-2">
+                      <AccordionTrigger className="flex-1 hover:no-underline pr-4 py-2 text-left">
                         <span className='font-semibold text-foreground truncate'>{item.criterion}</span>
                       </AccordionTrigger>
-                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive hover:bg-transparent rounded-full mr-2" onClick={() => setCriterionToDelete(item.id)}>
+                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive hover:bg-transparent rounded-full mr-2 shrink-0" onClick={() => setCriterionToDelete(item.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -351,5 +351,3 @@ export default function CallReviewForm() {
     </>
   );
 }
-
-    
