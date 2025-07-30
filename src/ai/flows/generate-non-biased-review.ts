@@ -29,10 +29,39 @@ const GenerateNonBiasedReviewInputSchema = z.object({
 });
 export type GenerateNonBiasedReviewInput = z.infer<typeof GenerateNonBiasedReviewInputSchema>;
 
-const GenerateNonBiasedReviewOutputSchema = z.object({
-  review: z.string().describe('The generated review of the call transcript.'),
+const ScoreItemSchema = z.object({
+  criterion: z.string().describe('The name of the criterion being scored.'),
+  score: z.number().describe('The score given for the criterion (0-5).'),
+  justification: z.string().describe('The justification for the given score.'),
 });
-export type GenerateNonBiasedReviewOutput = z.infer<typeof GenerateNonBiasedReviewOutputSchema>;
+
+const GenerateNonBiasedReviewOutputSchema = z.object({
+  analystName: z
+    .string()
+    .describe("The name of the analyst extracted from the call metadata."),
+  quickScore: z
+    .string()
+    .describe(
+      "A single, concise overall score (e.g., '4/5' or 'Good/Excellent')."
+    ),
+  quickSummary: z
+    .string()
+    .describe("A very brief, one-sentence summary of the call's performance."),
+  scores: z
+    .array(ScoreItemSchema)
+    .describe('An array of scores and justifications for each criterion.'),
+  overallSummary: z
+    .string()
+    .describe(
+      "A concise summary of the call's performance, highlighting key strengths and weaknesses."
+    ),
+  areasForImprovement: z
+    .array(z.string())
+    .describe('A list of 2-3 actionable suggestions for improvement.'),
+});
+export type GenerateNonBiasedReviewOutput = z.infer<
+  typeof GenerateNonBiasedReviewOutputSchema
+>;
 
 export async function generateNonBiasedReview(
   input: GenerateNonBiasedReviewInput
@@ -45,7 +74,7 @@ const prompt = ai.definePrompt({
   input: {schema: GenerateNonBiasedReviewInputSchema},
   output: {schema: GenerateNonBiasedReviewOutputSchema},
   prompt: `You are a non-biased Quality Management Assistant for an IT Service Desk.
-Your task is to review a call and score the analyst based on the provided scoring matrix.
+Your task is to review a call and score the analyst based on the provided scoring matrix, returning the output as a JSON object.
 If an audio recording is provided, you must first transcribe it to get the call transcript. If both an audio recording and a text transcript are provided, the audio recording is the primary source of truth. If only a text transcript is provided, use that.
 
 For each criterion, assign a score from 0 to 5 and provide a brief justification based on the transcript.
@@ -57,7 +86,7 @@ The scoring scale is as follows:
 1 – Not Demonstrated: Missed or handled poorly.
 
 Please note: The provided call transcript includes initial metadata from Genesys.
-**Crucially, you must extract the analyst's name from the initial metadata (e.g., from a line like 'Jo Read • joined') and use this as the definitive source for the 'Analyst Name/ID' in the review.** This is more reliable than names mentioned in the dialogue.
+**Crucially, you must extract the analyst's name from the initial metadata (e.g., from a line like 'Jo Read • joined') and use this as the definitive source for the 'analystName' field in the output.** This is more reliable than names mentioned in the dialogue.
 The other metadata (locale, wait time, dialect, programme, transcriber) should be disregarded for the purpose of scoring the call content.
 
 Finally, provide an overall summary of the call's performance and suggest 2-3 actionable areas for improvement.
@@ -76,25 +105,7 @@ Call Audio (transcribe this if present):
 {{/if}}
 
 ---
-Please provide the review in the following structured format:
-
-**Call Review - [Analyst Name/ID extracted from metadata]**
-
-**Quick Overview Score:**
-[A single, concise overall score (e.g., Average Score: X/5 or Overall Rating: Good/Excellent/Needs Improvement) and a very brief, one-sentence summary of the call's performance.]
-
-**Scores:**
-- [Criterion 1 Name]: [Score]/5 - [Justification]
-- [Criterion 2 Name]: [Score]/5 - [Justification]
-...
-
-**Overall Summary:**
-[Concise summary of the call's performance, highlighting key strengths and weaknesses.]
-
-**Areas for Improvement:**
-1. [Actionable suggestion 1]
-2. [Actionable suggestion 2]
-3. [Actionable suggestion 3 (optional)]
+Please provide the review as a valid JSON object matching the output schema.
 `,
 });
 
@@ -107,8 +118,10 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
   async input => {
     let model;
     if (input.audioRecording) {
+      // Use a model with transcription capabilities
       model = googleAI.model('gemini-2.0-flash-preview');
     } else {
+      // Use a standard text model
       model = googleAI.model('gemini-1.5-flash');
     }
     const {output} = await prompt({model}, input);
