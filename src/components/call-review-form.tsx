@@ -143,8 +143,19 @@ export default function CallReviewForm() {
   };
 
   const canGenerate = !isLoading && (!!callTranscript.trim() || !!audioFile);
+  const isQuotaError = error.includes('429');
+  const isModelOverloadedError = !isQuotaError && (error.includes('503') || error.toLowerCase().includes('overloaded'));
 
-  const isModelOverloadedError = error.includes('503') || error.toLowerCase().includes('overloaded');
+
+  const getErrorMessage = () => {
+    if (isQuotaError) {
+      return "You have exceeded your API quota. Please check your plan or API key in settings.";
+    }
+    if (isModelOverloadedError) {
+      return "The AI model is currently busy. Please try again in a few moments.";
+    }
+    return "An unexpected error occurred. Please check your inputs or try again later.";
+  }
 
   return (
     <>
@@ -299,11 +310,7 @@ export default function CallReviewForm() {
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Error Generating Review</AlertTitle>
               <AlertDescription>
-                <p>
-                  {isModelOverloadedError
-                    ? "The AI model is currently busy. Please try again in a few moments."
-                    : "An unexpected error occurred. Please check your inputs or try again later."}
-                </p>
+                <p>{getErrorMessage()}</p>
                 <Collapsible open={showErrorDetails} onOpenChange={setShowErrorDetails}>
                   <CollapsibleTrigger asChild>
                     <Button variant="link" className="p-0 h-auto text-destructive-foreground/80 font-normal">
