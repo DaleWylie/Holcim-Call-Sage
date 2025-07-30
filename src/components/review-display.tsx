@@ -130,7 +130,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                   </div>
                 )}
                 
-                <Label className="text-sm font-medium text-muted-foreground pt-4 block">Quick Summary</Label>
+                <Label className="text-sm font-bold text-muted-foreground pt-4 block">Quick Summary</Label>
                 <p className="text-muted-foreground">{review.quickSummary}</p>
               </div>
               <div className="text-right">
@@ -156,7 +156,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                         <AccordionTrigger className="flex-1 py-2 pr-2">
                             <div className="flex items-center gap-4 w-full">
                                 <div className={cn(
-                                    "w-8 h-8 flex items-center justify-center rounded-full text-white font-bold text-sm",
+                                    "w-8 h-8 flex items-center justify-center rounded-full text-white font-bold text-sm shrink-0",
                                     getScoreColor(item.score)
                                 )}>
                                     {item.score}/5
