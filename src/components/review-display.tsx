@@ -148,35 +148,37 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
             <Accordion type="multiple" defaultValue={review.scores.map((_, i) => `item-${i}`)} className="w-full">
               {review.scores.map((item, index) => (
                 <AccordionItem value={`item-${index}`} key={index}>
-                  <AccordionTrigger>
-                    <div className="flex items-center gap-4 w-full">
-                      {editingField === `score-${index}` ? (
-                          <div className="flex items-center gap-2">
-                              <Input 
+                    <div className="flex justify-between items-center w-full">
+                        <AccordionTrigger className="flex-1">
+                            <div className="flex items-center gap-4 w-full">
+                                <div className={cn(
+                                    "w-12 h-12 flex items-center justify-center rounded-full text-white font-bold text-lg",
+                                    getScoreColor(item.score)
+                                )}>
+                                    {item.score}
+                                </div>
+                                <span className="flex-1 text-left font-medium">{item.criterion}</span>
+                            </div>
+                        </AccordionTrigger>
+                        {editingField === `score-${index}` ? (
+                            <div className="flex items-center gap-2 ml-4">
+                                <Input 
                                 type="number"
                                 value={tempValue}
                                 onChange={e => setTempValue(e.target.value)}
                                 className="w-20 h-8 text-center"
                                 min={0} max={5}
                                 autoFocus
-                              />
-                              <Button size="icon" className="h-8 w-8 bg-green-500 hover:bg-green-600 action-button" onClick={() => handleSave(`score-${index}`)}><Check className="h-4 w-4" /></Button>
-                              <Button size="icon" variant="ghost" className="h-8 w-8 action-button" onClick={handleCancel}><X className="h-4 w-4" /></Button>
-                          </div>
-                      ) : (
-                         <div className="flex items-center gap-2">
-                            <div className={cn(
-                                "w-12 h-12 flex items-center justify-center rounded-full text-white font-bold text-lg",
-                                getScoreColor(item.score)
-                            )}>
-                                {item.score}
+                                />
+                                <Button size="icon" className="h-8 w-8 bg-green-500 hover:bg-green-600 action-button" onClick={() => handleSave(`score-${index}`)}><Check className="h-4 w-4" /></Button>
+                                <Button size="icon" variant="ghost" className="h-8 w-8 action-button" onClick={handleCancel}><X className="h-4 w-4" /></Button>
                             </div>
-                             <Button size="icon" variant="ghost" className="h-8 w-8 action-button" onClick={() => handleEditClick(`score-${index}`, item.score)}><Pencil className="h-4 w-4"/></Button>
-                         </div>
-                      )}
-                      <span className="flex-1 text-left font-medium">{item.criterion}</span>
+                        ) : (
+                            <div className="flex items-center gap-2 ml-4">
+                                <Button size="icon" variant="ghost" className="h-8 w-8 action-button" onClick={() => handleEditClick(`score-${index}`, item.score)}><Pencil className="h-4 w-4"/></Button>
+                            </div>
+                        )}
                     </div>
-                  </AccordionTrigger>
                   <AccordionContent className="pl-4">
                     <p className="text-sm text-muted-foreground">{item.justification}</p>
                   </AccordionContent>
