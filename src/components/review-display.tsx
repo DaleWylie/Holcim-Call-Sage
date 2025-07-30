@@ -149,22 +149,22 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
             </div>
           </CardHeader>
           <CardContent>
-            <Accordion type="multiple" defaultValue={review.scores.map((_, i) => `item-${i}`)} className="w-full">
+            <Accordion type="multiple" className="w-full">
               {review.scores.map((item, index) => (
                 <AccordionItem value={`item-${index}`} key={index}>
-                  <div className="flex justify-between items-center w-full">
-                      <div className="flex items-center gap-4 w-full">
+                  <div className="flex justify-between items-center w-full gap-2">
+                      <div className="flex items-center gap-4 flex-1">
                           <div className={cn(
                               "w-8 h-8 flex items-center justify-center rounded-full text-white font-bold text-sm shrink-0",
                               getScoreColor(item.score)
                           )}>
                               {item.score}/5
                           </div>
-                          <AccordionTrigger className="flex-1 py-2 pr-2 justify-start">
+                          <AccordionTrigger className="flex-1 py-2 pr-2 justify-start no-underline hover:no-underline">
                               <span className="text-left font-medium">{item.criterion}</span>
                           </AccordionTrigger>
                       </div>
-                      <div className="flex items-center gap-2 ml-4">
+                      <div className="flex items-center gap-2 ml-4 shrink-0">
                           {editingField === `score-${index}` ? (
                               <>
                                   <Input 
