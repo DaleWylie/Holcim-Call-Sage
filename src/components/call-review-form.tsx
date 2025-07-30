@@ -92,20 +92,20 @@ export default function CallReviewForm() {
     } catch (e: any) {
       console.error(e);
       let errorMessage = "An unexpected error occurred. Please check the console for details.";
-      if (e instanceof Error) {
-          if (e.message.includes('overloaded')) {
-              errorMessage = "The AI service is currently overloaded. Please try again in a few moments."
-          } else if (e.message.includes('AI_FLOW_FAILED')) {
-              errorMessage = "The AI failed to generate a review after multiple attempts. This could be due to a temporary service issue or a problem with the provided input. Please try again shortly."
-          } else {
-              errorMessage = e.message;
-          }
+       if (e instanceof Error) {
+        if (e.message.includes('AI_FLOW_FAILED')) {
+          errorMessage = "The AI failed to generate a review after multiple attempts. This could be due to a temporary service issue or a problem with the provided input. Please try again shortly."
+        } else if (e.message.includes('overloaded')) {
+          errorMessage = "The AI service is currently overloaded. Please try again in a few moments."
+        } else {
+          errorMessage = e.message;
+        }
       }
       setError(errorMessage);
        toast({
         variant: "destructive",
         title: "Error Generating Review",
-        description: "An issue occurred while generating the review. Please try again later.",
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
