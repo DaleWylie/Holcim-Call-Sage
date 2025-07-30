@@ -97,7 +97,7 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
     let attempt = 0;
     while (attempt < maxRetries) {
       try {
-        const { output } = await nonBiasedReviewPrompt({ model }, input);
+        const { output } = await nonBiasedReviewPrompt(input, { model });
         return output!;
       } catch (err: any) {
         attempt++;
