@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, Plus, Trash2, Settings } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from './ui/badge';
 import { ReviewDisplay } from './review-display';
@@ -24,6 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { SettingsDialog } from './settings-dialog';
 
 const defaultScoringMatrix = [
   { id: "1", criterion: "1. Greeting & Introduction", description: "Greeted the caller professionally and warmly, introduced self by name and team/department, asked for and confirmed the caller’s name and/or account/ID politely. For this criterion, consider the sentiment and clear intent of the agent's opening remarks, even if specific words (like their name) are not perfectly transcribed. (0-5)" },
@@ -51,6 +52,7 @@ export default function CallReviewForm() {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [criterionToDelete, setCriterionToDelete] = useState<string | null>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
 
   const handleMatrixChange = (id: string, field: 'criterion' | 'description', value: string) => {
@@ -140,7 +142,13 @@ export default function CallReviewForm() {
 
   return (
     <>
-    <Card className="w-full max-w-6xl shadow-xl">
+    <Card className="w-full max-w-6xl shadow-xl relative">
+       <div className="absolute top-4 right-4">
+          <Button variant="ghost" size="icon" onClick={() => setIsSettingsOpen(true)}>
+            <Settings className="h-5 w-5" />
+            <span className="sr-only">Settings</span>
+          </Button>
+        </div>
       <CardHeader className="text-center">
         <CardTitle className="text-4xl font-extrabold text-[#1d4370] font-headline">
           Holcim Call Sage
@@ -157,7 +165,7 @@ export default function CallReviewForm() {
                 <Binary className="h-5 w-5" />
                 1. Define Call Scoring Matrix
               </Label>
-              <Accordion type="single" collapsible className="w-full">
+              <Accordion type="multiple" className="w-full">
                 {scoringMatrix.map((item, index) => (
                   <AccordionItem value={`item-${index}`} key={item.id}>
                     <AccordionTrigger className="hover:no-underline">
@@ -308,8 +316,7 @@ export default function CallReviewForm() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <SettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
     </>
   );
 }
-
-
