@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useState, useRef } from 'react';
@@ -9,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, Plus, Trash2, Settings } from 'lucide-react';
+import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, Plus, Trash2, Settings, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from './ui/badge';
 import { ReviewDisplay } from './review-display';
@@ -25,6 +24,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { SettingsDialog } from './settings-dialog';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 
 const defaultScoringMatrix = [
   { id: "1", criterion: "1. Greeting & Introduction", description: "Greeted the caller professionally and warmly, introduced self by name and team/department, asked for and confirmed the caller’s name and/or account/ID politely. For this criterion, consider the sentiment and clear intent of the agent's opening remarks, even if specific words (like their name) are not perfectly transcribed. (0-5)" },
@@ -49,6 +49,7 @@ export default function CallReviewForm() {
   const [review, setReview] = useState<GenerateNonBiasedReviewOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showErrorDetails, setShowErrorDetails] = useState(false);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [criterionToDelete, setCriterionToDelete] = useState<string | null>(null);
@@ -100,6 +101,7 @@ export default function CallReviewForm() {
     setIsLoading(true);
     setReview(null);
     setError('');
+    setShowErrorDetails(false);
 
     try {
       if (!callTranscript.trim() && !audioFile) {
@@ -132,7 +134,7 @@ export default function CallReviewForm() {
 
     } catch (err: any) {
       console.error("Error generating review:", err);
-      setError(`Failed to generate review. The AI service may be temporarily unavailable or the request may have failed. Please try again later. Error: ${err.message}`);
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -167,11 +169,11 @@ export default function CallReviewForm() {
                 1. Define Call Scoring Matrix
               </Label>
               <Accordion type="multiple" className="w-full">
-                {scoringMatrix.map((item, index) => (
-                  <AccordionItem value={`item-${index}`} key={item.id}>
+                {scoringMatrix.map((item) => (
+                  <AccordionItem value={item.id} key={item.id}>
                     <div className="flex items-center w-full">
-                      <AccordionTrigger className="flex-1 hover:no-underline">
-                        <span className='font-semibold text-foreground truncate pr-4'>{item.criterion}</span>
+                      <AccordionTrigger className="flex-1 hover:no-underline pr-4">
+                        <span className='font-semibold text-foreground truncate'>{item.criterion}</span>
                       </AccordionTrigger>
                       <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive mr-2" onClick={() => setCriterionToDelete(item.id)}>
                         <Trash2 className="h-4 w-4" />
@@ -270,7 +272,29 @@ export default function CallReviewForm() {
             </div>
         </div>
 
-        <div className="text-center pt-6">
+        <div className="space-y-4 pt-6 text-center">
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error Generating Review</AlertTitle>
+              <AlertDescription>
+                <p>An unexpected error occurred. Please check your inputs or try again later.</p>
+                <Collapsible open={showErrorDetails} onOpenChange={setShowErrorDetails}>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="link" className="p-0 h-auto text-destructive-foreground/80 font-normal">
+                      Show Details <ChevronDown className={`ml-1 h-4 w-4 transition-transform ${showErrorDetails ? 'rotate-180' : ''}`} />
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <pre className="mt-2 rounded-md bg-muted p-3 font-mono text-xs text-muted-foreground overflow-auto">
+                      {error}
+                    </pre>
+                  </CollapsibleContent>
+                </Collapsible>
+              </AlertDescription>
+            </Alert>
+          )}
+
           <Button
             onClick={generateReview}
             className="bg-[#1d4370] hover:bg-[#1d4370]/90 text-white font-bold h-auto py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -290,13 +314,6 @@ export default function CallReviewForm() {
           </Button>
         </div>
 
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
 
         {review && (
           <ReviewDisplay review={review} />
@@ -325,3 +342,5 @@ export default function CallReviewForm() {
     </>
   );
 }
+
+    
