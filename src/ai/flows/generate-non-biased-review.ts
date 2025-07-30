@@ -90,8 +90,8 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
     outputSchema: GenerateNonBiasedReviewOutputSchema,
   },
   async (input) => {
-    // We use gemini-1.5-flash as it's fast, cost-effective, and supports multimodal input (audio/text).
-    const model = googleAI.model('gemini-1.5-flash');
+    // We use gemini-2.0-flash as it's fast, cost-effective, and supports multimodal input (audio/text).
+    const model = googleAI.model('gemini-2.0-flash');
 
     try {
       const { output } = await nonBiasedReviewPrompt(input, { model });
