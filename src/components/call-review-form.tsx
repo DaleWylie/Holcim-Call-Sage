@@ -215,7 +215,7 @@ export default function CallReviewForm() {
             </div>
 
             {/* Right Column */}
-            <div className="md:w-1/2 space-y-4">
+            <div className="md:w-1/2 space-y-4 md:border-l md:pl-8 border-border">
                 <div className="space-y-4 text-center">
                     <Label htmlFor="callTranscript" className="text-lg font-semibold text-foreground flex items-center justify-center gap-2">
                         <ClipboardPaste className="h-5 w-5" />
@@ -342,5 +342,3 @@ export default function CallReviewForm() {
     </>
   );
 }
-
-    
