@@ -152,15 +152,20 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
             <Accordion type="multiple" className="w-full">
               {review.scores.map((item, index) => (
                 <AccordionItem value={`item-${index}`} key={index}>
-                   <div className="flex items-center w-full gap-2 py-2">
-                      <div className={cn("w-8 h-8 flex items-center justify-center rounded-full text-white font-bold text-sm shrink-0", getScoreColor(item.score))}>
+                  <div className="flex w-full items-center gap-2 py-2">
+                      <div
+                        className={cn(
+                          'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white',
+                          getScoreColor(item.score)
+                        )}
+                      >
                         {item.score}/5
                       </div>
-                    <AccordionTrigger className="flex-1 pr-2 justify-start no-underline hover:no-underline text-left">
-                      <span className="font-medium">{item.criterion}</span>
-                    </AccordionTrigger>
+                      <AccordionTrigger className="flex-1 justify-start pr-2 text-left no-underline hover:no-underline">
+                          <span className="font-medium">{item.criterion}</span>
+                      </AccordionTrigger>
 
-                    <div className="flex items-center gap-2 ml-4 shrink-0">
+                      <div className="flex items-center gap-2 ml-4 shrink-0">
                       {editingField === `score-${index}` ? (
                         <>
                           <Input
@@ -170,6 +175,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                             className="w-20 h-8 text-center action-button"
                             min={0}
                             max={5}
+                            step={1}
                             autoFocus
                           />
                           <Button
@@ -200,7 +206,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                       )}
                     </div>
                   </div>
-                  <AccordionContent className="pl-16">
+                  <AccordionContent className="pl-12">
                     <p className="text-sm text-muted-foreground">{item.justification}</p>
                   </AccordionContent>
                 </AccordionItem>
