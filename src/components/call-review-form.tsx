@@ -322,7 +322,7 @@ export default function CallReviewForm() {
 
 
         {review && (
-          <ReviewDisplay review={review} />
+          <ReviewDisplay review={review} setReview={setReview} />
         )}
       </CardContent>
     </Card>
@@ -348,5 +348,3 @@ export default function CallReviewForm() {
     </>
   );
 }
-
-    
