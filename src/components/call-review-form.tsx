@@ -93,13 +93,7 @@ export default function CallReviewForm() {
       console.error(e);
       let errorMessage = "An unexpected error occurred. Please check the console for details.";
        if (e instanceof Error) {
-        if (e.message.includes('AI_FLOW_FAILED')) {
-          errorMessage = "The AI failed to generate a review after multiple attempts. This could be due to a temporary service issue or a problem with the provided input. Please try again shortly."
-        } else if (e.message.includes('overloaded')) {
-          errorMessage = "The AI service is currently overloaded. Please try again in a few moments."
-        } else {
-          errorMessage = e.message;
-        }
+        errorMessage = e.message;
       }
       setError(errorMessage);
        toast({
@@ -183,7 +177,7 @@ export default function CallReviewForm() {
                       <AccordionTrigger className="flex-1 py-2 text-left pr-2">
                         <div className="flex-1 flex justify-between items-center">
                           <span className='font-semibold text-foreground truncate group-hover:underline'>{item.criterion}</span>
-                          <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 ml-auto group-data-[state=open]:rotate-180" />
+                          <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
                         </div>
                       </AccordionTrigger>
                       <Button 
@@ -225,9 +219,6 @@ export default function CallReviewForm() {
                   <Plus className="mr-2 h-4 w-4" /> Add Criterion
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground text-center">
-                Provide your scoring criteria. The AI will use this to score the call.
-              </p>
             </div>
 
             {/* Right Column */}
@@ -244,9 +235,6 @@ export default function CallReviewForm() {
                         onChange={(e) => setAgentName(e.target.value)}
                         placeholder="e.g. Scott Chegg"
                     />
-                    <p className="text-sm text-muted-foreground">
-                        Provide the agent's name to override automatic extraction.
-                    </p>
                 </div>
 
                 <div className="space-y-4 text-center">
@@ -260,7 +248,7 @@ export default function CallReviewForm() {
                         rows={7}
                         value={callTranscript}
                         onChange={(e) => setCallTranscript(e.target.value)}
-                        placeholder="Paste your call complete transcript here... This is not required if you are providing a .wav file."
+                        placeholder="Paste the complete transcript here... This is not required if you are providing a .wav file."
                     />
                 </div>
 
