@@ -311,18 +311,9 @@ export default function CallReviewForm() {
               <AlertTitle>Error Generating Review</AlertTitle>
               <AlertDescription>
                 <p>{getErrorMessage()}</p>
-                <Collapsible open={showErrorDetails} onOpenChange={setShowErrorDetails}>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="link" className="p-0 h-auto font-normal">
-                      Show Details <ChevronDown className={`ml-1 h-4 w-4 transition-transform ${showErrorDetails ? 'rotate-180' : ''}`} />
-                    </Button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <pre className="mt-2 rounded-md bg-muted p-3 font-mono text-xs text-muted-foreground overflow-auto">
-                      {error}
-                    </pre>
-                  </CollapsibleContent>
-                </Collapsible>
+                 <pre className="mt-2 rounded-md bg-muted/20 p-3 font-mono text-xs text-destructive-foreground/80 overflow-auto whitespace-pre-wrap">
+                    {error}
+                </pre>
               </AlertDescription>
             </Alert>
           )}
