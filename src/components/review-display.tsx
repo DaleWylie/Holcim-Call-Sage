@@ -70,42 +70,78 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
   
   const handlePrint = async () => {
     if (!reviewRef.current) return;
-    
-    const allItemIds = review.scores.map((_, index) => `item-${index}`);
-    setOpenAccordionItems(allItemIds);
     setIsPrinting(true);
 
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Ensure all accordions are open for accurate rendering
+    const allItemIds = review.scores.map((_, index) => `item-${index}`);
+    setOpenAccordionItems(allItemIds);
+    await new Promise(resolve => setTimeout(resolve, 100)); // Short delay for re-render
+
+    const pdf = new jsPDF({
+      orientation: 'p',
+      unit: 'pt', // Use points as units
+      format: 'a4'
+    });
+
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const margin = 20; // 20pt margin
+    const contentWidth = pdfWidth - margin * 2;
+    let yPos = margin;
+
+    const addElementToPdf = async (element: HTMLElement) => {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        onclone: (doc) => {
+          const clonedElement = doc.getElementById(element.id);
+          if (clonedElement) {
+             const actionButtons = clonedElement.querySelectorAll('.action-button');
+             actionButtons.forEach(button => (button as HTMLElement).style.display = 'none');
+             
+             // For the "Checked By" card, hide the input and show the static text
+             const checkerInput = clonedElement.querySelector<HTMLInputElement>('#checkerName');
+             if (checkerInput) checkerInput.style.display = 'none';
+
+             const checkerText = clonedElement.querySelector<HTMLParagraphElement>('#checkerNameDisplay');
+             if(checkerText) checkerText.style.display = 'block';
+          }
+        }
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const imgHeight = (canvas.height * contentWidth) / canvas.width;
+
+      if (yPos + imgHeight > pdfHeight - margin) {
+        pdf.addPage();
+        yPos = margin;
+      }
+
+      pdf.addImage(imgData, 'PNG', margin, yPos, contentWidth, imgHeight);
+      yPos += imgHeight + 10; // Add some padding after each section
+    };
 
     try {
-        const element = reviewRef.current;
-        const canvas = await html2canvas(element, {
-            scale: 2,
-            windowWidth: element.scrollWidth,
-            windowHeight: element.scrollHeight,
-            onclone: (document) => {
-               const actionButtons = document.querySelectorAll('.action-button');
-               actionButtons.forEach(button => (button as HTMLElement).style.display = 'none');
-            }
-        });
+      // Add each card/section sequentially
+      const elementsToPrint = reviewRef.current.querySelectorAll<HTMLElement>('[data-printable-section]');
 
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF({
-            orientation: 'p',
-            unit: 'px',
-            format: [canvas.width, canvas.height]
-        });
-        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-        const safeAgentName = review.agentName.replace(/\s+/g, '-');
-        const safeInteractionId = interactionId.replace(/\s+/g, '');
-        pdf.save(`${safeAgentName}_${safeInteractionId}.pdf`);
+      for (const element of Array.from(elementsToPrint)) {
+        await addElementToPdf(element);
+      }
+
+      // Save the PDF
+      const safeAgentName = review.agentName.replace(/\s+/g, '-');
+      const safeInteractionId = interactionId.replace(/\s+/g, '');
+      pdf.save(`${safeAgentName}_${safeInteractionId}.pdf`);
+
     } catch (error) {
-        console.error("Failed to generate PDF:", error);
+      console.error("Failed to generate PDF:", error);
     } finally {
-        setOpenAccordionItems([]);
-        setIsPrinting(false);
+      setIsPrinting(false);
+      setOpenAccordionItems([]); // Collapse accordions after printing
     }
   };
+
 
   return (
     <div className="relative">
@@ -117,7 +153,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
           </h2>
         </div>
 
-        <Card className="mb-6">
+        <Card id="quickSummarySection" data-printable-section className="mb-6">
           <CardHeader>
             <div className="flex justify-between items-start">
               <div>
@@ -145,7 +181,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
           </CardContent>
         </Card>
 
-        <Card className="mb-6">
+        <Card id="detailedScoresSection" data-printable-section className="mb-6">
           <CardHeader>
             <div className="flex items-center gap-2">
               <ListChecks className="h-5 w-5 text-primary" />
@@ -218,7 +254,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
           </CardContent>
         </Card>
 
-        <Card className="mb-6">
+        <Card id="overallSummarySection" data-printable-section className="mb-6">
           <CardHeader>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-primary" />
@@ -230,7 +266,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card id="improvementAreasSection" data-printable-section>
           <CardHeader>
             <div className="flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
@@ -246,7 +282,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
           </CardContent>
         </Card>
 
-        <Card className="mt-6">
+        <Card id="checkedBySection" data-printable-section className="mt-6">
             <CardHeader>
                 <div className="flex justify-between items-start">
                     <div className="flex items-center gap-2">
@@ -270,7 +306,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                             onChange={(e) => setCheckerName(e.target.value)}
                             className="action-button"
                         />
-                         {isPrinting && <p className="font-semibold">{checkerName}</p>}
+                         <p id="checkerNameDisplay" style={{display: "none"}} className="font-semibold">{checkerName}</p>
                     </div>
                 </div>
                  <div className="mt-6 text-center">
@@ -288,3 +324,5 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
     </div>
   )
 }
+
+    
