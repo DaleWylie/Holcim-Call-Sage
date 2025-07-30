@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import {
@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import type { GenerateNonBiasedReviewOutput } from "@/ai/flows/generate-non-biased-review"
 import { CheckCircle2, ListChecks, Printer, Sparkles, Target, Pencil, Check, X } from "lucide-react"
 import { cn, getScoreColor } from "@/lib/utils";
@@ -131,7 +130,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
               </div>
               <div className="text-right">
                 <Label className="text-sm font-medium">Quick Score</Label>
-                <Badge variant="secondary" className="text-lg font-bold ml-2">{review.quickScore}</Badge>
+                <Badge variant="secondary" className="text-lg font-bold ml-2">{review.quickScore.toFixed(1)}/5</Badge>
               </div>
             </div>
           </CardHeader>
@@ -152,34 +151,34 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                         <AccordionTrigger className="flex-1">
                             <div className="flex items-center gap-4 w-full">
                                 <div className={cn(
-                                    "w-12 h-12 flex items-center justify-center rounded-full text-white font-bold text-lg",
+                                    "w-10 h-10 flex items-center justify-center rounded-full text-white font-bold text-base",
                                     getScoreColor(item.score)
                                 )}>
-                                    {item.score}
+                                    {item.score}/5
                                 </div>
                                 <span className="flex-1 text-left font-medium">{item.criterion}</span>
                             </div>
                         </AccordionTrigger>
-                        {editingField === `score-${index}` ? (
-                            <div className="flex items-center gap-2 ml-4">
-                                <Input 
-                                type="number"
-                                value={tempValue}
-                                onChange={e => setTempValue(e.target.value)}
-                                className="w-20 h-8 text-center"
-                                min={0} max={5}
-                                autoFocus
-                                />
-                                <Button size="icon" className="h-8 w-8 bg-green-500 hover:bg-green-600 action-button" onClick={() => handleSave(`score-${index}`)}><Check className="h-4 w-4" /></Button>
-                                <Button size="icon" variant="ghost" className="h-8 w-8 action-button" onClick={handleCancel}><X className="h-4 w-4" /></Button>
-                            </div>
-                        ) : (
-                            <div className="flex items-center gap-2 ml-4">
+                         <div className="flex items-center gap-2 ml-4">
+                            {editingField === `score-${index}` ? (
+                                <>
+                                    <Input 
+                                        type="number"
+                                        value={tempValue}
+                                        onChange={e => setTempValue(e.target.value)}
+                                        className="w-20 h-8 text-center action-button"
+                                        min={0} max={5}
+                                        autoFocus
+                                    />
+                                    <Button size="icon" className="h-8 w-8 bg-green-500 hover:bg-green-600 action-button" onClick={() => handleSave(`score-${index}`)}><Check className="h-4 w-4" /></Button>
+                                    <Button size="icon" variant="ghost" className="h-8 w-8 action-button" onClick={handleCancel}><X className="h-4 w-4" /></Button>
+                                </>
+                            ) : (
                                 <Button size="icon" variant="ghost" className="h-8 w-8 action-button" onClick={() => handleEditClick(`score-${index}`, item.score)}><Pencil className="h-4 w-4"/></Button>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
-                  <AccordionContent className="pl-4">
+                  <AccordionContent className="pl-16">
                     <p className="text-sm text-muted-foreground">{item.justification}</p>
                   </AccordionContent>
                 </AccordionItem>
