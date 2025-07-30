@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import {
@@ -10,25 +10,74 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { GenerateNonBiasedReviewOutput } from "@/ai/flows/generate-non-biased-review"
-import { CheckCircle2, ListChecks, Printer, Sparkles, Target } from "lucide-react"
+import { CheckCircle2, ListChecks, Printer, Sparkles, Target, Pencil } from "lucide-react"
+import { cn } from "@/lib/utils";
 
 interface ReviewDisplayProps {
   review: GenerateNonBiasedReviewOutput
   setReview: React.Dispatch<React.SetStateAction<GenerateNonBiasedReviewOutput | null>>;
 }
+
+const EditableField = ({ value, onSave, multiline = false, type = 'text' }: { value: string | number, onSave: (newValue: string) => void, multiline?: boolean, type?: string }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentValue, setCurrentValue] = useState(value);
+  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (isEditing) {
+      inputRef.current?.focus();
+    }
+  }, [isEditing]);
+
+  const handleSave = () => {
+    onSave(String(currentValue));
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !multiline) {
+      handleSave();
+    }
+    if (e.key === 'Escape') {
+      setCurrentValue(value);
+      setIsEditing(false);
+    }
+  };
+
+  if (isEditing) {
+    const commonProps = {
+      ref: inputRef as any,
+      value: currentValue,
+      onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setCurrentValue(e.target.value),
+      onBlur: handleSave,
+      onKeyDown: handleKeyDown,
+      className: "text-base p-1 h-auto w-full border-primary bg-background shadow-none focus-visible:ring-1 focus-visible:ring-ring"
+    };
+    return multiline ? (
+      <Textarea {...commonProps} rows={4} />
+    ) : (
+      <Input {...commonProps} type={type} />
+    );
+  }
+
+  return (
+    <div onClick={() => setIsEditing(true)} className={cn("hover:bg-muted/50 p-1 rounded cursor-pointer", multiline ? "min-h-[100px]" : "min-h-[2.5rem] flex items-center")}>
+        {value}
+        <Pencil className="h-3 w-3 ml-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+    </div>
+  );
+};
+
 
 export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
   const reviewRef = useRef<HTMLDivElement>(null);
@@ -38,11 +87,11 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
     setReview(prev => prev ? { ...prev, [field]: value } : null);
   };
 
-  const handleScoreChange = (index: number, field: 'score' | 'justification' | 'criterion', value: string | number) => {
+  const handleScoreChange = (index: number, field: 'score' | 'justification' | 'criterion', value: string) => {
     setReview(prev => {
       if (!prev) return null;
       const newScores = [...prev.scores];
-      const scoreItem = { ...newScores[index], [field]: value };
+      const scoreItem = { ...newScores[index], [field]: field === 'score' ? Number(value) : value };
       newScores[index] = scoreItem;
       return { ...prev, scores: newScores };
     });
@@ -94,16 +143,20 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
 
         <Card className="mb-6">
           <CardHeader>
-            <Label htmlFor="analystName" className="text-sm font-medium text-muted-foreground">Analyst Name</Label>
-            <Input id="analystName" value={review.analystName} onChange={(e) => handleFieldChange('analystName', e.target.value)} className="text-2xl font-bold p-0 border-0 shadow-none focus-visible:ring-0" />
+            <Label className="text-sm font-medium text-muted-foreground">Analyst Name</Label>
+            <div className="text-2xl font-bold group">
+                <EditableField value={review.analystName} onSave={(val) => handleFieldChange('analystName', val)} />
+            </div>
 
-            <Label htmlFor="quickSummary" className="text-sm font-medium text-muted-foreground pt-2">Quick Summary</Label>
-            <Input id="quickSummary" value={review.quickSummary} onChange={(e) => handleFieldChange('quickSummary', e.target.value)} className="text-muted-foreground p-0 border-0 shadow-none focus-visible:ring-0" />
+            <Label className="text-sm font-medium text-muted-foreground pt-2">Quick Summary</Label>
+             <div className="text-muted-foreground group">
+                <EditableField value={review.quickSummary} onSave={(val) => handleFieldChange('quickSummary', val)} />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2">
-              <Label htmlFor="quickScore" className="text-sm font-medium">Quick Score:</Label>
-              <Input id="quickScore" value={review.quickScore} onChange={(e) => handleFieldChange('quickScore', e.target.value)} className="text-base p-1 h-auto w-auto border-0 shadow-none focus-visible:ring-0" />
+            <div className="flex items-center gap-2 group">
+              <Label className="text-sm font-medium">Quick Score:</Label>
+              <EditableField value={review.quickScore} onSave={(val) => handleFieldChange('quickScore', val)} />
             </div>
           </CardContent>
         </Card>
@@ -120,31 +173,18 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
               {review.scores.map((item, index) => (
                 <AccordionItem value={`item-${index}`} key={index}>
                   <AccordionTrigger>
-                    <div className="flex items-center gap-4 w-full">
-                      <Input
-                        type="number"
-                        min={0} max={5}
-                        value={item.score}
-                        onChange={(e) => handleScoreChange(index, 'score', e.target.valueAsNumber)}
-                        onClick={(e) => e.stopPropagation()}
-                        className="w-16 h-8 text-center"
-                      />
-                      <Input
-                        value={item.criterion}
-                        onChange={(e) => handleScoreChange(index, 'criterion', e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex-1 text-left font-medium p-1 h-auto border-0 shadow-none focus-visible:ring-0"
-                      />
+                    <div className="flex items-center gap-4 w-full group">
+                      <div className="w-16 h-8 text-center" onClick={(e) => e.stopPropagation()}>
+                        <EditableField value={item.score} type="number" onSave={(val) => handleScoreChange(index, 'score', val)} />
+                      </div>
+                      <div className="flex-1 text-left font-medium p-1 h-auto" onClick={(e) => e.stopPropagation()}>
+                        <EditableField value={item.criterion} onSave={(val) => handleScoreChange(index, 'criterion', val)} />
+                      </div>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="pl-4">
-                    <Label htmlFor={`justification-${index}`} className="font-semibold text-muted-foreground">Justification</Label>
-                    <Textarea
-                      id={`justification-${index}`}
-                      value={item.justification}
-                      onChange={(e) => handleScoreChange(index, 'justification', e.target.value)}
-                      rows={4}
-                    />
+                  <AccordionContent className="pl-4 group">
+                    <Label className="font-semibold text-muted-foreground">Justification</Label>
+                    <EditableField value={item.justification} onSave={(val) => handleScoreChange(index, 'justification', val)} multiline />
                   </AccordionContent>
                 </AccordionItem>
               ))}
@@ -159,13 +199,8 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
               <CardTitle className="text-xl">Overall Summary</CardTitle>
             </div>
           </CardHeader>
-          <CardContent>
-            <Textarea
-              value={review.overallSummary}
-              onChange={(e) => handleFieldChange('overallSummary', e.target.value)}
-              rows={5}
-              className="text-sm text-foreground"
-            />
+          <CardContent className="group">
+            <EditableField value={review.overallSummary} onSave={(val) => handleFieldChange('overallSummary', val)} multiline />
           </CardContent>
         </Card>
 
@@ -179,12 +214,9 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
           <CardContent>
             <div className="space-y-2">
               {review.areasForImprovement.map((item, index) => (
-                <Textarea
-                  key={index}
-                  value={item}
-                  onChange={(e) => handleImprovementChange(index, e.target.value)}
-                  className="text-sm text-foreground"
-                />
+                <div key={index} className="group">
+                    <EditableField value={item} onSave={(val) => handleImprovementChange(index, val)} multiline />
+                </div>
               ))}
             </div>
           </CardContent>
