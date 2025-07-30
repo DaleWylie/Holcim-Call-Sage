@@ -95,6 +95,8 @@ export default function CallReviewForm() {
       if (e.message) {
         if (e.message.includes('overloaded')) {
             errorMessage = "The AI service is currently overloaded. Please try again in a few moments."
+        } else if (e.message.includes('AI_FLOW_FAILED')) {
+            errorMessage = "The AI failed to generate a review after multiple attempts. This might be due to a temporary service issue or a problem with the provided input. Please try again shortly."
         } else {
             errorMessage = e.message;
         }
@@ -177,19 +179,19 @@ export default function CallReviewForm() {
               <Accordion type="multiple" className="w-full">
                 {scoringMatrix.map((item) => (
                   <AccordionItem value={item.id} key={item.id}>
-                    <div className="flex items-center w-full">
-                        <AccordionTrigger className="flex-1 hover:no-underline py-2 text-left pr-2">
-                            <span className='font-semibold text-foreground truncate group-hover:underline'>{item.criterion}</span>
-                             <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 ml-auto group-data-[state=open]:rotate-180" />
-                        </AccordionTrigger>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="text-muted-foreground hover:text-destructive hover:bg-transparent rounded-full shrink-0" 
-                          onClick={() => setCriterionToDelete(item.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                    <div className="flex items-center w-full gap-2">
+                      <AccordionTrigger className="flex-1 py-2 text-left pr-2">
+                        <span className='font-semibold text-foreground truncate group-hover:underline'>{item.criterion}</span>
+                        <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 ml-auto group-data-[state=open]:rotate-180" />
+                      </AccordionTrigger>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="text-muted-foreground hover:text-destructive hover:bg-transparent rounded-full shrink-0" 
+                        onClick={() => setCriterionToDelete(item.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                     <AccordionContent>
                       <div className="space-y-2 p-2">
@@ -322,10 +324,7 @@ export default function CallReviewForm() {
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Error Generating Review</AlertTitle>
                     <AlertDescription className="text-center">
-                        <p>The AI model failed to generate a review. This can happen if the service is overloaded or if there's an issue with the input provided.</p>
-                        <pre className="mt-2 whitespace-pre-wrap font-mono text-xs bg-destructive/10 p-2 rounded-md text-primary">
-                            {error}
-                        </pre>
+                        <p>{error}</p>
                     </AlertDescription>
                 </Alert>
             </div>

@@ -98,23 +98,28 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
     while (attempt < maxRetries) {
       try {
         const { output } = await nonBiasedReviewPrompt(input, { model });
-        return output!;
-      } catch (err: any) {
-        attempt++;
-        if (attempt >= maxRetries) {
-          console.error(`Flow failed after ${maxRetries} attempts.`, err);
-          throw err;
+        
+        // Explicitly check if the output is valid before returning.
+        if (output) {
+            return output;
         }
+
+        // If output is null, it's a valid attempt but we should retry.
+        console.log(`AI returned empty output, attempt ${attempt + 1} of ${maxRetries}. Retrying...`);
+
+      } catch (err: any) {
         if (err.message.includes('503') || err.message.includes('overloaded')) {
           console.log(`Model is overloaded, retrying in ${attempt * 2} seconds...`);
           await new Promise(resolve => setTimeout(resolve, attempt * 2000));
         } else {
-          // For other errors, fail immediately
-          throw err;
+          // For other errors, we still want to retry a few times as they might be transient.
+          console.error(`An error occurred on attempt ${attempt + 1}:`, err);
         }
       }
+      attempt++;
     }
-    // This should not be reached, but satisfies TypeScript
-    throw new Error('Flow failed to produce an output.');
+    
+    // If we've exhausted retries and still have no output, throw a specific error.
+    throw new Error('AI_FLOW_FAILED: The AI flow failed to produce a valid review after multiple attempts.');
   }
 );
