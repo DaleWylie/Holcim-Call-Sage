@@ -136,11 +136,12 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                 <Badge variant="secondary" className="text-lg font-bold ml-2">{review.quickScore.toFixed(1)}/5</Badge>
               </div>
             </div>
+           </CardHeader>
            <CardContent>
-              {review.interactionId && (
+              {interactionId && (
                 <div>
                   <Label className="text-sm font-medium text-muted-foreground">Interaction ID</Label>
-                  <p className="font-semibold">{review.interactionId}</p>
+                  <p className="font-semibold">{interactionId}</p>
                 </div>
               )}
           </CardContent>
@@ -299,7 +300,6 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                 </p>
             </CardContent>
         </Card>
-
       </div>
     </div>
   )
