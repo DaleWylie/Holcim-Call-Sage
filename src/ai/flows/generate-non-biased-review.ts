@@ -136,7 +136,7 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
       model = googleAI.model('gemini-1.5-flash');
     } else {
       // Use a powerful text-only model for transcript analysis.
-      model = googleAI.model('gemini-pro');
+      model = googleAI.model('gemini-1.5-pro-latest');
     }
     
     const maxRetries = 3;
