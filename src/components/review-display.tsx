@@ -152,8 +152,8 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
             <Accordion type="multiple" className="w-full">
               {review.scores.map((item, index) => (
                 <AccordionItem value={`item-${index}`} key={index}>
-                  <div className="flex justify-between items-center w-full gap-2 py-2">
-                     <div
+                   <div className="flex items-center w-full gap-2 py-2">
+                      <div
                         className={cn(
                           "w-8 h-8 flex items-center justify-center rounded-full text-white font-bold text-sm shrink-0",
                           getScoreColor(item.score)
