@@ -8,7 +8,6 @@ export function cn(...inputs: ClassValue[]) {
 // This function now returns a full, static class name to prevent issues with
 // Tailwind's Just-in-Time (JIT) compiler purging dynamic classes.
 export function getScoreColor(score: number): string {
-  // Use direct decimal comparison to avoid rounding errors.
   if (score < 2) {
     return 'bg-red-500'; // Red for scores below 2
   }
