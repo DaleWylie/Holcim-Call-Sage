@@ -22,6 +22,7 @@ const ScoringItemSchema = z.object({
 const GenerateNonBiasedReviewInputSchema = z.object({
   scoringMatrix: z.array(ScoringItemSchema).describe('The list of criteria to score the call against.'),
   agentName: z.string().optional().describe("The name of the agent being reviewed. If provided, this name MUST be used."),
+  interactionId: z.string().optional().describe('An optional unique identifier for the call interaction.'),
   callTranscript: z.string().optional().describe('The full text transcript of the call.'),
   audioDataUri: z.string().optional().describe("An audio recording of the call, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
 });
@@ -31,6 +32,7 @@ export type GenerateNonBiasedReviewInput = z.infer<typeof GenerateNonBiasedRevie
 // Define the output schema for the AI flow
 const GenerateNonBiasedReviewOutputSchema = z.object({
   agentName: z.string().describe("The name of the agent who handled the call. Use the 'agentName' from the input if it was provided, otherwise extract it from the transcript."),
+  interactionId: z.string().optional().describe("The interaction ID from the input. Return it as provided."),
   quickSummary: z.string().describe("A very brief, one or two-sentence summary of the call's outcome and the agent's performance."),
   quickScore: z.number().describe("An overall score for the call, calculated as the average of all detailed scores. It should be a number between 0 and 5, and can be a decimal."),
   scores: z.array(z.object({
@@ -60,12 +62,13 @@ const nonBiasedReviewPrompt = ai.definePrompt({
 
     **Instructions:**
     1.  **Identify the Agent**: This is your highest priority. If an 'agentName' is provided in the input, you MUST use that exact name for the 'agentName' in your output. Only if 'agentName' is empty or not provided should you deduce the agent's name from the transcript.
-    2.  **Analyze the Interaction**: Carefully review the provided call data. If an audio file is provided, it is the primary source; transcribe and analyse it. If only a transcript is provided, use that.
-    3.  **Score the Call**: Use the provided scoring matrix to evaluate the agent's performance. For each criterion in the matrix, provide a score as a number from 0 to 5 and a detailed justification.
-    4.  **Justification Rule**: The 'justification' text must explain the reasoning for the score by referencing specific parts of the conversation. It must NOT include the score number itself (e.g., do not write "Score: 4/5" in the justification).
-    5.  **Calculate Quick Score**: Calculate the average of all the individual scores and set it as the 'quickScore'. This can be a decimal.
-    6.  **Summarise**: Provide a concise "quick summary" and a more "overall summary" of the interaction.
-    7.  **Provide Feedback**: List specific, actionable "areas for improvement".
+    2.  **Carry over Interaction ID**: If an 'interactionId' is provided in the input, you MUST include it in the 'interactionId' field of your output.
+    3.  **Analyze the Interaction**: Carefully review the provided call data. If an audio file is provided, it is the primary source; transcribe and analyse it. If only a transcript is provided, use that.
+    4.  **Score the Call**: Use the provided scoring matrix to evaluate the agent's performance. For each criterion in the matrix, provide a score as a number from 0 to 5 and a detailed justification.
+    5.  **Justification Rule**: The 'justification' text must explain the reasoning for the score by referencing specific parts of the conversation. It must NOT include the score number itself (e.g., do not write "Score: 4/5" in the justification).
+    6.  **Calculate Quick Score**: Calculate the average of all the individual scores and set it as the 'quickScore'. This can be a decimal.
+    7.  **Summarise**: Provide a concise "quick summary" and a more "overall summary" of the interaction.
+    8.  **Provide Feedback**: List specific, actionable "areas for improvement".
 
     **Scoring Matrix to Use:**
     {{#each scoringMatrix}}
@@ -76,6 +79,9 @@ const nonBiasedReviewPrompt = ai.definePrompt({
     **Call Data:**
     {{#if agentName}}
     Agent's Name (to be used): {{agentName}}
+    {{/if}}
+    {{#if interactionId}}
+    Interaction ID (to be used): {{interactionId}}
     {{/if}}
     {{#if audioDataUri}}
     Audio Recording:
@@ -101,9 +107,11 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
       const { output } = await nonBiasedReviewPrompt(input, { model });
       
       if (output) {
-          // The prompt now requests agentName, but let's ensure consistency.
-          // The AI output field is now agentName, so this is correct.
-          return { ...output, agentName: output.agentName || "Unknown Agent" };
+          return {
+            ...output,
+            agentName: output.agentName || "Unknown Agent",
+            interactionId: input.interactionId // Ensure interactionId is passed through
+          };
       }
       
       // If the AI returns a null/undefined output without throwing, we'll treat it as an error.

@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, Plus, Trash2, User } from 'lucide-react';
+import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, Plus, Trash2, User, Fingerprint } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from './ui/badge';
 import { ReviewDisplay } from './review-display';
@@ -75,6 +75,7 @@ const fileToDataUri = (file: File): Promise<string> => {
 export default function CallReviewForm() {
   const [scoringMatrix, setScoringMatrix] = useState<ScoringItem[]>(defaultScoringMatrix);
   const [agentName, setAgentName] = useState('');
+  const [interactionId, setInteractionId] = useState('');
   const [callTranscript, setCallTranscript] = useState('');
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -95,6 +96,7 @@ export default function CallReviewForm() {
       const result = await generateNonBiasedReview({
         scoringMatrix,
         agentName: agentName.trim() || undefined,
+        interactionId: interactionId.trim() || undefined,
         callTranscript: callTranscript.trim() || undefined,
         audioDataUri,
       });
@@ -238,6 +240,20 @@ export default function CallReviewForm() {
                         value={agentName}
                         onChange={(e) => setAgentName(e.target.value)}
                         placeholder="e.g. Scott Chegg"
+                    />
+                </div>
+
+                <div className="space-y-4 text-center">
+                    <Label htmlFor="interactionId" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
+                        <Fingerprint className="h-5 w-5" />
+                        Interaction ID (Optional)
+                    </Label>
+                    <Input
+                        id="interactionId"
+                        className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
+                        value={interactionId}
+                        onChange={(e) => setInteractionId(e.target.value)}
+                        placeholder="e.g. 123456789"
                     />
                 </div>
 
