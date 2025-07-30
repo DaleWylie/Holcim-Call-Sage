@@ -1,3 +1,4 @@
+
 "use client"
 
 import {
@@ -21,7 +22,7 @@ interface ReviewDisplayProps {
   review: GenerateNonBiasedReviewOutput
 }
 
-const getScoreColor = (score: number) => {
+const getScoreColour = (score: number) => {
   if (score >= 4) return "bg-green-500"
   if (score >= 3) return "bg-yellow-500"
   return "bg-red-500"
@@ -64,7 +65,7 @@ export function ReviewDisplay({ review }: ReviewDisplayProps) {
                 <AccordionTrigger>
                   <div className="flex items-center gap-4 w-full">
                     <Badge
-                      className={`w-12 h-6 flex items-center justify-center text-white ${getScoreColor(item.score)}`}
+                      className={`w-12 h-6 flex items-center justify-center text-white ${getScoreColour(item.score)}`}
                     >
                       {item.score}/5
                     </Badge>

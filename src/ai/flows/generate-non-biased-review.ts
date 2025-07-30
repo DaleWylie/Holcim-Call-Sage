@@ -94,6 +94,8 @@ Please note: The provided call transcript includes initial metadata from Genesys
 **Crucially, you must extract the analyst's name from the initial metadata (e.g., from a line like 'Jo Read • joined') and use this as the definitive source for the 'analystName' field in the output.** This is more reliable than names mentioned in the dialogue.
 The other metadata (locale, wait time, dialect, programme, transcriber) should be disregarded for the purpose of scoring the call content.
 
+**Language Requirement:** All output text, including justifications, summaries, and areas for improvement, MUST be in British English (e.g., use 'centre', 'colour', 'behaviour' instead of 'center', 'color', 'behavior').
+
 Finally, provide an overall summary of the call's performance and suggest 2-3 actionable areas for improvement.
 
 ---
@@ -133,4 +135,3 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
     return output!;
   }
 );
-
