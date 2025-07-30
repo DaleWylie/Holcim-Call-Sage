@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, Plus, Trash2, Settings, User } from 'lucide-react';
+import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, Plus, Trash2, Settings, User, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from './ui/badge';
 import { ReviewDisplay } from './review-display';
@@ -177,20 +177,20 @@ export default function CallReviewForm() {
               <Accordion type="multiple" className="w-full">
                 {scoringMatrix.map((item) => (
                   <AccordionItem value={item.id} key={item.id}>
-                    <AccordionTrigger className="flex-1 justify-between hover:no-underline pr-2 py-2 text-left">
-                        <span className='font-semibold text-foreground truncate group-hover:underline'>{item.criterion}</span>
+                    <div className="flex items-center w-full">
+                        <AccordionTrigger className="flex-1 hover:no-underline py-2 text-left pr-2">
+                            <span className='font-semibold text-foreground truncate group-hover:underline'>{item.criterion}</span>
+                             <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 ml-auto group-data-[state=open]:rotate-180" />
+                        </AccordionTrigger>
                         <Button 
                           variant="ghost" 
                           size="icon" 
                           className="text-muted-foreground hover:text-destructive hover:bg-transparent rounded-full shrink-0" 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setCriterionToDelete(item.id);
-                          }}
+                          onClick={() => setCriterionToDelete(item.id)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
-                    </AccordionTrigger>
+                    </div>
                     <AccordionContent>
                       <div className="space-y-2 p-2">
                         <div className="space-y-1">
