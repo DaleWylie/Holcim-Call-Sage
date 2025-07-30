@@ -168,7 +168,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                           getScoreColor(item.score)
                         )}
                       >
-                        {item.score}/5
+                        {Math.round(item.score)}/5
                       </div>
                       <AccordionTrigger className="flex-1 justify-start pr-2 text-left no-underline hover:no-underline">
                           <span className="font-medium">{item.criterion}</span>
@@ -183,7 +183,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                             className="w-20 h-8 text-center action-button"
                             min={0}
                             max={5}
-                            step={1}
+                            step={0.1}
                             autoFocus
                           />
                           <Button
