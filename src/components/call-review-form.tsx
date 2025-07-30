@@ -91,10 +91,7 @@ export default function CallReviewForm() {
       setReview(result);
     } catch (e: any) {
       console.error(e);
-      let errorMessage = "An unexpected error occurred. Please check the console for details.";
-       if (e instanceof Error) {
-        errorMessage = e.message;
-      }
+      const errorMessage = e instanceof Error ? e.message : "An unexpected error occurred. Please try again.";
       setError(errorMessage);
        toast({
         variant: "destructive",
@@ -172,18 +169,15 @@ export default function CallReviewForm() {
               </Label>
               <Accordion type="multiple" className="w-full">
                 {scoringMatrix.map((item) => (
-                  <AccordionItem value={item.id} key={item.id}>
+                   <AccordionItem value={item.id} key={item.id}>
                     <div className="flex items-center w-full gap-2">
                       <AccordionTrigger className="flex-1 py-2 text-left pr-2">
-                        <div className="flex-1 flex justify-between items-center">
                           <span className='font-semibold text-foreground truncate group-hover:underline'>{item.criterion}</span>
-                          <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
-                        </div>
                       </AccordionTrigger>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="text-muted-foreground hover:text-destructive hover:bg-transparent rounded-full shrink-0" 
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-muted-foreground hover:text-destructive hover:bg-transparent rounded-full shrink-0"
                         onClick={() => setCriterionToDelete(item.id)}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -193,17 +187,17 @@ export default function CallReviewForm() {
                       <div className="space-y-2 p-2">
                         <div className="space-y-1">
                           <Label htmlFor={`criterion-${item.id}`} className="text-primary">Criterion Name</Label>
-                          <Input 
-                            id={`criterion-${item.id}`} 
-                            value={item.criterion} 
+                          <Input
+                            id={`criterion-${item.id}`}
+                            value={item.criterion}
                             onChange={(e) => handleMatrixChange(item.id, 'criterion', e.target.value)}
                             className="font-semibold"
                           />
                         </div>
                         <div className="space-y-1">
                           <Label htmlFor={`description-${item.id}`} className="text-primary">Description</Label>
-                          <Textarea 
-                            id={`description-${item.id}`} 
+                          <Textarea
+                            id={`description-${item.id}`}
                             value={item.description}
                             onChange={(e) => handleMatrixChange(item.id, 'description', e.target.value)}
                             rows={3}
@@ -248,7 +242,7 @@ export default function CallReviewForm() {
                         rows={7}
                         value={callTranscript}
                         onChange={(e) => setCallTranscript(e.target.value)}
-                        placeholder="Paste your call complete transcript here... This is not required if you are providing a .wav file below."
+                        placeholder="Paste the complete transcript here - This is not required if you are providing a .wav file below..."
                     />
                 </div>
 
