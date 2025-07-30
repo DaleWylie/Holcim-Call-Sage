@@ -311,7 +311,7 @@ export default function CallReviewForm() {
               <AlertTitle>Error Generating Review</AlertTitle>
               <AlertDescription>
                 <p>{getErrorMessage()}</p>
-                 <pre className="mt-2 rounded-md bg-muted/20 p-3 font-mono text-xs text-destructive-foreground/80 overflow-auto whitespace-pre-wrap">
+                 <pre className="mt-2 rounded-md bg-muted/20 p-3 font-mono text-xs text-primary overflow-auto whitespace-pre-wrap">
                     {error}
                 </pre>
               </AlertDescription>
@@ -365,3 +365,5 @@ export default function CallReviewForm() {
     </>
   );
 }
+
+    
