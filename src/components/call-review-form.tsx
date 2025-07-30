@@ -172,9 +172,11 @@ export default function CallReviewForm() {
                     <AccordionTrigger className="hover:no-underline">
                       <div className='flex items-center justify-between w-full'>
                         <span className='font-semibold text-foreground truncate pr-4'>{item.criterion}</span>
-                        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={(e) => { e.stopPropagation(); setCriterionToDelete(item.id); }}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={() => setCriterionToDelete(item.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </AccordionTrigger>
                     <AccordionContent>
