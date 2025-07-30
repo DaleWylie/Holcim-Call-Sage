@@ -169,16 +169,14 @@ export default function CallReviewForm() {
               <Accordion type="multiple" className="w-full">
                 {scoringMatrix.map((item, index) => (
                   <AccordionItem value={`item-${index}`} key={item.id}>
-                    <AccordionTrigger className="hover:no-underline">
-                      <div className='flex items-center justify-between w-full'>
+                    <div className="flex items-center w-full">
+                      <AccordionTrigger className="flex-1 hover:no-underline">
                         <span className='font-semibold text-foreground truncate pr-4'>{item.criterion}</span>
-                        <div onClick={(e) => e.stopPropagation()}>
-                          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={() => setCriterionToDelete(item.id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </AccordionTrigger>
+                      </AccordionTrigger>
+                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive mr-2" onClick={() => setCriterionToDelete(item.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                     <AccordionContent>
                       <div className="space-y-3 p-2">
                         <div className="space-y-1">
