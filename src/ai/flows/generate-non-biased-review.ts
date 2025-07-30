@@ -105,9 +105,11 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
     outputSchema: GenerateNonBiasedReviewOutputSchema,
   },
   async input => {
-    let model = googleAI.model('gemini-1.5-flash');
+    let model;
     if (input.audioRecording) {
       model = googleAI.model('gemini-2.0-flash-preview');
+    } else {
+      model = googleAI.model('gemini-1.5-flash');
     }
     const {output} = await prompt({model}, input);
     return output!;
