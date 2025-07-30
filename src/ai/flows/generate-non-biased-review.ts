@@ -130,8 +130,8 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
     outputSchema: GenerateNonBiasedReviewOutputSchema,
   },
   async input => {
-    // gemini-2.0-flash-preview has transcription capabilities and can handle both audio and text inputs.
-    const model = googleAI.model('gemini-2.0-flash-preview');
+    // gemini-1.5-pro-latest has transcription capabilities and can handle both audio and text inputs.
+    const model = googleAI.model('gemini-1.5-pro-latest');
     const {output} = await prompt({model}, input);
     return output!;
   }
