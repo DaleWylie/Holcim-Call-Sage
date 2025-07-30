@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, Plus, Trash2, User, ChevronDown } from 'lucide-react';
+import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, Plus, Trash2, User } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from './ui/badge';
 import { ReviewDisplay } from './review-display';
@@ -339,7 +339,7 @@ export default function CallReviewForm() {
       </CardContent>
     </Card>
     <footer className="text-center mt-8 text-sm text-muted-foreground">
-        <p>This application was created by Dale Wylie. Intended purpose is to be used as an AI assistant to help with Call Quality Management and provides a rigid, non-biased review on defined voice calls and transcripts. As with all AI tools, human qualification is required. Use responsibly.</p>
+        <p>© 2025 Dale Wylie. "Call Sage" is an AI Call Quality Management Assistant, powered by Gemini, providing objective call and transcript analysis. AI-generated insights require human validation.</p>
     </footer>
     </div>
      <AlertDialog open={!!criterionToDelete} onOpenChange={(isOpen) => !isOpen && setCriterionToDelete(null)}>
