@@ -260,11 +260,8 @@ export default function CallReviewForm() {
                         rows={7}
                         value={callTranscript}
                         onChange={(e) => setCallTranscript(e.target.value)}
-                        placeholder="Paste your Genesys Cloud call transcript here... (Disregarded if uploading WAV file)"
+                        placeholder="Paste your call complete transcript here... This is not required if you are providing a .wav file."
                     />
-                     <p className="text-sm text-muted-foreground">
-                        Ensure the transcript is complete. This is optional if you provide a WAV file.
-                    </p>
                 </div>
 
                 <div className="text-center font-bold text-muted-foreground">OR</div>
@@ -298,9 +295,6 @@ export default function CallReviewForm() {
                             </Button>
                         </div>
                     )}
-                    <p className="text-sm text-muted-foreground">
-                        Alternatively, upload the call recording for direct analysis.
-                    </p>
                 </div>
             </div>
         </div>
