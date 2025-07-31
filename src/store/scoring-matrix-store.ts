@@ -49,7 +49,7 @@ export const useScoringMatrixStore = create<ScoringMatrixState>()(
     }),
     {
       name: 'scoring-matrix-storage', // name of the item in storage (must be unique)
-      storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
+      storage: createJSONStorage(() => sessionStorage), // Use sessionStorage to reset on new session
     }
   )
 );
