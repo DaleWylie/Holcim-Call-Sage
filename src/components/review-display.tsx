@@ -103,6 +103,19 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
     if (!mainElement) return;
 
     setIsPrinting(true);
+    
+    // Add a temporary style block for printing
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @media print {
+            .printable-hidden { display: none !important; }
+            .printable-only { display: inline !important; }
+        }
+        .printable-hidden { display: inline-flex; }
+        .printable-only { display: none; }
+    `;
+    document.head.appendChild(style);
+
 
     // Temporarily modify the DOM for printing
     const actionButtons = mainElement.querySelectorAll<HTMLElement>('.action-button');
@@ -134,6 +147,11 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
             useCORS: true,
             windowWidth: element.scrollWidth,
             windowHeight: element.scrollHeight,
+            onclone: (doc) => {
+                // Apply printing classes to the cloned document for canvas rendering
+                 doc.querySelectorAll<HTMLElement>('.printable-hidden').forEach(el => el.style.display = 'none');
+                 doc.querySelectorAll<HTMLElement>('.printable-only').forEach(el => el.style.display = 'inline');
+            }
         });
 
         const imgData = canvas.toDataURL('image/png');
@@ -165,6 +183,10 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
         actionButtons.forEach(button => (button.style.display = ''));
         if (checkerInput) checkerInput.style.display = '';
         if (checkerText) checkerText.style.display = 'none';
+        
+        // Remove the temporary style block
+        document.head.removeChild(style);
+
         setIsPrinting(false);
     }
   };
@@ -315,14 +337,17 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                                 <div className="flex items-start gap-2">
                                     <p className="text-sm text-muted-foreground flex-1">
                                         {item.justification.timestamp && (
-                                            <Badge 
-                                                variant="outline" 
-                                                className="mr-2 cursor-pointer hover:bg-primary hover:text-primary-foreground"
-                                                onClick={() => handleTimestampClick(item.justification.timestamp!)}
-                                            >
-                                                <Clock className="h-3 w-3 mr-1" />
-                                                {item.justification.timestamp}
-                                            </Badge>
+                                            <>
+                                                <Badge 
+                                                    variant="outline" 
+                                                    className="mr-2 cursor-pointer hover:bg-primary hover:text-primary-foreground printable-hidden"
+                                                    onClick={() => handleTimestampClick(item.justification.timestamp!)}
+                                                >
+                                                    <Clock className="h-3 w-3 mr-1" />
+                                                    {item.justification.timestamp}
+                                                </Badge>
+                                                <span className="printable-only mr-2 font-semibold text-muted-foreground">{item.justification.timestamp}</span>
+                                            </>
                                         )}
                                         {item.justification.text}
                                     </p>
@@ -404,14 +429,17 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                 {review.goodPoints.map((item, index) => (
                    <li key={index} className="text-base">
                         {item.timestamp && (
-                            <Badge 
-                                variant="outline" 
-                                className="mr-2 cursor-pointer hover:bg-primary hover:text-primary-foreground"
-                                onClick={() => handleTimestampClick(item.timestamp!)}
-                            >
-                                <Clock className="h-3 w-3 mr-1" />
-                                {item.timestamp}
-                            </Badge>
+                            <>
+                                <Badge 
+                                    variant="outline" 
+                                    className="mr-2 cursor-pointer hover:bg-primary hover:text-primary-foreground printable-hidden"
+                                    onClick={() => handleTimestampClick(item.timestamp!)}
+                                >
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    {item.timestamp}
+                                </Badge>
+                                <span className="printable-only mr-2 font-semibold text-muted-foreground">{item.timestamp}</span>
+                            </>
                         )}
                         {item.text}
                     </li>
@@ -433,14 +461,17 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
               {review.areasForImprovement.map((item, index) => (
                  <li key={index} className="text-base">
                     {item.timestamp && (
-                        <Badge 
-                            variant="outline" 
-                            className="mr-2 cursor-pointer hover:bg-primary hover:text-primary-foreground"
-                            onClick={() => handleTimestampClick(item.timestamp!)}
-                        >
-                            <Clock className="h-3 w-3 mr-1" />
-                            {item.timestamp}
-                        </Badge>
+                         <>
+                            <Badge 
+                                variant="outline" 
+                                className="mr-2 cursor-pointer hover:bg-primary hover:text-primary-foreground printable-hidden"
+                                onClick={() => handleTimestampClick(item.timestamp!)}
+                            >
+                                <Clock className="h-3 w-3 mr-1" />
+                                {item.timestamp}
+                            </Badge>
+                             <span className="printable-only mr-2 font-semibold text-muted-foreground">{item.timestamp}</span>
+                        </>
                     )}
                     {item.text}
                 </li>
@@ -491,3 +522,5 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
     </div>
   )
 }
+
+    
