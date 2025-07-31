@@ -101,7 +101,7 @@ export function SettingsDialog({ setOpen }: SettingsDialogProps) {
                         id={`criterion-${item.id}`}
                         value={item.criterion}
                         onChange={(e) => handleMatrixChange(item.id, 'criterion', e.target.value)}
-                        className="font-semibold"
+                        className="font-semibold bg-card"
                     />
                     </div>
                     <div className="space-y-1">
@@ -111,6 +111,7 @@ export function SettingsDialog({ setOpen }: SettingsDialogProps) {
                         value={item.description}
                         onChange={(e) => handleMatrixChange(item.id, 'description', e.target.value)}
                         rows={3}
+                        className="bg-card"
                     />
                     </div>
                 </div>
@@ -153,3 +154,5 @@ export function SettingsDialog({ setOpen }: SettingsDialogProps) {
     </DialogContent>
   );
 }
+
+    

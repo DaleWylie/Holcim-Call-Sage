@@ -280,7 +280,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                                     />
                                     <Button
                                     size="icon"
-                                    className="h-8 w-8 bg-green-500 hover:bg-green-600"
+                                    className="h-8 w-8"
                                     onClick={() => handleSave(`score-${index}`)}
                                     >
                                     <Check className="h-4 w-4" />
@@ -319,7 +319,6 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                                     <div className="flex items-center gap-2 justify-end action-button">
                                         <Button
                                             size="sm"
-                                            className="bg-green-500 hover:bg-green-600"
                                             onClick={() => handleSave(`justification-${index}`)}
                                         >
                                             <Check className="h-4 w-4" />
@@ -400,7 +399,6 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                         <div className="flex items-center gap-2 justify-end action-button">
                             <Button
                                 size="sm"
-                                className="bg-green-500 hover:bg-green-600"
                                 onClick={() => handleSave('overallSummary')}
                             >
                                 <Check className="h-4 w-4" />
@@ -522,5 +520,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
     </div>
   )
 }
+
+    
 
     
