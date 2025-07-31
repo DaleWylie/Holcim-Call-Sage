@@ -105,15 +105,15 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
             // Recalculate weighted score
             let totalAchievedPoints = 0;
             let totalPossiblePoints = 0;
-            const scoringMap = new Map(fullMatrix.map(item => [item.criterion, item.weight]));
+            const scoringMap = new Map(fullMatrix.map(item => [item.criterion, { weight: item.weight }]));
             
-            for (const scoreItem of newScores) {
-                const weight = scoringMap.get(scoreItem.criterion);
-                if (weight !== undefined && weight > 0) {
-                    totalAchievedPoints += scoreItem.score * weight;
-                    totalPossiblePoints += 5 * weight; // Max score is 5
+            newScores.forEach(scoreItem => {
+                const criterionDetails = scoringMap.get(scoreItem.criterion);
+                if (criterionDetails && criterionDetails.weight > 0) {
+                    totalAchievedPoints += scoreItem.score * criterionDetails.weight;
+                    totalPossiblePoints += 5 * criterionDetails.weight; // Max score is 5 for each criterion
                 }
-            }
+            });
 
             const newOverallScore = (totalPossiblePoints > 0) ? (totalAchievedPoints / totalPossiblePoints) * 100 : 0;
             newReview = { ...newReview, scores: newScores, overallScore: newOverallScore };
