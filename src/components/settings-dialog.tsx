@@ -41,6 +41,7 @@ export function SettingsDialog({ setOpen }: SettingsDialogProps) {
   const { scoringMatrix, setScoringMatrix } = useScoringMatrixStore();
   const [localMatrix, setLocalMatrix] = useState(scoringMatrix);
   const [criterionToDelete, setCriterionToDelete] = useState<string | null>(null);
+  const [openAccordionItems, setOpenAccordionItems] = useState<string[]>([]);
 
   const handleMatrixChange = (id: string, field: 'criterion' | 'description', value: string) => {
     setLocalMatrix(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
@@ -53,6 +54,7 @@ export function SettingsDialog({ setOpen }: SettingsDialogProps) {
       description: ""
     };
     setLocalMatrix(prev => [...prev, newItem]);
+    setOpenAccordionItems(prev => [...prev, newItem.id]);
   };
   
   const confirmRemoveItem = () => {
@@ -77,7 +79,7 @@ export function SettingsDialog({ setOpen }: SettingsDialogProps) {
       </DialogHeader>
       
       <div className="py-4 max-h-[60vh] overflow-y-auto pr-2">
-        <Accordion type="multiple" className="w-full" defaultValue={localMatrix.map(i => i.id)}>
+        <Accordion type="multiple" value={openAccordionItems} onValueChange={setOpenAccordionItems} className="w-full">
             {localMatrix.map((item) => (
             <AccordionItem value={item.id} key={item.id}>
                 <div className="flex items-center w-full gap-2">
