@@ -62,7 +62,7 @@ const nonBiasedReviewPrompt = ai.definePrompt({
     You MUST use British English spelling and grammar at all times (e.g., "summarise", "behaviour", "centre").
 
     **Instructions:**
-    1.  **Identify the Agent**: This is your highest priority. The 'agentName' is provided in the input, and you MUST use that exact name for the 'agentName' in your output. Do not attempt to deduce the agent's name from the transcript.
+    1.  **Identify the Agent**: This is your highest priority. The full 'agentName' is provided in the input, and you MUST use that exact name for the 'agentName' in your output. However, when analysing the transcript for the agent's introduction, you should look for their first name (the first word of the agentName). If you cannot find the agent introducing themselves by their first name, you should still analyse the greeting and introduction based on other conversational cues.
     2.  **Carry over Interaction ID**: If an 'interactionId' is provided in the input, you MUST include it in the 'interactionId' field of your output.
     3.  **Analyze the Interaction**: Carefully review the provided call data. If an audio file is provided, it is the primary source; transcribe and analyse it. If only a transcript is provided, use that.
     4.  **Score the Call**: Use the provided scoring matrix to evaluate the agent's performance. For each criterion in the matrix, provide a score as a whole number (integer) from 0 to 5 and a detailed justification.
