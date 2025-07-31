@@ -157,7 +157,7 @@ export default function CallReviewForm() {
                       <ul className="space-y-2">
                          {scoringMatrix.map((item) => (
                            <li key={item.id} className="flex items-center justify-between">
-                             <span className="font-semibold text-foreground truncate">{item.criterion}</span>
+                             <span className="font-semibold text-primary truncate">{item.criterion}</span>
                              <AlertDialog>
                                <AlertDialogTrigger asChild>
                                  <Button variant="ghost" size="icon" className='text-muted-foreground hover:text-primary h-8 w-8'>
@@ -209,7 +209,7 @@ export default function CallReviewForm() {
                           className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
                           value={interactionId}
                           onChange={(e) => setInteractionId(e.target.value)}
-                          placeholder="e.g. df14f08f-0377-4e25-875f-8f07140de97d"
+                          placeholder="e.g. 1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
                       />
                   </div>
 
