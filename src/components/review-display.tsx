@@ -299,11 +299,11 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                             <div className="flex w-full items-center gap-2 py-2">
                                 <div
                                     className={cn(
-                                    'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white',
+                                    'flex h-8 w-12 shrink-0 items-center justify-center rounded-md px-2 text-sm font-bold text-white',
                                     getScoreColor(item.score * 20) // Multiply by 20 to map 0-5 scale to 0-100 for color
                                     )}
                                 >
-                                    {item.score}
+                                    {item.score}/5
                                 </div>
                                 <div className="flex-1">
                                     <span className="font-medium">{item.criterion}</span>
