@@ -98,7 +98,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
 
         } else if (type === 'justification') {
             const newScores = [...prev.scores];
-            newScores[index] = { ...newScores[index], justification: { ...newScores[index].justification, text: String(tempValue) } };
+            newScores[index] = { ...newScores[index], justification: String(tempValue) };
             newReview = { ...newReview, scores: newScores };
         } else if (type === 'overallSummary') {
             newReview = { ...newReview, overallSummary: String(tempValue) };
@@ -362,26 +362,13 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                                 ) : (
                                     <div className="flex items-start gap-2">
                                         <p className="text-sm text-muted-foreground flex-1">
-                                            {item.justification.timestamp && (
-                                                <>
-                                                    <Badge 
-                                                        variant="outline" 
-                                                        className="mr-2 cursor-pointer hover:bg-primary hover:text-primary-foreground printable-hidden"
-                                                        onClick={() => handleTimestampClick(item.justification.timestamp!)}
-                                                    >
-                                                        <Clock className="h-3 w-3 mr-1" />
-                                                        {item.justification.timestamp}
-                                                    </Badge>
-                                                    <span className="printable-only mr-2 text-muted-foreground">{item.justification.timestamp}</span>
-                                                </>
-                                            )}
-                                            {item.justification.text}
+                                            {item.justification}
                                         </p>
                                         <Button
                                             size="icon"
                                             variant="ghost"
                                             className="h-8 w-8 text-muted-foreground hover:bg-primary hover:text-primary-foreground action-button shrink-0"
-                                            onClick={() => handleEditClick(`justification-${index}`, item.justification.text)}
+                                            onClick={() => handleEditClick(`justification-${index}`, item.justification)}
                                         >
                                             <Pencil className="h-4 w-4" />
                                         </Button>
@@ -461,7 +448,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
               <ul className="list-disc pl-5 space-y-2">
                 {review.goodPoints.map((item, index) => (
                    <li key={index} className="text-base">
-                        {item.timestamp && (
+                        {item.timestamp && audioDataUri && (
                             <>
                                 <Badge 
                                     variant="outline" 
@@ -493,7 +480,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
             <ul className="list-disc pl-5 space-y-2">
               {review.areasForImprovement.map((item, index) => (
                  <li key={index} className="text-base">
-                    {item.timestamp && (
+                    {item.timestamp && audioDataUri && (
                          <>
                             <Badge 
                                 variant="outline" 

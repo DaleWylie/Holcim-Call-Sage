@@ -44,7 +44,7 @@ const GenerateNonBiasedReviewOutputSchema = z.object({
   scores: z.array(z.object({
     criterion: z.string().describe('The specific criterion being scored, matching one from the input matrix.'),
     score: z.number().int().min(0).max(5).describe('The score given for this criterion, as a whole number (integer) from 0 to 5, based on the detailed scoring breakdown in the description.'),
-    justification: TimestampedStringSchema.describe('A detailed justification for why the score was given, referencing parts of the call transcript. Do not include the score number in this justification text.'),
+    justification: z.string().describe('A detailed justification for why the score was given, referencing parts of the call transcript. Do not include the score number or a timestamp in this justification text.'),
   })).describe('A detailed breakdown of scores for each criterion from the input matrix.'),
   overallSummary: z.string().describe('A detailed overall summary of the call, highlighting strengths and weaknesses of the agent. This summary must incorporate and touch upon each of the scoring criteria provided in the input.'),
   goodPoints: z.array(TimestampedStringSchema).describe('A list of specific, positive aspects or strengths demonstrated by the agent during the call, including timestamps if available. Each point should clearly relate to one of the scoring criteria.'),
@@ -72,10 +72,10 @@ const nonBiasedReviewPrompt = ai.definePrompt({
     2.  **Identify the Agent**: The full 'agentName' is provided in the input, and you MUST use that exact name for the 'agentName' in your output. However, when analysing the transcript for the agent's introduction, you should look for their first name (the first word of the agentName). If you cannot find the agent introducing themselves by their first name, you should still analyse the greeting and introduction based on other conversational cues.
     3.  **Carry over Interaction ID**: If an 'interactionId' is provided in the input, you MUST include it in the 'interactionId' field of your output.
     4.  **Analyze the Interaction**: Carefully review the provided call data. If an audio file is provided, it is the primary source; transcribe and analyse it. If only a transcript is provided, use that.
-    5.  **Extract Timestamps**: When providing a 'justification', 'goodPoints', or 'areasForImprovement', you MUST look for a corresponding timestamp in the transcript (e.g., [00:01:23] or a similar format). If you find a relevant timestamp, you must extract it and place it in the 'timestamp' field. If no specific timestamp is applicable or available, leave the field blank.
+    5.  **Extract Timestamps (Conditional)**: When providing 'goodPoints' or 'areasForImprovement', you MUST look for a corresponding timestamp in the transcript (e.g., [00:01:23] or a similar format). If you find a relevant timestamp, you must extract it and place it in the 'timestamp' field. For the 'justification' field in the 'scores' array, you MUST NOT include a timestamp.
     6.  **Timestamp Uniqueness**: Avoid referencing the exact same timestamp multiple times within the same list (e.g., in 'goodPoints' or 'areasForImprovement'), unless it is to highlight a completely different aspect of the interaction. Each reference should ideally provide new value.
-    7.  **Justification Rule**: The 'justification.text' must explain the reasoning for the score by referencing specific parts of the conversation. It must NOT include the score number itself (e.g., do not write "Score: 4/5" in the justification).
-    8.  **Do NOT Calculate Overall Score**: You should focus on providing accurate individual scores based on the criteria. The 'overallScore' will be calculated externally based on the weights. Do NOT populate the 'overallScore' field in your response, leave it as 0.
+    7.  **Justification Rule**: The 'justification' text must explain the reasoning for the score by referencing specific parts of the conversation. It must NOT include the score number itself (e.g., do not write "Score: 4/5" in the justification).
+    8.  **Calculate Overall Score**: You MUST calculate the 'overallScore'. Take the score for each criterion (from 0 to 5) and multiply it by its respective weight. The sum of these weighted scores divided by the sum of the maximum possible weighted score will give you a total out of 100. This will be the “Overall Score” as a percentage. Only criteria with a weight > 0 should be included.
     9.  **Summarise**: Provide a concise "quick summary" and a more "overall summary" of the interaction. The 'overallSummary' MUST touch upon every single criterion from the scoring matrix.
     10. **Highlight Strengths & Feedback**: Identify specific things the agent did well under 'goodPoints' and list actionable 'areasForImprovement'. Every point you list under 'goodPoints' and 'areasForImprovement' must clearly relate to one of the criteria from the scoring matrix.
 
@@ -118,13 +118,13 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
           let totalAchievedPoints = 0;
           let totalPossiblePoints = 0;
 
-          const scoringMap = new Map(input.scoringMatrix.map(item => [item.criterion, item.weight]));
+          const scoringMap = new Map(input.scoringMatrix.map(item => [item.criterion, { weight: item.weight }]));
 
           for (const scoreItem of output.scores) {
-              const weight = scoringMap.get(scoreItem.criterion);
-              if (weight !== undefined && weight > 0) {
-                  totalAchievedPoints += scoreItem.score * weight;
-                  totalPossiblePoints += 5 * weight; // Max score is 5 for each criterion
+              const criterionDetails = scoringMap.get(scoreItem.criterion);
+              if (criterionDetails && criterionDetails.weight > 0) {
+                  totalAchievedPoints += scoreItem.score * criterionDetails.weight;
+                  totalPossiblePoints += 5 * criterionDetails.weight; // Max score is 5 for each criterion
               }
           }
 
