@@ -29,6 +29,11 @@ const GenerateNonBiasedReviewInputSchema = z.object({
 
 export type GenerateNonBiasedReviewInput = z.infer<typeof GenerateNonBiasedReviewInputSchema>;
 
+const TimestampedStringSchema = z.object({
+    text: z.string(),
+    timestamp: z.string().optional().describe("The timestamp from the transcript (e.g., [00:01:23]) relevant to the text. Extract it if available."),
+});
+
 // Define the output schema for the AI flow
 const GenerateNonBiasedReviewOutputSchema = z.object({
   agentName: z.string().describe("The name of the agent who handled the call. Use the 'agentName' from the input as it is mandatory."),
@@ -38,11 +43,11 @@ const GenerateNonBiasedReviewOutputSchema = z.object({
   scores: z.array(z.object({
     criterion: z.string().describe('The specific criterion being scored, matching one from the input matrix.'),
     score: z.number().int().min(0).max(5).describe('The score given for this criterion, as a whole number (integer) from 0 to 5.'),
-    justification: z.string().describe('A detailed justification for why the score was given, referencing parts of the call transcript. Do not include the score number in this justification text.'),
+    justification: TimestampedStringSchema.describe('A detailed justification for why the score was given, referencing parts of the call transcript. Do not include the score number in this justification text.'),
   })).describe('A detailed breakdown of scores for each criterion from the input matrix.'),
   overallSummary: z.string().describe('A detailed overall summary of the call, highlighting strengths and weaknesses of the agent.'),
-  goodPoints: z.array(z.string()).describe('A list of specific, positive aspects or strengths demonstrated by the agent during the call.'),
-  areasForImprovement: z.array(z.string()).describe('A list of specific, actionable suggestions for the agent to improve.'),
+  goodPoints: z.array(TimestampedStringSchema).describe('A list of specific, positive aspects or strengths demonstrated by the agent during the call, including timestamps if available.'),
+  areasForImprovement: z.array(TimestampedStringSchema).describe('A list of specific, actionable suggestions for the agent to improve, including timestamps if available.'),
 });
 
 export type GenerateNonBiasedReviewOutput = z.infer<typeof GenerateNonBiasedReviewOutputSchema>;
@@ -65,12 +70,13 @@ const nonBiasedReviewPrompt = ai.definePrompt({
     1.  **Identify the Agent**: This is your highest priority. The full 'agentName' is provided in the input, and you MUST use that exact name for the 'agentName' in your output. However, when analysing the transcript for the agent's introduction, you should look for their first name (the first word of the agentName). If you cannot find the agent introducing themselves by their first name, you should still analyse the greeting and introduction based on other conversational cues.
     2.  **Carry over Interaction ID**: If an 'interactionId' is provided in the input, you MUST include it in the 'interactionId' field of your output.
     3.  **Analyze the Interaction**: Carefully review the provided call data. If an audio file is provided, it is the primary source; transcribe and analyse it. If only a transcript is provided, use that.
-    4.  **Score the Call**: Use the provided scoring matrix to evaluate the agent's performance. For each criterion in the matrix, provide a score as a whole number (integer) from 0 to 5 and a detailed justification.
-    5.  **Justification Rule**: The 'justification' text must explain the reasoning for the score by referencing specific parts of the conversation. It must NOT include the score number itself (e.g., do not write "Score: 4/5" in the justification).
-    6.  **Calculate Overall Score**: Calculate the average of all the individual scores and set it as the 'overallScore'. This can be a decimal.
-    7.  **Summarise**: Provide a concise "quick summary" and a more "overall summary" of the interaction.
-    8.  **Highlight Strengths**: Identify and list specific things the agent did well under a 'goodPoints' heading. This should be a list of positive points.
-    9.  **Provide Feedback**: List specific, actionable "areas for improvement".
+    4.  **Extract Timestamps**: When providing a 'justification', 'goodPoints', or 'areasForImprovement', you MUST look for a corresponding timestamp in the transcript (e.g., [00:01:23] or a similar format). If you find a relevant timestamp, you must extract it and place it in the 'timestamp' field. If no specific timestamp is applicable or available, leave the field blank.
+    5.  **Score the Call**: Use the provided scoring matrix to evaluate the agent's performance. For each criterion in the matrix, provide a score as a whole number (integer) from 0 to 5 and a detailed justification.
+    6.  **Justification Rule**: The 'justification.text' must explain the reasoning for the score by referencing specific parts of the conversation. It must NOT include the score number itself (e.g., do not write "Score: 4/5" in the justification).
+    7.  **Calculate Overall Score**: Calculate the average of all the individual scores and set it as the 'overallScore'. This can be a decimal.
+    8.  **Summarise**: Provide a concise "quick summary" and a more "overall summary" of the interaction.
+    9.  **Highlight Strengths**: Identify and list specific things the agent did well under 'goodPoints'.
+    10. **Provide Feedback**: List specific, actionable 'areasForImprovement'.
 
     **Scoring Matrix to Use:**
     {{#each scoringMatrix}}

@@ -14,20 +14,36 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { GenerateNonBiasedReviewOutput } from "@/ai/flows/generate-non-biased-review"
-import { CheckCircle2, ListChecks, Printer, Sparkles, Target, Pencil, Check, X, UserCheck, Calendar, ThumbsUp } from "lucide-react"
+import { CheckCircle2, ListChecks, Printer, Sparkles, Target, Pencil, Check, X, UserCheck, Calendar, ThumbsUp, Clock } from "lucide-react"
 import { cn, getScoreColor } from "@/lib/utils";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
 import { Textarea } from "./ui/textarea";
 
 interface ReviewDisplayProps {
-  review: GenerateNonBiasedReviewOutput
+  review: GenerateNonBiasedReviewOutput;
   setReview: React.Dispatch<React.SetStateAction<GenerateNonBiasedReviewOutput | null>>;
+  audioDataUri: string | null;
 }
 
+// Converts [HH:MM:SS] or MM:SS to seconds
+const timeToSeconds = (timeStr: string): number => {
+    if (!timeStr) return 0;
+    const time = timeStr.replace(/[\[\]]/g, ''); // Remove brackets
+    const parts = time.split(':').map(Number);
+    if (parts.length === 3) { // [HH:MM:SS]
+        return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    }
+    if (parts.length === 2) { // MM:SS
+        return parts[0] * 60 + parts[1];
+    }
+    return 0;
+};
 
-export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
+
+export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplayProps) {
   const reviewRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const [isPrinting, setIsPrinting] = React.useState(false);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState<string | number>('');
@@ -35,7 +51,14 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
   
   const interactionId = review.interactionId || '';
 
-  const handleEditClick = (field: string, currentValue: string | number) => {
+  const handleTimestampClick = (timestamp: string) => {
+    if (audioRef.current) {
+        audioRef.current.currentTime = timeToSeconds(timestamp);
+        audioRef.current.play();
+    }
+  };
+
+  const handleEditClick = (field: string, currentValue: any) => {
     setEditingField(field);
     setTempValue(currentValue);
   };
@@ -59,7 +82,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
             newReview = { ...newReview, scores: newScores, overallScore: newOverallScore };
         } else if (type === 'justification') {
             const newScores = [...prev.scores];
-            newScores[index] = { ...newScores[index], justification: String(tempValue) };
+            newScores[index] = { ...newScores[index], justification: { ...newScores[index].justification, text: String(tempValue) } };
             newReview = { ...newReview, scores: newScores };
         } else if (type === 'overallSummary') {
             newReview = { ...newReview, overallSummary: String(tempValue) };
@@ -101,6 +124,11 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
     let yPos = margin;
 
     const addElementToPdf = async (element: HTMLElement) => {
+        // Skip non-printable sections
+        if (element.getAttribute('data-printable-section') === 'false') {
+            return;
+        }
+
         const canvas = await html2canvas(element, {
             scale: 2,
             useCORS: true,
@@ -151,8 +179,16 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
             Generated Review
           </h2>
         </div>
+        
+        {audioDataUri && (
+             <div data-printable-section="false" className="mb-6">
+                <audio ref={audioRef} controls src={audioDataUri} className="w-full">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+        )}
 
-        <Card data-printable-section className="mb-6">
+        <Card data-printable-section="true" className="mb-6">
           <CardHeader>
             <div className="flex justify-between items-start">
               <div>
@@ -180,7 +216,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
           </CardContent>
         </Card>
 
-        <Card data-printable-section className="mb-6">
+        <Card data-printable-section="true" className="mb-6">
           <CardHeader>
             <div className="flex items-center gap-2">
               <ListChecks className="h-5 w-5 text-primary" />
@@ -213,7 +249,6 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                                         className="w-20 h-8 text-center"
                                         min={0}
                                         max={5}
-                                        step={1}
                                         onKeyDown={(e) => {
                                             if (e.key === '.') {
                                                 e.preventDefault();
@@ -278,12 +313,24 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                                 </div>
                             ) : (
                                 <div className="flex items-start gap-2">
-                                    <p className="text-sm text-muted-foreground flex-1">{item.justification}</p>
+                                    <p className="text-sm text-muted-foreground flex-1">
+                                        {item.justification.timestamp && (
+                                            <Badge 
+                                                variant="outline" 
+                                                className="mr-2 cursor-pointer hover:bg-primary hover:text-primary-foreground"
+                                                onClick={() => handleTimestampClick(item.justification.timestamp!)}
+                                            >
+                                                <Clock className="h-3 w-3 mr-1" />
+                                                {item.justification.timestamp}
+                                            </Badge>
+                                        )}
+                                        {item.justification.text}
+                                    </p>
                                     <Button
                                         size="icon"
                                         variant="ghost"
                                         className="h-8 w-8 text-muted-foreground hover:bg-primary hover:text-primary-foreground action-button shrink-0"
-                                        onClick={() => handleEditClick(`justification-${index}`, item.justification)}
+                                        onClick={() => handleEditClick(`justification-${index}`, item.justification.text)}
                                     >
                                         <Pencil className="h-4 w-4" />
                                     </Button>
@@ -297,7 +344,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
           </CardContent>
         </Card>
 
-        <Card data-printable-section className="mb-6">
+        <Card data-printable-section="true" className="mb-6">
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -345,7 +392,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
         </Card>
         
         {review.goodPoints && review.goodPoints.length > 0 && (
-          <Card data-printable-section className="mb-6">
+          <Card data-printable-section="true" className="mb-6">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <ThumbsUp className="h-5 w-5 text-primary" />
@@ -355,14 +402,26 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
             <CardContent>
               <ul className="list-disc pl-5 space-y-2">
                 {review.goodPoints.map((item, index) => (
-                  <li key={index} className="text-base">{item}</li>
+                   <li key={index} className="text-base">
+                        {item.timestamp && (
+                            <Badge 
+                                variant="outline" 
+                                className="mr-2 cursor-pointer hover:bg-primary hover:text-primary-foreground"
+                                onClick={() => handleTimestampClick(item.timestamp!)}
+                            >
+                                <Clock className="h-3 w-3 mr-1" />
+                                {item.timestamp}
+                            </Badge>
+                        )}
+                        {item.text}
+                    </li>
                 ))}
               </ul>
             </CardContent>
           </Card>
         )}
 
-        <Card data-printable-section className="mb-6">
+        <Card data-printable-section="true" className="mb-6">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
@@ -372,13 +431,25 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
           <CardContent>
             <ul className="list-disc pl-5 space-y-2">
               {review.areasForImprovement.map((item, index) => (
-                <li key={index} className="text-base">{item}</li>
+                 <li key={index} className="text-base">
+                    {item.timestamp && (
+                        <Badge 
+                            variant="outline" 
+                            className="mr-2 cursor-pointer hover:bg-primary hover:text-primary-foreground"
+                            onClick={() => handleTimestampClick(item.timestamp!)}
+                        >
+                            <Clock className="h-3 w-3 mr-1" />
+                            {item.timestamp}
+                        </Badge>
+                    )}
+                    {item.text}
+                </li>
               ))}
             </ul>
           </CardContent>
         </Card>
 
-        <Card data-printable-section className="mt-6">
+        <Card data-printable-section="true" className="mt-6">
             <CardHeader>
                 <div className="flex justify-between items-start">
                     <div className="flex items-center gap-2">

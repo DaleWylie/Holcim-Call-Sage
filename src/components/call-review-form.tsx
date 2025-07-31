@@ -67,6 +67,7 @@ export default function CallReviewForm() {
   const [interactionId, setInteractionId] = useState('');
   const [callTranscript, setCallTranscript] = useState('');
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [audioDataUriForPlayer, setAudioDataUriForPlayer] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ErrorState | null>(null);
@@ -78,9 +79,15 @@ export default function CallReviewForm() {
     setIsLoading(true);
     setError(null);
     setReview(null);
+    setAudioDataUriForPlayer(null);
     
     try {
       const audioDataUri = audioFile ? await fileToDataUri(audioFile) : undefined;
+      
+      if (audioDataUri) {
+        setAudioDataUriForPlayer(audioDataUri);
+      }
+
       const agentName = `${agentFirstName.trim()} ${agentLastName.trim()}`;
       
       const result = await generateNonBiasedReview({
@@ -321,7 +328,11 @@ export default function CallReviewForm() {
           
           {review && !isLoading && (
               <div className="mt-8">
-                  <ReviewDisplay review={review} setReview={setReview} />
+                  <ReviewDisplay 
+                    review={review}
+                    setReview={setReview}
+                    audioDataUri={audioDataUriForPlayer}
+                  />
               </div>
           )}
 
