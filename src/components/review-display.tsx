@@ -260,9 +260,14 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                 <Label className="text-sm font-bold text-muted-foreground pt-4 block">Quick Summary</Label>
                 <p className="text-muted-foreground">{review.quickSummary}</p>
               </div>
-              <div className="text-right">
-                <Label className="text-sm font-medium">Overall Score</Label>
-                <Badge variant="secondary" className="text-lg font-bold ml-2">{review.overallScore.toFixed(0)}%</Badge>
+              <div className="text-center">
+                  <Label className="text-sm font-medium text-muted-foreground">Overall Score</Label>
+                  <div className={cn(
+                    "mt-1 flex items-center justify-center w-24 h-24 rounded-full text-white text-3xl font-bold",
+                    getScoreColor(review.overallScore, 100)
+                  )}>
+                    {review.overallScore.toFixed(0)}%
+                  </div>
               </div>
             </div>
            </CardHeader>
@@ -295,7 +300,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                                 <div
                                     className={cn(
                                     'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white',
-                                    getScoreColor(item.score, 5) // Use 0-5 scale for individual item color
+                                    getScoreColor(item.score * 20) // Multiply by 20 to map 0-5 scale to 0-100 for color
                                     )}
                                 >
                                     {item.score}
