@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2024-08-02
+
+### Changed
+- **UI/UX**: Refined the score display in the generated review.
+- The "Overall Score" circle has been made smaller for a more balanced layout.
+- Individual criteria scores are now displayed in smaller, rounded rectangles (e.g., "X/5") for a cleaner look.
+- The "Overall Score" label is now on a single line to improve alignment.
+
 ## [1.2.0] - 2024-08-01
 
 ### Changed
