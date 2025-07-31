@@ -122,9 +122,8 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
 
           for (const scoreItem of output.scores) {
               const weight = scoringMap.get(scoreItem.criterion);
-              if (weight !== undefined) {
-                  // The multiplier is weight itself, as the total score is out of 100.
-                  // e.g., for a 20% weight, the contribution is score * 4. 20/5 = 4.
+              // Only include items with a weight greater than 0 in the calculation
+              if (weight !== undefined && weight > 0) {
                   totalWeightedScore += scoreItem.score * (weight / 5);
                   totalWeight += weight;
               }

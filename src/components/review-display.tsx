@@ -87,7 +87,8 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
 
             for (const scoreItem of newScores) {
                 const weight = scoringMap.get(scoreItem.criterion);
-                if (weight !== undefined) {
+                // Only include items with a weight greater than 0 in the calculation
+                if (weight !== undefined && weight > 0) {
                     totalWeightedScore += scoreItem.score * (weight / 5);
                     totalWeight += weight;
                 }
