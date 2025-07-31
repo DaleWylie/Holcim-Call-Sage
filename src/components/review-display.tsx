@@ -263,7 +263,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
               <div className="text-center">
                   <Label className="text-sm font-medium text-muted-foreground">Overall Score</Label>
                   <div className={cn(
-                    "mt-1 flex items-center justify-center w-24 h-24 rounded-full text-white text-3xl font-bold",
+                    "mt-1 flex items-center justify-center w-20 h-20 rounded-full text-white text-2xl font-bold",
                     getScoreColor(review.overallScore, 100)
                   )}>
                     {review.overallScore.toFixed(0)}%
