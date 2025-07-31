@@ -68,18 +68,17 @@ const nonBiasedReviewPrompt = ai.definePrompt({
     You MUST use British English spelling and grammar at all times (e.g., "summarise", "behaviour", "centre").
 
     **CRITICAL Instructions:**
-    1.  **Score Strictly by Description**: You MUST evaluate the agent's performance for each criterion based exclusively on its 'description', which includes a detailed 0-5 scoring guide. Do NOT use your own general knowledge of customer service. If an action described in the scoring guide did not happen (e.g., a call closure), you must assign the score that reflects its absence (e.g., 0/5) and not invent a partial or complete action. The provided call data is the ONLY source of truth.
-    2.  **Identify the Agent**: The full 'agentName' is provided in the input, and you MUST use that exact name for the 'agentName' in your output. However, when analysing the transcript for the agent's introduction, you should look for their first name (the first word of the agentName). If you cannot find the agent introducing themselves by their first name, you should still analyse the greeting and introduction based on other conversational cues.
-    3.  **Carry over Interaction ID**: If an 'interactionId' is provided in the input, you MUST include it in the 'interactionId' field of your output.
-    4.  **Analyze the Interaction**: Carefully review the provided call data. If an audio file is provided, it is the primary source; transcribe and analyse it. If only a transcript is provided, use that.
+    1.  **Analyse the Interaction**: Carefully review the provided call data. If an audio file is provided, it is the primary source; transcribe and analyse it. If only a transcript is provided, use that.
+    2.  **Score Strictly by Description**: You MUST evaluate the agent's performance for each criterion based exclusively on its 'description', which includes a detailed 0-5 scoring guide. Do NOT use your own general knowledge of customer service.
+    3.  **Identify the Agent**: The 'agentName' is provided in the input, and you MUST use that name for the 'agentName' in your output.
+    4.  **Carry over Interaction ID**: If an 'interactionId' is provided in the input, you MUST include it in the 'interactionId' field of your output.
     5.  **Extract Timestamps (Conditional)**: When providing 'goodPoints' or 'areasForImprovement', you MUST look for a corresponding timestamp in the transcript (e.g., [00:01:23] or a similar format). If you find a relevant timestamp, you must extract it and place it in the 'timestamp' field. For the 'justification' field in the 'scores' array, you MUST NOT include a timestamp.
     6.  **Timestamp Uniqueness**: Avoid referencing the exact same timestamp multiple times within the same list (e.g., in 'goodPoints' or 'areasForImprovement'), unless it is to highlight a completely different aspect of the interaction. Each reference should ideally provide new value.
     7.  **Justification Rule**: The 'justification' text must explain the reasoning for the score by referencing specific parts of the conversation. It must NOT include the score number itself (e.g., do not write "Score: 4/5" in the justification).
     8.  **Calculate Overall Score**: You MUST calculate the 'overallScore'. Take the score for each criterion (from 0 to 5) and multiply it by its respective weight. The sum of these weighted scores divided by the sum of the maximum possible weighted score will give you a total out of 100. This will be the “Overall Score” as a percentage. Only criteria with a weight > 0 should be included.
     9.  **Summarise**: Provide a concise "quick summary" and a more "overall summary" of the interaction. The 'overallSummary' MUST touch upon every single criterion from the scoring matrix.
     10. **Highlight Strengths & Feedback**: Identify specific things the agent did well under 'goodPoints' and list actionable 'areasForImprovement'. Every point you list under 'goodPoints' and 'areasForImprovement' must clearly relate to one of the criteria from the scoring matrix.
-    11. **Timestamp Integrity**: The timestamps you extract MUST exist in the provided transcript. Do not invent or hallucinate timestamps. If you refer to an event at a specific time, that time must be present in the source text.
-
+    
     **Scoring Matrix to Use:**
     {{#each scoringMatrix}}
     -   **Criterion**: {{criterion}} (Weight: {{weight}})

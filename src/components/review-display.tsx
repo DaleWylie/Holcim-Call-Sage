@@ -263,7 +263,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
               <div className="text-center">
                   <Label className="text-sm font-medium text-muted-foreground">Overall Score</Label>
                   <div className={cn(
-                    "mt-1 flex items-center justify-center w-16 h-16 rounded-full text-white text-xl font-bold",
+                    "mt-1 flex items-center justify-center w-20 h-20 rounded-full text-white text-2xl font-bold",
                     getScoreColor(review.overallScore, 100)
                   )}>
                     {review.overallScore.toFixed(0)}%
@@ -299,16 +299,16 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                             <div className="flex w-full items-center gap-2 py-2">
                                 <div
                                     className={cn(
-                                    'flex h-8 w-12 shrink-0 items-center justify-center rounded-md px-2 text-sm font-bold text-white',
+                                    'flex h-10 w-10 shrink-0 items-center justify-center rounded-full px-2 text-lg font-bold text-white',
                                     getScoreColor(item.score * 20) // Multiply by 20 to map 0-5 scale to 0-100 for color
                                     )}
                                 >
-                                    {item.score}/5
+                                    {item.score}
                                 </div>
                                 <div className="flex-1">
                                     <span className="font-medium">{item.criterion}</span>
                                     {weight > 0 && (
-                                        <span className="text-xs text-muted-foreground ml-2">(Overall Weighting: {weight}%)</span>
+                                        <span className="text-xs text-muted-foreground ml-2">(Weight: {weight}%)</span>
                                     )}
                                 </div>
                                 <div className="action-button flex items-center gap-2 ml-4 shrink-0">
