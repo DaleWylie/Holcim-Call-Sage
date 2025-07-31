@@ -193,20 +193,26 @@ export default function CallReviewForm() {
                         Agent Name
                       </Label>
                       <div className="flex flex-col sm:flex-row gap-2">
-                          <Input
-                              id="agentFirstName"
-                              className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
-                              value={agentFirstName}
-                              onChange={(e) => setAgentFirstName(e.target.value)}
-                              placeholder="e.g. Scott"
-                          />
-                           <Input
-                              id="agentLastName"
-                              className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
-                              value={agentLastName}
-                              onChange={(e) => setAgentLastName(e.target.value)}
-                              placeholder="e.g. Chegg"
-                          />
+                          <div className='w-full space-y-1'>
+                              <Label htmlFor="agentFirstName" className="text-xs text-muted-foreground">First</Label>
+                              <Input
+                                  id="agentFirstName"
+                                  className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
+                                  value={agentFirstName}
+                                  onChange={(e) => setAgentFirstName(e.target.value)}
+                                  placeholder="e.g. Scott"
+                              />
+                          </div>
+                          <div className='w-full space-y-1'>
+                              <Label htmlFor="agentLastName" className="text-xs text-muted-foreground">Last</Label>
+                              <Input
+                                  id="agentLastName"
+                                  className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
+                                  value={agentLastName}
+                                  onChange={(e) => setAgentLastName(e.target.value)}
+                                  placeholder="e.g. Chegg"
+                              />
+                          </div>
                       </div>
                   </div>
 
