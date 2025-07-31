@@ -19,12 +19,10 @@ Holcim Call Sage is an internal tool designed to assist in the quality managemen
 
 ## How to Use the Application
 
-1.  **Define the Call Scoring Matrix (Optional)**:
-    -   The application comes with a pre-defined scoring matrix. To edit it, click the **Settings** (gear) icon in the top-right corner.
-    -   In the settings panel, you can click on any criterion to expand it and edit its name and description.
-    -   Click the **"Add Criterion"** button to add a new item to the list.
-    -   Click the trash can icon next to a criterion to delete it (a confirmation will be required).
-    -   Click "Save Changes" to apply your modifications.
+1.  **Review the Call Scoring Matrix (Optional: Edit if needed)**:
+    -   The application comes with a pre-defined scoring matrix, which is displayed on the left side of the main screen. You can click the **Info** icon next to each criterion to see its full description.
+    -   To edit the matrix, click the **Settings** (gear) icon in the top-right corner. This is an optional step if the default criteria meet your needs.
+    -   In the settings panel, you can click on any criterion to expand it and edit its name and description. You can also add new criteria or delete existing ones. Click "Save Changes" to apply your modifications.
 
 2.  **Provide the Call Data**:
     -   On the right side of the screen, fill in the required details:
