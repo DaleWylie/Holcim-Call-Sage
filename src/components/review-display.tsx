@@ -47,7 +47,9 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
       setReview(prev => {
         if (!prev) return null;
         const newScores = [...prev.scores];
-        newScores[scoreIndex] = { ...newScores[scoreIndex], score: Number(tempValue) };
+        // Ensure the score is a whole number
+        const newScoreValue = Math.round(Number(tempValue));
+        newScores[scoreIndex] = { ...newScores[scoreIndex], score: newScoreValue };
         
         const totalScore = newScores.reduce((acc, s) => acc + s.score, 0);
         const newQuickScore = totalScore / newScores.length;
@@ -187,7 +189,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                                 getScoreColor(item.score)
                                 )}
                             >
-                                {item.score.toFixed(1)}
+                                {item.score}
                             </div>
                             <div className="flex-1">
                                 <span className="font-medium">{item.criterion}</span>
@@ -202,7 +204,12 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                                         className="w-20 h-8 text-center"
                                         min={0}
                                         max={5}
-                                        step={0.1}
+                                        step={1}
+                                        onKeyDown={(e) => {
+                                            if (e.key === '.') {
+                                                e.preventDefault();
+                                            }
+                                        }}
                                         autoFocus
                                     />
                                     <Button

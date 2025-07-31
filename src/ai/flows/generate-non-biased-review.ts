@@ -37,7 +37,7 @@ const GenerateNonBiasedReviewOutputSchema = z.object({
   quickScore: z.number().describe("An overall score for the call, calculated as the average of all detailed scores. It should be a number between 0 and 5, and can be a decimal."),
   scores: z.array(z.object({
     criterion: z.string().describe('The specific criterion being scored, matching one from the input matrix.'),
-    score: z.number().min(0).max(5).describe('The score given for this criterion, as a number from 0 to 5.'),
+    score: z.number().int().min(0).max(5).describe('The score given for this criterion, as a whole number (integer) from 0 to 5.'),
     justification: z.string().describe('A detailed justification for why the score was given, referencing parts of the call transcript. Do not include the score number in this justification text.'),
   })).describe('A detailed breakdown of scores for each criterion from the input matrix.'),
   overallSummary: z.string().describe('A detailed overall summary of the call, highlighting strengths and weaknesses of the agent.'),
@@ -64,7 +64,7 @@ const nonBiasedReviewPrompt = ai.definePrompt({
     1.  **Identify the Agent**: This is your highest priority. If an 'agentName' is provided in the input, you MUST use that exact name for the 'agentName' in your output. Only if 'agentName' is empty or not provided should you deduce the agent's name from the transcript.
     2.  **Carry over Interaction ID**: If an 'interactionId' is provided in the input, you MUST include it in the 'interactionId' field of your output.
     3.  **Analyze the Interaction**: Carefully review the provided call data. If an audio file is provided, it is the primary source; transcribe and analyse it. If only a transcript is provided, use that.
-    4.  **Score the Call**: Use the provided scoring matrix to evaluate the agent's performance. For each criterion in the matrix, provide a score as a number from 0 to 5 and a detailed justification.
+    4.  **Score the Call**: Use the provided scoring matrix to evaluate the agent's performance. For each criterion in the matrix, provide a score as a whole number (integer) from 0 to 5 and a detailed justification.
     5.  **Justification Rule**: The 'justification' text must explain the reasoning for the score by referencing specific parts of the conversation. It must NOT include the score number itself (e.g., do not write "Score: 4/5" in the justification).
     6.  **Calculate Quick Score**: Calculate the average of all the individual scores and set it as the 'quickScore'. This can be a decimal.
     7.  **Summarise**: Provide a concise "quick summary" and a more "overall summary" of the interaction.
