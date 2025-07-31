@@ -72,7 +72,7 @@ export function SettingsDialog({ setOpen }: SettingsDialogProps) {
   return (
     <DialogContent className="max-w-3xl">
       <DialogHeader>
-        <DialogTitle>Scoring Matrix Settings</DialogTitle>
+        <DialogTitle className="text-primary">Scoring Matrix Settings</DialogTitle>
         <DialogDescription>
           Add, edit, or remove the criteria used to score calls. These changes will be applied to all future reviews.
         </DialogDescription>
@@ -122,7 +122,7 @@ export function SettingsDialog({ setOpen }: SettingsDialogProps) {
             ))}
         </Accordion>
         <div className="text-center mt-4">
-            <Button onClick={addMatrixItem}>
+            <Button onClick={addMatrixItem} variant="default">
                 <Plus className="mr-2 h-4 w-4" /> Add Criterion
             </Button>
         </div>
@@ -156,5 +156,3 @@ export function SettingsDialog({ setOpen }: SettingsDialogProps) {
     </DialogContent>
   );
 }
-
-    
