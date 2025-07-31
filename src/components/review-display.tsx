@@ -308,7 +308,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                                 <div className="flex-1">
                                     <span className="font-medium">{item.criterion}</span>
                                     {weight > 0 && (
-                                        <span className="text-xs text-muted-foreground ml-2">(Weight: {weight}%)</span>
+                                        <span className="text-xs text-muted-foreground ml-2">(Overall Weighting: {weight}%)</span>
                                     )}
                                 </div>
                                 <div className="action-button flex items-center gap-2 ml-4 shrink-0">
