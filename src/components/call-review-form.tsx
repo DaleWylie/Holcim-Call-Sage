@@ -165,7 +165,7 @@ export default function CallReviewForm() {
         <CardContent className="p-6 sm:p-8 space-y-8">
           <div className="flex flex-col md:flex-row gap-8">
               {/* Left Column */}
-              <div className="md:w-2/3 space-y-4 flex flex-col items-center">
+              <div className="md:w-1/2 space-y-4 flex flex-col items-center">
                 <Label className="text-lg font-semibold text-primary flex items-center gap-2">
                   <List className="h-5 w-5" />
                   Call Scoring Matrix
@@ -206,7 +206,7 @@ export default function CallReviewForm() {
               </div>
 
               {/* Right Column */}
-              <div className="md:w-1/3 space-y-4 md:border-l md:pl-8 border-border">
+              <div className="md:w-1/2 space-y-4 md:border-l md:pl-8 border-border">
                   <div className="space-y-4 text-center">
                       <Label className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
                         <User className="h-5 w-5" />
@@ -258,7 +258,7 @@ export default function CallReviewForm() {
                       <Textarea
                           id="callTranscript"
                           className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-left"
-                          rows={7}
+                          rows={5}
                           value={callTranscript}
                           onChange={(e) => setCallTranscript(e.target.value)}
                           placeholder="Paste the complete transcript here..."
