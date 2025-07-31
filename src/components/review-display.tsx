@@ -52,9 +52,9 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
         newScores[scoreIndex] = { ...newScores[scoreIndex], score: newScoreValue };
         
         const totalScore = newScores.reduce((acc, s) => acc + s.score, 0);
-        const newQuickScore = totalScore / newScores.length;
+        const newOverallScore = totalScore / newScores.length;
 
-        return { ...prev, scores: newScores, quickScore: newQuickScore };
+        return { ...prev, scores: newScores, overallScore: newOverallScore };
       });
     }
     setEditingField(null);
@@ -156,8 +156,8 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                 <p className="text-muted-foreground">{review.quickSummary}</p>
               </div>
               <div className="text-right">
-                <Label className="text-sm font-medium">Quick Score</Label>
-                <Badge variant="secondary" className="text-lg font-bold ml-2">{review.quickScore.toFixed(1)}/5</Badge>
+                <Label className="text-sm font-medium">Overall Score</Label>
+                <Badge variant="secondary" className="text-lg font-bold ml-2">{review.overallScore.toFixed(1)}/5</Badge>
               </div>
             </div>
            </CardHeader>

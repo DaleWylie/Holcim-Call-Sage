@@ -34,7 +34,7 @@ const GenerateNonBiasedReviewOutputSchema = z.object({
   agentName: z.string().describe("The name of the agent who handled the call. Use the 'agentName' from the input if it was provided, otherwise extract it from the transcript."),
   interactionId: z.string().optional().describe("The interaction ID from the input. Return it as provided."),
   quickSummary: z.string().describe("A very brief, one or two-sentence summary of the call's outcome and the agent's performance."),
-  quickScore: z.number().describe("An overall score for the call, calculated as the average of all detailed scores. It should be a number between 0 and 5, and can be a decimal."),
+  overallScore: z.number().describe("An overall score for the call, calculated as the average of all detailed scores. It should be a number between 0 and 5, and can be a decimal."),
   scores: z.array(z.object({
     criterion: z.string().describe('The specific criterion being scored, matching one from the input matrix.'),
     score: z.number().int().min(0).max(5).describe('The score given for this criterion, as a whole number (integer) from 0 to 5.'),
@@ -66,7 +66,7 @@ const nonBiasedReviewPrompt = ai.definePrompt({
     3.  **Analyze the Interaction**: Carefully review the provided call data. If an audio file is provided, it is the primary source; transcribe and analyse it. If only a transcript is provided, use that.
     4.  **Score the Call**: Use the provided scoring matrix to evaluate the agent's performance. For each criterion in the matrix, provide a score as a whole number (integer) from 0 to 5 and a detailed justification.
     5.  **Justification Rule**: The 'justification' text must explain the reasoning for the score by referencing specific parts of the conversation. It must NOT include the score number itself (e.g., do not write "Score: 4/5" in the justification).
-    6.  **Calculate Quick Score**: Calculate the average of all the individual scores and set it as the 'quickScore'. This can be a decimal.
+    6.  **Calculate Overall Score**: Calculate the average of all the individual scores and set it as the 'overallScore'. This can be a decimal.
     7.  **Summarise**: Provide a concise "quick summary" and a more "overall summary" of the interaction.
     8.  **Provide Feedback**: List specific, actionable "areas for improvement".
 
