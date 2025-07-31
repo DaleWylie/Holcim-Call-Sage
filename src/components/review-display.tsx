@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useMemo } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { Button } from "@/components/ui/button";
@@ -54,6 +54,28 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
   const [checkerName, setCheckerName] = useState('');
   
   const interactionId = review.interactionId || '';
+
+  const sortedGoodPoints = useMemo(() => {
+    return [...review.goodPoints].sort((a, b) => {
+        const aHasTimestamp = !!a.timestamp;
+        const bHasTimestamp = !!b.timestamp;
+        if (!aHasTimestamp && bHasTimestamp) return -1;
+        if (aHasTimestamp && !bHasTimestamp) return 1;
+        if (!aHasTimestamp && !bHasTimestamp) return 0;
+        return timeToSeconds(a.timestamp!) - timeToSeconds(b.timestamp!);
+    });
+  }, [review.goodPoints]);
+
+  const sortedAreasForImprovement = useMemo(() => {
+    return [...review.areasForImprovement].sort((a, b) => {
+        const aHasTimestamp = !!a.timestamp;
+        const bHasTimestamp = !!b.timestamp;
+        if (!aHasTimestamp && bHasTimestamp) return -1;
+        if (aHasTimestamp && !bHasTimestamp) return 1;
+        if (!aHasTimestamp && !bHasTimestamp) return 0;
+        return timeToSeconds(a.timestamp!) - timeToSeconds(b.timestamp!);
+    });
+  }, [review.areasForImprovement]);
 
   const handleTimestampClick = (timestamp: string) => {
     if (audioRef.current) {
@@ -446,7 +468,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
             </CardHeader>
             <CardContent>
               <ul className="list-disc pl-5 space-y-2">
-                {review.goodPoints.map((item, index) => (
+                {sortedGoodPoints.map((item, index) => (
                    <li key={index} className="text-base">
                         {item.timestamp && audioDataUri && (
                             <>
@@ -478,7 +500,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
           </CardHeader>
           <CardContent>
             <ul className="list-disc pl-5 space-y-2">
-              {review.areasForImprovement.map((item, index) => (
+              {sortedAreasForImprovement.map((item, index) => (
                  <li key={index} className="text-base">
                     {item.timestamp && audioDataUri && (
                          <>
