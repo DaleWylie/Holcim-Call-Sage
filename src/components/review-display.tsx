@@ -230,7 +230,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                                 <Button
                                     size="icon"
                                     variant="ghost"
-                                    className="h-8 w-8"
+                                    className="h-8 w-8 text-muted-foreground hover:bg-primary hover:text-primary-foreground"
                                     onClick={() => handleEditClick(`score-${index}`, item.score)}
                                 >
                                     <Pencil className="h-4 w-4" />

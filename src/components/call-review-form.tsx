@@ -141,7 +141,7 @@ export default function CallReviewForm() {
             AI-Powered Quality Assistant for Holcim
           </CardDescription>
           <DialogTrigger asChild>
-             <Button variant="ghost" size="icon" className="absolute top-4 right-4 text-muted-foreground hover:text-primary">
+             <Button variant="ghost" size="icon" className="absolute top-4 right-4 text-muted-foreground hover:bg-primary hover:text-primary-foreground">
                 <Settings />
              </Button>
           </DialogTrigger>
@@ -162,7 +162,7 @@ export default function CallReviewForm() {
                              <span className="font-semibold text-primary truncate">{item.criterion}</span>
                              <AlertDialog>
                                <AlertDialogTrigger asChild>
-                                 <Button variant="ghost" size="icon" className='text-muted-foreground hover:text-primary h-8 w-8'>
+                                 <Button variant="ghost" size="icon" className='text-muted-foreground hover:bg-primary hover:text-primary-foreground h-8 w-8'>
                                     <Info className="h-4 w-4" />
                                  </Button>
                                </AlertDialogTrigger>
