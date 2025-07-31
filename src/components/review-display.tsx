@@ -261,7 +261,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                 <p className="text-muted-foreground">{review.quickSummary}</p>
               </div>
               <div className="text-center">
-                  <Label className="text-sm font-medium text-muted-foreground">Overall Score</Label>
+                  <Label className="text-sm font-medium text-muted-foreground whitespace-nowrap">Overall Score</Label>
                   <div className={cn(
                     "mt-1 flex items-center justify-center w-18 h-18 rounded-full text-white text-2xl font-bold",
                     getScoreColor(review.overallScore, 100)
@@ -299,7 +299,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                             <div className="flex w-full items-center gap-2 py-2">
                                 <div
                                     className={cn(
-                                    'flex h-10 w-14 shrink-0 items-center justify-center rounded-md px-2 text-lg font-bold text-white',
+                                    'flex h-8 w-12 shrink-0 items-center justify-center rounded-md px-2 text-sm font-bold text-white',
                                     getScoreColor(item.score * 20) // Multiply by 20 to map 0-5 scale to 0-100 for color
                                     )}
                                 >
