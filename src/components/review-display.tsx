@@ -281,7 +281,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                                     <Button
                                     size="icon"
                                     variant="ghost"
-                                    className="h-8 w-8 text-primary hover:text-green-500"
+                                    className="h-8 w-8 text-primary hover:text-green-500 hover:bg-transparent"
                                     onClick={() => handleSave(`score-${index}`)}
                                     >
                                     <Check className="h-4 w-4" />
@@ -289,7 +289,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                                     <Button
                                     size="icon"
                                     variant="ghost"
-                                    className="h-8 w-8 text-primary hover:text-red-500"
+                                    className="h-8 w-8 text-primary hover:text-red-500 hover:bg-transparent"
                                     onClick={handleCancel}
                                     >
                                     <X className="h-4 w-4" />
@@ -321,7 +321,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                                         <Button
                                             size="icon"
                                             variant="ghost"
-                                            className="h-8 w-8 text-primary hover:text-green-500"
+                                            className="h-8 w-8 text-primary hover:text-green-500 hover:bg-transparent"
                                             onClick={() => handleSave(`justification-${index}`)}
                                         >
                                             <Check className="h-4 w-4" />
@@ -329,7 +329,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                                         <Button
                                             size="icon"
                                             variant="ghost"
-                                            className="h-8 w-8 text-primary hover:text-red-500"
+                                            className="h-8 w-8 text-primary hover:text-red-500 hover:bg-transparent"
                                             onClick={handleCancel}
                                         >
                                             <X className="h-4 w-4" />
@@ -404,7 +404,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                             <Button
                                 size="icon"
                                 variant="ghost"
-                                className="h-8 w-8 text-primary hover:text-green-500"
+                                className="h-8 w-8 text-primary hover:text-green-500 hover:bg-transparent"
                                 onClick={() => handleSave('overallSummary')}
                             >
                                 <Check className="h-4 w-4" />
@@ -412,7 +412,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                             <Button
                                 size="icon"
                                 variant="ghost"
-                                className="h-8 w-8 text-primary hover:text-red-500"
+                                className="h-8 w-8 text-primary hover:text-red-500 hover:bg-transparent"
                                 onClick={handleCancel}
                             >
                                 <X className="h-4 w-4" />
