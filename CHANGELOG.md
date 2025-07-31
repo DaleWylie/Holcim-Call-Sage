@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2024-08-01
+
+### Changed
+- **Rigid Scoring Matrix**: The core scoring matrix is now rigid and cannot be edited or deleted by users from the settings panel. This ensures a consistent baseline for all standard evaluations.
+- **Ad-Hoc Custom Criteria**: Users can now add their own custom criteria on an ad-hoc basis via the Settings panel. These custom criteria are temporary and will reset upon reloading the application, providing flexibility for specific, one-off evaluations without altering the core matrix.
+- **State Management**: The application's state management (`zustand`) has been refactored to separate the rigid matrix from temporary custom criteria.
+
 ## [1.1.0] - 2024-08-01
 
 ### Added

@@ -61,7 +61,9 @@ const fileToDataUri = (file: File): Promise<string> => {
 
 
 export default function CallReviewForm() {
-  const { scoringMatrix } = useScoringMatrixStore();
+  const { defaultScoringMatrix, customScoringMatrix } = useScoringMatrixStore();
+  const scoringMatrix = [...defaultScoringMatrix, ...customScoringMatrix];
+
   const [agentFirstName, setAgentFirstName] = useState('');
   const [agentLastName, setAgentLastName] = useState('');
   const [interactionId, setInteractionId] = useState('');

@@ -1,6 +1,5 @@
 
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
 
 export type ScoringItem = {
   id: string;
@@ -9,9 +8,12 @@ export type ScoringItem = {
 };
 
 interface ScoringMatrixState {
-  scoringMatrix: ScoringItem[];
-  setScoringMatrix: (matrix: ScoringItem[]) => void;
-  resetToDefaults: () => void;
+  defaultScoringMatrix: ScoringItem[];
+  customScoringMatrix: ScoringItem[];
+  addCustomCriterion: (criterion: ScoringItem) => void;
+  updateCustomCriterion: (id: string, criterion: Partial<Omit<ScoringItem, 'id'>>) => void;
+  removeCustomCriterion: (id: string) => void;
+  resetCustomCriteria: () => void;
 }
 
 const defaultScoringMatrix: ScoringItem[] = [
@@ -25,23 +27,19 @@ const defaultScoringMatrix: ScoringItem[] = [
     { id: "8", criterion: "8. Compliance & System Use", description: "Checked adherence to internal procedures and documentation: Logged or updated the ticket appropriately during/after call; followed internal procedures, security/compliance checks." },
 ];
 
-const initialState = {
-    scoringMatrix: defaultScoringMatrix,
-};
-
-
 export const useScoringMatrixStore = create<ScoringMatrixState>()(
-  persist(
     (set) => ({
-      ...initialState,
-      setScoringMatrix: (matrix) => set({ scoringMatrix: matrix }),
-      resetToDefaults: () => {
-          set(initialState);
-      }
-    }),
-    {
-      name: 'scoring-matrix-storage-v1', // name of the item in storage (must be unique)
-      storage: createJSONStorage(() => sessionStorage), // Use sessionStorage to reset on new session
-    }
-  )
+      defaultScoringMatrix: defaultScoringMatrix,
+      customScoringMatrix: [],
+      addCustomCriterion: (criterion) => set((state) => ({ customScoringMatrix: [...state.customScoringMatrix, criterion] })),
+      updateCustomCriterion: (id, updates) => set((state) => ({
+        customScoringMatrix: state.customScoringMatrix.map(item => 
+          item.id === id ? { ...item, ...updates } : item
+        )
+      })),
+      removeCustomCriterion: (id) => set((state) => ({
+        customScoringMatrix: state.customScoringMatrix.filter(item => item.id !== id)
+      })),
+      resetCustomCriteria: () => set({ customScoringMatrix: [] }),
+    })
 );
