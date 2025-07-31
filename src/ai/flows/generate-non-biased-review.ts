@@ -45,9 +45,9 @@ const GenerateNonBiasedReviewOutputSchema = z.object({
     score: z.number().int().min(0).max(5).describe('The score given for this criterion, as a whole number (integer) from 0 to 5.'),
     justification: TimestampedStringSchema.describe('A detailed justification for why the score was given, referencing parts of the call transcript. Do not include the score number in this justification text.'),
   })).describe('A detailed breakdown of scores for each criterion from the input matrix.'),
-  overallSummary: z.string().describe('A detailed overall summary of the call, highlighting strengths and weaknesses of the agent.'),
-  goodPoints: z.array(TimestampedStringSchema).describe('A list of specific, positive aspects or strengths demonstrated by the agent during the call, including timestamps if available.'),
-  areasForImprovement: z.array(TimestampedStringSchema).describe('A list of specific, actionable suggestions for the agent to improve, including timestamps if available.'),
+  overallSummary: z.string().describe('A detailed overall summary of the call, highlighting strengths and weaknesses of the agent. This summary must incorporate and touch upon each of the scoring criteria provided in the input.'),
+  goodPoints: z.array(TimestampedStringSchema).describe('A list of specific, positive aspects or strengths demonstrated by the agent during the call, including timestamps if available. Each point should clearly relate to one of the scoring criteria.'),
+  areasForImprovement: z.array(TimestampedStringSchema).describe('A list of specific, actionable suggestions for the agent to improve, including timestamps if available. Each point should clearly relate to one of the scoring criteria.'),
 });
 
 export type GenerateNonBiasedReviewOutput = z.infer<typeof GenerateNonBiasedReviewOutputSchema>;
@@ -75,9 +75,8 @@ const nonBiasedReviewPrompt = ai.definePrompt({
     6.  **Score the Call**: Use the provided scoring matrix to evaluate the agent's performance. For each criterion in the matrix, provide a score as a whole number (integer) from 0 to 5 and a detailed justification.
     7.  **Justification Rule**: The 'justification.text' must explain the reasoning for the score by referencing specific parts of the conversation. It must NOT include the score number itself (e.g., do not write "Score: 4/5" in the justification).
     8.  **Calculate Overall Score**: Calculate the average of all the individual scores and set it as the 'overallScore'. This can be a decimal.
-    9.  **Summarise**: Provide a concise "quick summary" and a more "overall summary" of the interaction.
-    10. **Highlight Strengths**: Identify and list specific things the agent did well under 'goodPoints'.
-    11. **Provide Feedback**: List specific, actionable 'areasForImprovement'.
+    9.  **Summarise**: Provide a concise "quick summary" and a more "overall summary" of the interaction. The 'overallSummary' MUST touch upon every single criterion from the scoring matrix.
+    10. **Highlight Strengths & Feedback**: Identify specific things the agent did well under 'goodPoints' and list actionable 'areasForImprovement'. Every point you list under 'goodPoints' and 'areasForImprovement' must clearly relate to one of the criteria from the scoring matrix.
 
     **Scoring Matrix to Use:**
     {{#each scoringMatrix}}
