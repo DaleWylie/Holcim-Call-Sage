@@ -81,20 +81,19 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
             newScores[index] = { ...newScores[index], score: newScoreValue };
             
             // Recalculate weighted score
-            let totalWeightedScore = 0;
+            let totalAchievedPoints = 0;
+            let totalPossiblePoints = 0;
             const scoringMap = new Map(fullMatrix.map(item => [item.criterion, item.weight]));
-            let totalWeight = 0;
-
+            
             for (const scoreItem of newScores) {
                 const weight = scoringMap.get(scoreItem.criterion);
-                // Only include items with a weight greater than 0 in the calculation
                 if (weight !== undefined && weight > 0) {
-                    totalWeightedScore += scoreItem.score * (weight / 5);
-                    totalWeight += weight;
+                    totalAchievedPoints += scoreItem.score * weight;
+                    totalPossiblePoints += 5 * weight; // Max score is 5
                 }
             }
 
-            const newOverallScore = (totalWeight > 0) ? (totalWeightedScore / totalWeight) * 100 : 0;
+            const newOverallScore = (totalPossiblePoints > 0) ? (totalAchievedPoints / totalPossiblePoints) * 100 : 0;
             newReview = { ...newReview, scores: newScores, overallScore: newOverallScore };
 
         } else if (type === 'justification') {
@@ -264,127 +263,135 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-                {review.scores.map((item, index) => (
-                    <div key={index} className="space-y-2">
-                        <div className="flex w-full items-center gap-2 py-2">
-                            <div
-                                className={cn(
-                                'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white',
-                                getScoreColor(item.score, 5) // Use 0-5 scale for individual item color
-                                )}
-                            >
-                                {item.score}
-                            </div>
-                            <div className="flex-1">
-                                <span className="font-medium">{item.criterion}</span>
-                            </div>
-                            <div className="action-button flex items-center gap-2 ml-4 shrink-0">
-                                {editingField === `score-${index}` ? (
-                                <>
-                                    <Input
-                                        type="number"
-                                        value={tempValue}
-                                        onChange={(e) => setTempValue(e.target.value)}
-                                        className="w-20 h-8 text-center"
-                                        min={0}
-                                        max={5}
-                                        onKeyDown={(e) => {
-                                            if (e.key === '.') {
-                                                e.preventDefault();
-                                            }
-                                        }}
-                                        autoFocus
-                                    />
-                                    <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="h-8 w-8 text-primary hover:text-green-500 hover:bg-transparent"
-                                    onClick={() => handleSave(`score-${index}`)}
-                                    >
-                                    <Check className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="h-8 w-8 text-primary hover:text-red-500 hover:bg-transparent"
-                                    onClick={handleCancel}
-                                    >
-                                    <X className="h-4 w-4" />
-                                    </Button>
-                                </>
-                                ) : (
-                                <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="h-8 w-8 text-muted-foreground hover:bg-primary hover:text-primary-foreground"
-                                    onClick={() => handleEditClick(`score-${index}`, item.score)}
+                {review.scores.map((item, index) => {
+                    const criterionDetails = fullMatrix.find(c => c.criterion === item.criterion);
+                    const weight = criterionDetails ? criterionDetails.weight : 0;
+
+                    return (
+                        <div key={index} className="space-y-2">
+                            <div className="flex w-full items-center gap-2 py-2">
+                                <div
+                                    className={cn(
+                                    'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white',
+                                    getScoreColor(item.score, 5) // Use 0-5 scale for individual item color
+                                    )}
                                 >
-                                    <Pencil className="h-4 w-4" />
-                                </Button>
-                                )}
-                            </div>
-                        </div>
-                        <div className="pl-12">
-                             {editingField === `justification-${index}` ? (
-                                <div className="flex flex-col gap-2">
-                                    <Textarea
-                                        value={String(tempValue)}
-                                        onChange={(e) => setTempValue(e.target.value)}
-                                        rows={4}
-                                        className="text-sm"
-                                        autoFocus
-                                    />
-                                    <div className="flex items-center gap-2 justify-end action-button">
-                                        <Button
-                                            size="icon"
-                                            variant="ghost"
-                                            className="h-8 w-8 text-primary hover:text-green-500 hover:bg-transparent"
-                                            onClick={() => handleSave(`justification-${index}`)}
-                                        >
-                                            <Check className="h-4 w-4" />
-                                        </Button>
-                                        <Button
-                                            size="icon"
-                                            variant="ghost"
-                                            className="h-8 w-8 text-primary hover:text-red-500 hover:bg-transparent"
-                                            onClick={handleCancel}
-                                        >
-                                            <X className="h-4 w-4" />
-                                        </Button>
-                                    </div>
+                                    {item.score}
                                 </div>
-                            ) : (
-                                <div className="flex items-start gap-2">
-                                    <p className="text-sm text-muted-foreground flex-1">
-                                        {item.justification.timestamp && (
-                                            <>
-                                                <Badge 
-                                                    variant="outline" 
-                                                    className="mr-2 cursor-pointer hover:bg-primary hover:text-primary-foreground printable-hidden"
-                                                    onClick={() => handleTimestampClick(item.justification.timestamp!)}
-                                                >
-                                                    <Clock className="h-3 w-3 mr-1" />
-                                                    {item.justification.timestamp}
-                                                </Badge>
-                                                <span className="printable-only mr-2 text-muted-foreground">{item.justification.timestamp}</span>
-                                            </>
-                                        )}
-                                        {item.justification.text}
-                                    </p>
+                                <div className="flex-1">
+                                    <span className="font-medium">{item.criterion}</span>
+                                    {weight > 0 && (
+                                        <span className="text-xs text-muted-foreground ml-2">(Overall Weighting: {weight}%)</span>
+                                    )}
+                                </div>
+                                <div className="action-button flex items-center gap-2 ml-4 shrink-0">
+                                    {editingField === `score-${index}` ? (
+                                    <>
+                                        <Input
+                                            type="number"
+                                            value={tempValue}
+                                            onChange={(e) => setTempValue(e.target.value)}
+                                            className="w-20 h-8 text-center"
+                                            min={0}
+                                            max={5}
+                                            onKeyDown={(e) => {
+                                                if (e.key === '.') {
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                            autoFocus
+                                        />
+                                        <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        className="h-8 w-8 text-primary hover:text-green-500 hover:bg-transparent"
+                                        onClick={() => handleSave(`score-${index}`)}
+                                        >
+                                        <Check className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        className="h-8 w-8 text-primary hover:text-red-500 hover:bg-transparent"
+                                        onClick={handleCancel}
+                                        >
+                                        <X className="h-4 w-4" />
+                                        </Button>
+                                    </>
+                                    ) : (
                                     <Button
                                         size="icon"
                                         variant="ghost"
-                                        className="h-8 w-8 text-muted-foreground hover:bg-primary hover:text-primary-foreground action-button shrink-0"
-                                        onClick={() => handleEditClick(`justification-${index}`, item.justification.text)}
+                                        className="h-8 w-8 text-muted-foreground hover:bg-primary hover:text-primary-foreground"
+                                        onClick={() => handleEditClick(`score-${index}`, item.score)}
                                     >
                                         <Pencil className="h-4 w-4" />
                                     </Button>
+                                    )}
                                 </div>
-                            )}
+                            </div>
+                            <div className="pl-12">
+                                {editingField === `justification-${index}` ? (
+                                    <div className="flex flex-col gap-2">
+                                        <Textarea
+                                            value={String(tempValue)}
+                                            onChange={(e) => setTempValue(e.target.value)}
+                                            rows={4}
+                                            className="text-sm"
+                                            autoFocus
+                                        />
+                                        <div className="flex items-center gap-2 justify-end action-button">
+                                            <Button
+                                                size="icon"
+                                                variant="ghost"
+                                                className="h-8 w-8 text-primary hover:text-green-500 hover:bg-transparent"
+                                                onClick={() => handleSave(`justification-${index}`)}
+                                            >
+                                                <Check className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                size="icon"
+                                                variant="ghost"
+                                                className="h-8 w-8 text-primary hover:text-red-500 hover:bg-transparent"
+                                                onClick={handleCancel}
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-start gap-2">
+                                        <p className="text-sm text-muted-foreground flex-1">
+                                            {item.justification.timestamp && (
+                                                <>
+                                                    <Badge 
+                                                        variant="outline" 
+                                                        className="mr-2 cursor-pointer hover:bg-primary hover:text-primary-foreground printable-hidden"
+                                                        onClick={() => handleTimestampClick(item.justification.timestamp!)}
+                                                    >
+                                                        <Clock className="h-3 w-3 mr-1" />
+                                                        {item.justification.timestamp}
+                                                    </Badge>
+                                                    <span className="printable-only mr-2 text-muted-foreground">{item.justification.timestamp}</span>
+                                                </>
+                                            )}
+                                            {item.justification.text}
+                                        </p>
+                                        <Button
+                                            size="icon"
+                                            variant="ghost"
+                                            className="h-8 w-8 text-muted-foreground hover:bg-primary hover:text-primary-foreground action-button shrink-0"
+                                            onClick={() => handleEditClick(`justification-${index}`, item.justification.text)}
+                                        >
+                                            <Pencil className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                            {index < review.scores.length - 1 && <Separator className="mt-4" />}
                         </div>
-                        {index < review.scores.length - 1 && <Separator className="mt-4" />}
-                    </div>
-                ))}
+                    )
+                })}
             </div>
           </CardContent>
         </Card>

@@ -115,22 +115,20 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
       
       if (output) {
           // Calculate the weighted score
-          let totalWeightedScore = 0;
-          let totalWeight = 0;
+          let totalAchievedPoints = 0;
+          let totalPossiblePoints = 0;
 
           const scoringMap = new Map(input.scoringMatrix.map(item => [item.criterion, item.weight]));
 
           for (const scoreItem of output.scores) {
               const weight = scoringMap.get(scoreItem.criterion);
-              // Only include items with a weight greater than 0 in the calculation
               if (weight !== undefined && weight > 0) {
-                  totalWeightedScore += scoreItem.score * (weight / 5);
-                  totalWeight += weight;
+                  totalAchievedPoints += scoreItem.score * weight;
+                  totalPossiblePoints += 5 * weight; // Max score is 5 for each criterion
               }
           }
 
-          // Normalize to 100 if totalWeight is not 100, though it should be.
-          const overallScore = (totalWeight > 0) ? (totalWeightedScore / totalWeight) * 100 : 0;
+          const overallScore = (totalPossiblePoints > 0) ? (totalAchievedPoints / totalPossiblePoints) * 100 : 0;
 
           return {
             ...output,
