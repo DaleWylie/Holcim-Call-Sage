@@ -177,11 +177,11 @@ export default function CallReviewForm() {
                       {scoringMatrix.length > 0 ? (
                         <ul className="space-y-2">
                           {scoringMatrix.map((item) => (
-                            <li key={item.id} className="flex items-center justify-between">
-                              <span className="font-semibold text-primary truncate">{item.criterion}</span>
+                            <li key={item.id} className="flex items-center justify-between text-center">
+                              <span className="font-semibold text-primary truncate flex-1">{item.criterion}</span>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="icon" className='text-muted-foreground hover:bg-primary hover:text-primary-foreground h-8 w-8'>
+                                  <Button variant="ghost" size="icon" className='text-muted-foreground hover:bg-primary hover:text-primary-foreground h-8 w-8 shrink-0'>
                                       <Info className="h-4 w-4" />
                                   </Button>
                                 </AlertDialogTrigger>
