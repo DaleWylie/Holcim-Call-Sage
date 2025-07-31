@@ -4,12 +4,6 @@
 import React, { useRef, useState } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -81,7 +75,6 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
     });
     
     const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
     const margin = 20;
     const contentWidth = pdfWidth - margin * 2;
     let yPos = margin;
@@ -98,6 +91,8 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
         const canvas = await html2canvas(element, {
             scale: 2,
             useCORS: true,
+            windowWidth: element.scrollWidth,
+            windowHeight: element.scrollHeight,
         });
 
         // Restore the DOM
@@ -108,13 +103,13 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
         const imgData = canvas.toDataURL('image/png');
         const imgHeight = (canvas.height * contentWidth) / canvas.width;
 
-        if (yPos + imgHeight > pdfHeight - margin) {
+        if (yPos + imgHeight > pdf.internal.pageSize.getHeight() - margin) {
             pdf.addPage();
             yPos = margin;
         }
 
         pdf.addImage(imgData, 'PNG', margin, yPos, contentWidth, imgHeight);
-        yPos += imgHeight + 10;
+        yPos += imgHeight + 10; // Add some padding between sections
     };
 
 
@@ -146,7 +141,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
           </h2>
         </div>
 
-        <Card id="quickSummarySection" data-printable-section className="mb-6">
+        <Card data-printable-section className="mb-6">
           <CardHeader>
             <div className="flex justify-between items-start">
               <div>
@@ -174,7 +169,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
           </CardContent>
         </Card>
 
-        <Card id="detailedScoresSection" data-printable-section className="mb-6">
+        <Card data-printable-section className="mb-6">
           <CardHeader>
             <div className="flex items-center gap-2">
               <ListChecks className="h-5 w-5 text-primary" />
@@ -248,7 +243,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
           </CardContent>
         </Card>
 
-        <Card id="overallSummarySection" data-printable-section className="mb-6">
+        <Card data-printable-section className="mb-6">
           <CardHeader>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-primary" />
@@ -260,7 +255,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
           </CardContent>
         </Card>
 
-        <Card id="improvementAreasSection" data-printable-section>
+        <Card data-printable-section className="mb-6">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
@@ -276,7 +271,7 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
           </CardContent>
         </Card>
 
-        <Card id="checkedBySection" data-printable-section className="mt-6">
+        <Card data-printable-section className="mt-6">
             <CardHeader>
                 <div className="flex justify-between items-start">
                     <div className="flex items-center gap-2">

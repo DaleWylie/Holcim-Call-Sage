@@ -7,46 +7,34 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, Plus, Trash2, User, Fingerprint } from 'lucide-react';
+import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, User, Fingerprint, Settings, List, Info } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from './ui/badge';
 import { ReviewDisplay } from './review-display';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Dialog,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-
+import { SettingsDialog } from '@/components/settings-dialog';
 import { generateNonBiasedReview, GenerateNonBiasedReviewOutput } from '@/ai/flows/generate-non-biased-review';
 import { useToast } from '@/hooks/use-toast';
+import { useScoringMatrixStore } from '@/store/scoring-matrix-store';
 
-const defaultScoringMatrix = [
-  { id: "1", criterion: "1. Greeting & Introduction", description: "Greeted the caller professionally and warmly, introduced self by name and team/department, asked for and confirmed the caller’s name and/or account/ID politely. For this criterion, consider the sentiment and clear intent of the agent's opening remarks, even if specific words (like their name) are not perfectly transcribed. (0-5)" },
-  { id: "2", criterion: "2. Communication Style", description: "Maintained a positive, professional tone of voice; spoke clearly and at an appropriate pace; avoided jargon and used language appropriate to caller’s understanding; demonstrated active listening (e.g., verbal nods, paraphrasing). (0-5)" },
-  { id: "3", criterion: "3. Issue Handling & Clarity", description: "Asked relevant, probing questions to understand the issue; repeated or summarised issue back to confirm understanding; showed ownership and confidence in addressing the issue; provided clear instructions or updates on what is being done. (0-5)" },
-  { id: "4", criterion: "4. Hold Procedure", description: "Asked permission before placing the caller on hold; explained the reason for the hold; thanked the caller when returning from hold; updated caller on progress when returning. (0-5)" },
-  { id: "5", criterion: "5. Professionalism & Empathy", description: "Displayed empathy and patience throughout the call; handled frustration or difficult behaviour appropriately; did not interrupt or speak over the caller. (0-5)" },
-  { id: "6", criterion: "6. Resolution & Next Steps", description: "Clearly explained the resolution or next steps; verified if the issue was fully resolved to the caller's satisfaction; offered additional help before closing the call. (0-5)" },
-  { id: "7", criterion: "7. Call Closure", description: "Summarised the call or resolution; closed the call politely and professionally; used caller’s name during wrap-up. (0-5)" },
-  { id: "8", criterion: "8. Compliance & System Use", description: "Checked adherence to internal procedures and documentation: Logged or updated the ticket appropriately during/after call; followed internal procedures, security/compliance checks. (0-5)" },
-];
-
-type ScoringItem = {
-  id: string;
-  criterion: string;
-  description: string;
-};
 
 type ErrorState = {
   title: string;
@@ -73,16 +61,16 @@ const fileToDataUri = (file: File): Promise<string> => {
 
 
 export default function CallReviewForm() {
-  const [scoringMatrix, setScoringMatrix] = useState<ScoringItem[]>(defaultScoringMatrix);
+  const { scoringMatrix } = useScoringMatrixStore();
   const [agentName, setAgentName] = useState('');
   const [interactionId, setInteractionId] = useState('');
   const [callTranscript, setCallTranscript] = useState('');
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [criterionToDelete, setCriterionToDelete] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ErrorState | null>(null);
   const [review, setReview] = useState<GenerateNonBiasedReviewOutput | null>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { toast } = useToast();
 
   const handleGenerateReview = async () => {
@@ -96,7 +84,7 @@ export default function CallReviewForm() {
       const result = await generateNonBiasedReview({
         scoringMatrix,
         agentName: agentName.trim() || undefined,
-        interactionId: interactionId.trim() || undefined,
+        interactionId: interactionId.trim(),
         callTranscript: callTranscript.trim() || undefined,
         audioDataUri,
       });
@@ -122,27 +110,6 @@ export default function CallReviewForm() {
   };
 
 
-  const handleMatrixChange = (id: string, field: 'criterion' | 'description', value: string) => {
-    setScoringMatrix(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
-  };
-  
-  const addMatrixItem = () => {
-    const newItem: ScoringItem = {
-      id: crypto.randomUUID(),
-      criterion: `New Criterion ${scoringMatrix.length + 1}`,
-      description: ""
-    };
-    setScoringMatrix(prev => [...prev, newItem]);
-  };
-  
-  const confirmRemoveItem = () => {
-    if (criterionToDelete) {
-      setScoringMatrix(prev => prev.filter(item => item.id !== criterionToDelete));
-      setCriterionToDelete(null);
-    }
-  };
-
-
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type === "audio/wav") {
@@ -162,216 +129,193 @@ export default function CallReviewForm() {
   return (
     <>
     <div className="w-full max-w-6xl">
-    <Card className="shadow-xl relative">
-      <CardHeader className="text-center">
-        <CardTitle className="text-4xl font-extrabold text-primary font-headline">
-          Holcim Call Sage
-        </CardTitle>
-        <CardDescription>
-          AI-Powered Quality Assistant for Holcim
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="p-6 sm:p-8 space-y-8">
-        <div className="flex flex-col md:flex-row gap-8">
-            {/* Left Column */}
-            <div className="md:w-1/2 space-y-4">
-              <Label htmlFor="scoringMatrix" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
-                <Binary className="h-5 w-5" />
-                1. Define Call Scoring Matrix
-              </Label>
-              <Accordion type="multiple" className="w-full">
-                {scoringMatrix.map((item) => (
-                  <AccordionItem value={item.id} key={item.id}>
-                    <div className="flex items-center w-full gap-2">
-                        <AccordionTrigger className="flex-1 py-2 text-left pr-2">
-                            <span className='font-semibold text-foreground truncate group-hover:underline'>{item.criterion}</span>
-                        </AccordionTrigger>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-muted-foreground hover:text-destructive hover:bg-transparent rounded-full shrink-0"
-                            onClick={() => setCriterionToDelete(item.id)}
-                        >
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
-                    </div>
-                    <AccordionContent>
-                      <div className="space-y-2 p-2">
-                        <div className="space-y-1">
-                          <Label htmlFor={`criterion-${item.id}`} className="text-primary">Criterion Name</Label>
-                          <Input
-                            id={`criterion-${item.id}`}
-                            value={item.criterion}
-                            onChange={(e) => handleMatrixChange(item.id, 'criterion', e.target.value)}
-                            className="font-semibold"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label htmlFor={`description-${item.id}`} className="text-primary">Description</Label>
-                          <Textarea
-                            id={`description-${item.id}`}
-                            value={item.description}
-                            onChange={(e) => handleMatrixChange(item.id, 'description', e.target.value)}
-                            rows={3}
-                          />
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-              <div className="text-center mt-2">
-                <Button onClick={addMatrixItem} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                  <Plus className="mr-2 h-4 w-4" /> Add Criterion
-                </Button>
+    <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+      <Card className="shadow-xl relative">
+        <CardHeader className="text-center">
+          <CardTitle className="text-4xl font-extrabold text-primary font-headline">
+            Holcim Call Sage
+          </CardTitle>
+          <CardDescription>
+            AI-Powered Quality Assistant for Holcim
+          </CardDescription>
+          <DialogTrigger asChild>
+             <Button variant="ghost" size="icon" className="absolute top-4 right-4 text-muted-foreground hover:text-primary">
+                <Settings />
+             </Button>
+          </DialogTrigger>
+        </CardHeader>
+        <CardContent className="p-6 sm:p-8 space-y-8">
+          <div className="flex flex-col md:flex-row gap-8">
+              {/* Left Column */}
+              <div className="md:w-1/2 space-y-4 flex flex-col items-center">
+                <Label className="text-lg font-semibold text-primary flex items-center gap-2">
+                  <List className="h-5 w-5" />
+                  Call Scoring Matrix
+                </Label>
+                <Card className="w-full max-w-md">
+                   <CardContent className="p-4">
+                      <ul className="space-y-2">
+                         {scoringMatrix.map((item) => (
+                           <li key={item.id} className="flex items-center justify-between">
+                             <span className="font-semibold text-foreground truncate">{item.criterion}</span>
+                             <AlertDialog>
+                               <AlertDialogTrigger asChild>
+                                 <Button variant="ghost" size="icon" className='text-muted-foreground hover:text-primary h-8 w-8'>
+                                    <Info className="h-4 w-4" />
+                                 </Button>
+                               </AlertDialogTrigger>
+                               <AlertDialogContent>
+                                 <AlertDialogHeader>
+                                   <AlertDialogTitle>{item.criterion}</AlertDialogTitle>
+                                   <AlertDialogDescription className="text-left whitespace-pre-wrap pt-2">
+                                     {item.description}
+                                   </AlertDialogDescription>
+                                 </AlertDialogHeader>
+                                 <AlertDialogFooter>
+                                   <AlertDialogAction>Close</AlertDialogAction>
+                                 </AlertDialogFooter>
+                               </AlertDialogContent>
+                             </AlertDialog>
+                           </li>
+                         ))}
+                       </ul>
+                   </CardContent>
+                </Card>
               </div>
-            </div>
 
-            {/* Right Column */}
-            <div className="md:w-1/2 space-y-4 md:border-l md:pl-8 border-border">
-                <div className="space-y-4 text-center">
-                    <Label htmlFor="agentName" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
-                      <User className="h-5 w-5" />
-                      Agent Name (Optional)
-                    </Label>
-                    <Input
-                        id="agentName"
-                        className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
-                        value={agentName}
-                        onChange={(e) => setAgentName(e.target.value)}
-                        placeholder="e.g. Scott Chegg"
-                    />
-                </div>
+              {/* Right Column */}
+              <div className="md:w-1/2 space-y-4 md:border-l md:pl-8 border-border">
+                  <div className="space-y-4 text-center">
+                      <Label htmlFor="agentName" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
+                        <User className="h-5 w-5" />
+                        Agent Name (Optional)
+                      </Label>
+                      <Input
+                          id="agentName"
+                          className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
+                          value={agentName}
+                          onChange={(e) => setAgentName(e.target.value)}
+                          placeholder="e.g. Scott Chegg"
+                      />
+                  </div>
 
-                <div className="space-y-4 text-center">
-                    <Label htmlFor="interactionId" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
-                        <Fingerprint className="h-5 w-5" />
-                        Interaction ID
-                    </Label>
-                    <Input
-                        id="interactionId"
-                        className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
-                        value={interactionId}
-                        onChange={(e) => setInteractionId(e.target.value)}
-                        placeholder="e.g. f81d4fae-7dec-11d0-a765-00a0c91e6bf6"
-                    />
-                </div>
+                  <div className="space-y-4 text-center">
+                      <Label htmlFor="interactionId" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
+                          <Fingerprint className="h-5 w-5" />
+                          Interaction ID
+                      </Label>
+                      <Input
+                          id="interactionId"
+                          className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
+                          value={interactionId}
+                          onChange={(e) => setInteractionId(e.target.value)}
+                          placeholder="e.g. df14f08f-0377-4e25-875f-8f07140de97d"
+                      />
+                  </div>
 
-                <div className="space-y-4 text-center">
-                    <Label htmlFor="callTranscript" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
-                        <ClipboardPaste className="h-5 w-5" />
-                        2. Input Call Transcript
-                    </Label>
-                    <Textarea
-                        id="callTranscript"
-                        className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-left"
-                        rows={7}
-                        value={callTranscript}
-                        onChange={(e) => setCallTranscript(e.target.value)}
-                        placeholder="Paste the complete transcript here - This is not required if you are providing a .wav file below..."
-                    />
-                </div>
+                  <div className="space-y-4 text-center">
+                      <Label htmlFor="callTranscript" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
+                          <ClipboardPaste className="h-5 w-5" />
+                          Input Call Transcript
+                      </Label>
+                      <Textarea
+                          id="callTranscript"
+                          className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-left"
+                          rows={7}
+                          value={callTranscript}
+                          onChange={(e) => setCallTranscript(e.target.value)}
+                          placeholder="Paste the complete transcript here..."
+                      />
+                  </div>
 
-                <div className="text-center font-bold text-muted-foreground">OR</div>
-                
-                <div className="space-y-4 text-center">
-                    <Label htmlFor="audioFile" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
-                        <FileAudio className="h-5 w-5" />
-                        3. Upload Call Recording
-                    </Label>
-                    <Input
-                        id="audioFile"
-                        type="file"
-                        accept="audio/wav"
-                        onChange={handleFileChange}
-                        ref={fileInputRef}
-                        className="hidden"
-                    />
-                    <Button onClick={() => fileInputRef.current?.click()} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                        Select .wav file
-                    </Button>
-                    {audioFile && (
-                        <div className="flex items-center justify-center gap-2 mt-2">
-                            <Badge variant="secondary">{audioFile.name}</Badge>
-                            <Button variant="ghost" size="icon" onClick={() => {
-                                setAudioFile(null);
-                                if (fileInputRef.current) {
-                                fileInputRef.current.value = '';
-                                }
-                            }}>
-                                <X className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-
-        <div className="space-y-4 pt-6 text-center">
-           <Button
-            onClick={handleGenerateReview}
-            disabled={!canGenerate}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-auto py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading ? (
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            ) : (
-              <Sparkles className="mr-2 h-5 w-5" />
-            )}
-            {isLoading ? 'Generating...' : 'Generate Call Review'}
-          </Button>
-        </div>
-        
-        {error && (
-          <div className="mt-6 flex justify-center">
-            <Alert variant="destructive" className="w-full max-w-lg">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>{error.title}</AlertTitle>
-              <AlertDescription>
-                {error.message}
-                {error.details && (
-                  <Collapsible className="mt-4">
-                    <CollapsibleTrigger asChild>
-                       <Button variant="link" className="p-0 h-auto text-destructive">Show details</Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <p className="text-xs font-mono bg-red-100 dark:bg-red-900/50 p-2 rounded mt-2">
-                        {error.details}
-                      </p>
-                    </CollapsibleContent>
-                  </Collapsible>
-                )}
-              </AlertDescription>
-            </Alert>
+                  <div className="text-center font-bold text-muted-foreground">OR</div>
+                  
+                  <div className="space-y-4 text-center">
+                      <Label htmlFor="audioFile" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
+                          <FileAudio className="h-5 w-5" />
+                          Upload Call Recording
+                      </Label>
+                      <Input
+                          id="audioFile"
+                          type="file"
+                          accept="audio/wav"
+                          onChange={handleFileChange}
+                          ref={fileInputRef}
+                          className="hidden"
+                      />
+                      <Button onClick={() => fileInputRef.current?.click()} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                          Select .wav file
+                      </Button>
+                      {audioFile && (
+                          <div className="flex items-center justify-center gap-2 mt-2">
+                              <Badge variant="secondary">{audioFile.name}</Badge>
+                              <Button variant="ghost" size="icon" onClick={() => {
+                                  setAudioFile(null);
+                                  if (fileInputRef.current) {
+                                  fileInputRef.current.value = '';
+                                  }
+                              }}>
+                                  <X className="h-4 w-4" />
+                              </Button>
+                          </div>
+                      )}
+                  </div>
+              </div>
           </div>
-        )}
-        
-        {review && !isLoading && (
-            <div className="mt-8">
-                <ReviewDisplay review={review} setReview={setReview} />
-            </div>
-        )}
 
-      </CardContent>
-    </Card>
+          <div className="space-y-4 pt-6 text-center">
+            <Button
+              onClick={handleGenerateReview}
+              disabled={!canGenerate}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-auto py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                <Sparkles className="mr-2 h-5 w-5" />
+              )}
+              {isLoading ? 'Generating...' : 'Generate Call Review'}
+            </Button>
+          </div>
+          
+          {error && (
+            <div className="mt-6 flex justify-center">
+              <Alert variant="destructive" className="w-full max-w-lg">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>{error.title}</AlertTitle>
+                <AlertDescription>
+                  {error.message}
+                  {error.details && (
+                    <Collapsible className="mt-4">
+                      <CollapsibleTrigger asChild>
+                        <Button variant="link" className="p-0 h-auto text-destructive">Show details</Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <p className="text-xs font-mono bg-red-100 dark:bg-red-900/50 p-2 rounded mt-2">
+                          {error.details}
+                        </p>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  )}
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
+          
+          {review && !isLoading && (
+              <div className="mt-8">
+                  <ReviewDisplay review={review} setReview={setReview} />
+              </div>
+          )}
+
+        </CardContent>
+      </Card>
+      <SettingsDialog setOpen={setIsSettingsOpen} />
+    </Dialog>
     <footer className="text-center mt-8 text-sm text-muted-foreground">
         <p>© 2025 Dale Wylie. "Call Sage" is an AI Call Quality Management Assistant, powered by Gemini, providing objective call and transcript analysis. AI-generated insights require human validation.</p>
     </footer>
     </div>
-     <AlertDialog open={!!criterionToDelete} onOpenChange={(isOpen) => !isOpen && setCriterionToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the scoring criterion.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setCriterionToDelete(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmRemoveItem}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }
