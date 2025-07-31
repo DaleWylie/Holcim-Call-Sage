@@ -40,7 +40,7 @@ const defaultScoringMatrix: ScoringItem[] = [
 const defaultProfiles: ScoringProfile[] = [
     {
         id: 'default-1',
-        name: 'General Customer Service',
+        name: 'IT Service Desk',
         scoringMatrix: defaultScoringMatrix,
         isDefault: true,
     }

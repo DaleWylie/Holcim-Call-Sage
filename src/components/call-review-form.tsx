@@ -181,7 +181,7 @@ export default function CallReviewForm() {
                   Scoring Profile
                 </Label>
                 <Select value={activeProfileId || ''} onValueChange={setActiveProfileId}>
-                    <SelectTrigger className="w-full max-w-md">
+                    <SelectTrigger className="w-full max-w-md text-muted-foreground">
                         <SelectValue placeholder="Select a profile" />
                     </SelectTrigger>
                     <SelectContent>
