@@ -21,7 +21,7 @@ const ScoringItemSchema = z.object({
 // Define the input schema for the AI flow
 const GenerateNonBiasedReviewInputSchema = z.object({
   scoringMatrix: z.array(ScoringItemSchema).describe('The list of criteria to score the call against.'),
-  agentName: z.string().optional().describe("The name of the agent being reviewed. If provided, this name MUST be used."),
+  agentName: z.string().describe("The name of the agent being reviewed. This name MUST be used."),
   interactionId: z.string().optional().describe('An optional unique identifier for the call interaction.'),
   callTranscript: z.string().optional().describe('The full text transcript of the call.'),
   audioDataUri: z.string().optional().describe("An audio recording of the call, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
@@ -31,7 +31,7 @@ export type GenerateNonBiasedReviewInput = z.infer<typeof GenerateNonBiasedRevie
 
 // Define the output schema for the AI flow
 const GenerateNonBiasedReviewOutputSchema = z.object({
-  agentName: z.string().describe("The name of the agent who handled the call. Use the 'agentName' from the input if it was provided, otherwise extract it from the transcript."),
+  agentName: z.string().describe("The name of the agent who handled the call. Use the 'agentName' from the input as it is mandatory."),
   interactionId: z.string().optional().describe("The interaction ID from the input. Return it as provided."),
   quickSummary: z.string().describe("A very brief, one or two-sentence summary of the call's outcome and the agent's performance."),
   overallScore: z.number().describe("An overall score for the call, calculated as the average of all detailed scores. It should be a number between 0 and 5, and can be a decimal."),
@@ -62,7 +62,7 @@ const nonBiasedReviewPrompt = ai.definePrompt({
     You MUST use British English spelling and grammar at all times (e.g., "summarise", "behaviour", "centre").
 
     **Instructions:**
-    1.  **Identify the Agent**: This is your highest priority. If an 'agentName' is provided in the input, you MUST use that exact name for the 'agentName' in your output. Only if 'agentName' is empty or not provided should you deduce the agent's name from the transcript.
+    1.  **Identify the Agent**: This is your highest priority. The 'agentName' is provided in the input, and you MUST use that exact name for the 'agentName' in your output. Do not attempt to deduce the agent's name from the transcript.
     2.  **Carry over Interaction ID**: If an 'interactionId' is provided in the input, you MUST include it in the 'interactionId' field of your output.
     3.  **Analyze the Interaction**: Carefully review the provided call data. If an audio file is provided, it is the primary source; transcribe and analyse it. If only a transcript is provided, use that.
     4.  **Score the Call**: Use the provided scoring matrix to evaluate the agent's performance. For each criterion in the matrix, provide a score as a whole number (integer) from 0 to 5 and a detailed justification.
@@ -79,9 +79,7 @@ const nonBiasedReviewPrompt = ai.definePrompt({
     {{/each}}
 
     **Call Data:**
-    {{#if agentName}}
     Agent's Name (to be used): {{agentName}}
-    {{/if}}
     {{#if interactionId}}
     Interaction ID (to be used): {{interactionId}}
     {{/if}}
@@ -111,7 +109,7 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
       if (output) {
           return {
             ...output,
-            agentName: output.agentName || "Unknown Agent",
+            agentName: output.agentName,
             interactionId: input.interactionId // Ensure interactionId is passed through
           };
       }
@@ -122,7 +120,7 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
     } catch (err: any) {
       console.error(`AI flow failed:`, err);
       // Re-throw a new error with a clear message for the frontend to handle.
-      // This helps abstract the backend details from the UI error message.
+      // This helps abstract the details from the UI error message.
       throw new Error(`AI_REQUEST_FAILED: The AI service was unable to process the request. The service may be busy or unavailable. Please wait a moment and try again. Raw error: ${err.message}`);
     }
   }

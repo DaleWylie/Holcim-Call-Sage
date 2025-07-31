@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, Binary, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, User, Fingerprint, Settings, List, Info } from 'lucide-react';
+import { Loader2, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, User, Fingerprint, Settings, List, Info } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from './ui/badge';
 import { ReviewDisplay } from './review-display';
@@ -62,7 +62,8 @@ const fileToDataUri = (file: File): Promise<string> => {
 
 export default function CallReviewForm() {
   const { scoringMatrix } = useScoringMatrixStore();
-  const [agentName, setAgentName] = useState('');
+  const [agentFirstName, setAgentFirstName] = useState('');
+  const [agentLastName, setAgentLastName] = useState('');
   const [interactionId, setInteractionId] = useState('');
   const [callTranscript, setCallTranscript] = useState('');
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -80,10 +81,11 @@ export default function CallReviewForm() {
     
     try {
       const audioDataUri = audioFile ? await fileToDataUri(audioFile) : undefined;
+      const agentName = `${agentFirstName.trim()} ${agentLastName.trim()}`;
       
       const result = await generateNonBiasedReview({
         scoringMatrix,
-        agentName: agentName.trim() || undefined,
+        agentName,
         interactionId: interactionId.trim(),
         callTranscript: callTranscript.trim() || undefined,
         audioDataUri,
@@ -124,7 +126,7 @@ export default function CallReviewForm() {
     }
   };
 
-  const canGenerate = !isLoading && !!interactionId.trim() && (!!callTranscript.trim() || !!audioFile);
+  const canGenerate = !isLoading && !!agentFirstName.trim() && !!agentLastName.trim() && !!interactionId.trim() && (!!callTranscript.trim() || !!audioFile);
 
   return (
     <>
@@ -186,17 +188,26 @@ export default function CallReviewForm() {
               {/* Right Column */}
               <div className="md:w-1/2 space-y-4 md:border-l md:pl-8 border-border">
                   <div className="space-y-4 text-center">
-                      <Label htmlFor="agentName" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
+                      <Label className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
                         <User className="h-5 w-5" />
-                        Agent Name (Optional)
+                        Agent Name
                       </Label>
-                      <Input
-                          id="agentName"
-                          className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
-                          value={agentName}
-                          onChange={(e) => setAgentName(e.target.value)}
-                          placeholder="e.g. Scott Chegg"
-                      />
+                      <div className="flex flex-col sm:flex-row gap-2">
+                          <Input
+                              id="agentFirstName"
+                              className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
+                              value={agentFirstName}
+                              onChange={(e) => setAgentFirstName(e.target.value)}
+                              placeholder="e.g. Scott"
+                          />
+                           <Input
+                              id="agentLastName"
+                              className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
+                              value={agentLastName}
+                              onChange={(e) => setAgentLastName(e.target.value)}
+                              placeholder="e.g. Chegg"
+                          />
+                      </div>
                   </div>
 
                   <div className="space-y-4 text-center">
@@ -209,7 +220,7 @@ export default function CallReviewForm() {
                           className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
                           value={interactionId}
                           onChange={(e) => setInteractionId(e.target.value)}
-                          placeholder="e.g. 1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+                          placeholder="e.g. df14f08f-0377-4e25-875f-8f07140de97d"
                       />
                   </div>
 
