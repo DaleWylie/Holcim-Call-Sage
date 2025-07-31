@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { GenerateNonBiasedReviewOutput } from "@/ai/flows/generate-non-biased-review"
-import { CheckCircle2, ListChecks, Printer, Sparkles, Target, Pencil, Check, X, UserCheck, Calendar } from "lucide-react"
+import { CheckCircle2, ListChecks, Printer, Sparkles, Target, Pencil, Check, X, UserCheck, Calendar, ThumbsUp } from "lucide-react"
 import { cn, getScoreColor } from "@/lib/utils";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
@@ -70,6 +70,14 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
 
     setIsPrinting(true);
 
+    // Temporarily modify the DOM for printing
+    const actionButtons = mainElement.querySelectorAll<HTMLElement>('.action-button');
+    actionButtons.forEach(button => (button.style.display = 'none'));
+    const checkerInput = mainElement.querySelector<HTMLInputElement>('#checkerName');
+    if (checkerInput) checkerInput.style.display = 'none';
+    const checkerText = mainElement.querySelector<HTMLParagraphElement>('#checkerNameDisplay');
+    if (checkerText) checkerText.style.display = 'block';
+
     const pdf = new jsPDF({
       orientation: 'p',
       unit: 'pt',
@@ -82,25 +90,12 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
     let yPos = margin;
 
     const addElementToPdf = async (element: HTMLElement) => {
-        // Temporarily modify the DOM for printing
-        const actionButtons = element.querySelectorAll('.action-button');
-        actionButtons.forEach(button => (button as HTMLElement).style.display = 'none');
-        const checkerInput = element.querySelector<HTMLInputElement>('#checkerName');
-        if (checkerInput) checkerInput.style.display = 'none';
-        const checkerText = element.querySelector<HTMLParagraphElement>('#checkerNameDisplay');
-        if (checkerText) checkerText.style.display = 'block';
-
         const canvas = await html2canvas(element, {
             scale: 2,
             useCORS: true,
             windowWidth: element.scrollWidth,
             windowHeight: element.scrollHeight,
         });
-
-        // Restore the DOM
-        actionButtons.forEach(button => (button as HTMLElement).style.display = '');
-        if (checkerInput) checkerInput.style.display = '';
-        if (checkerText) checkerText.style.display = 'none';
 
         const imgData = canvas.toDataURL('image/png');
         const imgHeight = (canvas.height * contentWidth) / canvas.width;
@@ -111,9 +106,8 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
         }
 
         pdf.addImage(imgData, 'PNG', margin, yPos, contentWidth, imgHeight);
-        yPos += imgHeight + 10; // Add some padding between sections
+        yPos += imgHeight + 5; // Add some padding between sections
     };
-
 
     try {
         const sections = mainElement.querySelectorAll<HTMLElement>('[data-printable-section]');
@@ -128,6 +122,10 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
     } catch (error) {
         console.error("Failed to generate PDF:", error);
     } finally {
+        // Restore the DOM after printing
+        actionButtons.forEach(button => (button.style.display = ''));
+        if (checkerInput) checkerInput.style.display = '';
+        if (checkerText) checkerText.style.display = 'none';
         setIsPrinting(false);
     }
   };
@@ -261,6 +259,24 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
             <p className="text-base whitespace-pre-wrap">{review.overallSummary}</p>
           </CardContent>
         </Card>
+        
+        {review.goodPoints && review.goodPoints.length > 0 && (
+          <Card data-printable-section className="mb-6">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <ThumbsUp className="h-5 w-5 text-primary" />
+                <CardTitle className="text-xl">Good Points</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <ul className="list-disc pl-5 space-y-2">
+                {review.goodPoints.map((item, index) => (
+                  <li key={index} className="text-base">{item}</li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
 
         <Card data-printable-section className="mb-6">
           <CardHeader>

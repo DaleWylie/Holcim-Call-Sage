@@ -41,6 +41,7 @@ const GenerateNonBiasedReviewOutputSchema = z.object({
     justification: z.string().describe('A detailed justification for why the score was given, referencing parts of the call transcript. Do not include the score number in this justification text.'),
   })).describe('A detailed breakdown of scores for each criterion from the input matrix.'),
   overallSummary: z.string().describe('A detailed overall summary of the call, highlighting strengths and weaknesses of the agent.'),
+  goodPoints: z.array(z.string()).describe('A list of specific, positive aspects or strengths demonstrated by the agent during the call.'),
   areasForImprovement: z.array(z.string()).describe('A list of specific, actionable suggestions for the agent to improve.'),
 });
 
@@ -68,7 +69,8 @@ const nonBiasedReviewPrompt = ai.definePrompt({
     5.  **Justification Rule**: The 'justification' text must explain the reasoning for the score by referencing specific parts of the conversation. It must NOT include the score number itself (e.g., do not write "Score: 4/5" in the justification).
     6.  **Calculate Overall Score**: Calculate the average of all the individual scores and set it as the 'overallScore'. This can be a decimal.
     7.  **Summarise**: Provide a concise "quick summary" and a more "overall summary" of the interaction.
-    8.  **Provide Feedback**: List specific, actionable "areas for improvement".
+    8.  **Highlight Strengths**: Identify and list specific things the agent did well under a 'goodPoints' heading. This should be a list of positive points.
+    9.  **Provide Feedback**: List specific, actionable "areas for improvement".
 
     **Scoring Matrix to Use:**
     {{#each scoringMatrix}}
