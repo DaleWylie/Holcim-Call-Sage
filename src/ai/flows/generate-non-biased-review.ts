@@ -112,7 +112,12 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
     const model = googleAI.model('gemini-2.0-flash');
 
     try {
-      const { output } = await nonBiasedReviewPrompt(input, { model });
+      const { output } = await nonBiasedReviewPrompt(input, { 
+        model,
+        config: {
+          temperature: 0,
+        } 
+      });
       
       if (output) {
           // Calculate the weighted score
