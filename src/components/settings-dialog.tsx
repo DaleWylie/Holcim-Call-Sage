@@ -84,7 +84,7 @@ export function SettingsDialog({ setOpen }: SettingsDialogProps) {
             <AccordionItem value={item.id} key={item.id}>
                 <div className="flex items-center w-full gap-2">
                     <AccordionTrigger className="flex-1 py-2 text-left pr-2">
-                        <span className='font-semibold text-foreground truncate group-hover:underline'>{item.criterion}</span>
+                        <span className='font-semibold text-primary truncate group-hover:underline'>{item.criterion}</span>
                     </AccordionTrigger>
                     <Button
                         variant="ghost"
@@ -103,7 +103,7 @@ export function SettingsDialog({ setOpen }: SettingsDialogProps) {
                         id={`criterion-${item.id}`}
                         value={item.criterion}
                         onChange={(e) => handleMatrixChange(item.id, 'criterion', e.target.value)}
-                        className="font-semibold bg-card"
+                        className="font-semibold bg-white"
                     />
                     </div>
                     <div className="space-y-1">
@@ -113,7 +113,7 @@ export function SettingsDialog({ setOpen }: SettingsDialogProps) {
                         value={item.description}
                         onChange={(e) => handleMatrixChange(item.id, 'description', e.target.value)}
                         rows={3}
-                        className="bg-card"
+                        className="bg-white"
                     />
                     </div>
                 </div>
@@ -122,7 +122,7 @@ export function SettingsDialog({ setOpen }: SettingsDialogProps) {
             ))}
         </Accordion>
         <div className="text-center mt-4">
-            <Button onClick={addMatrixItem} variant="outline" className="text-primary border-primary">
+            <Button onClick={addMatrixItem}>
                 <Plus className="mr-2 h-4 w-4" /> Add Criterion
             </Button>
         </div>
