@@ -40,11 +40,14 @@ interface SettingsDialogProps {
 export function SettingsDialog({ setOpen }: SettingsDialogProps) {
   const { scoringMatrix, setScoringMatrix, resetToDefaults } = useScoringMatrixStore();
   
-  const [localMatrix, setLocalMatrix] = useState<ScoringItem[]>(scoringMatrix);
+  const [localMatrix, setLocalMatrix] = useState<ScoringItem[]>([]);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [openAccordionItems, setOpenAccordionItems] = useState<string[]>([]);
 
   useEffect(() => {
+    // This effect now correctly syncs the local state whenever the global state changes.
+    // When the component mounts or the global scoringMatrix is updated (e.g., by resetToDefaults),
+    // the localMatrix will be updated to reflect those changes.
     setLocalMatrix(scoringMatrix);
   }, [scoringMatrix]);
   
@@ -79,6 +82,11 @@ export function SettingsDialog({ setOpen }: SettingsDialogProps) {
   const handleSaveChanges = () => {
     setScoringMatrix(localMatrix);
     setOpen(false);
+  };
+  
+  const handleReset = () => {
+      resetToDefaults();
+      // No need to manually setLocalMatrix here anymore, the useEffect will handle it.
   };
 
   return (
@@ -143,7 +151,7 @@ export function SettingsDialog({ setOpen }: SettingsDialogProps) {
 
       <DialogFooter>
         <div className="flex justify-between w-full">
-            <Button onClick={resetToDefaults} variant="destructive">
+            <Button onClick={handleReset} variant="destructive">
                 <Settings className="mr-2 h-4 w-4" /> Reset to Default
             </Button>
             <div className="flex gap-2">
