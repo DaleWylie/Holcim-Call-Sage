@@ -280,7 +280,8 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                                     />
                                     <Button
                                     size="icon"
-                                    className="h-8 w-8"
+                                    variant="ghost"
+                                    className="h-8 w-8 text-primary hover:text-green-500"
                                     onClick={() => handleSave(`score-${index}`)}
                                     >
                                     <Check className="h-4 w-4" />
@@ -288,7 +289,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                                     <Button
                                     size="icon"
                                     variant="ghost"
-                                    className="h-8 w-8"
+                                    className="h-8 w-8 text-primary hover:text-red-500"
                                     onClick={handleCancel}
                                     >
                                     <X className="h-4 w-4" />
@@ -318,14 +319,17 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                                     />
                                     <div className="flex items-center gap-2 justify-end action-button">
                                         <Button
-                                            size="sm"
+                                            size="icon"
+                                            variant="ghost"
+                                            className="h-8 w-8 text-primary hover:text-green-500"
                                             onClick={() => handleSave(`justification-${index}`)}
                                         >
                                             <Check className="h-4 w-4" />
                                         </Button>
                                         <Button
-                                            size="sm"
+                                            size="icon"
                                             variant="ghost"
+                                            className="h-8 w-8 text-primary hover:text-red-500"
                                             onClick={handleCancel}
                                         >
                                             <X className="h-4 w-4" />
@@ -398,12 +402,19 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                         />
                         <div className="flex items-center gap-2 justify-end action-button">
                             <Button
-                                size="sm"
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 text-primary hover:text-green-500"
                                 onClick={() => handleSave('overallSummary')}
                             >
                                 <Check className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={handleCancel}>
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 text-primary hover:text-red-500"
+                                onClick={handleCancel}
+                            >
                                 <X className="h-4 w-4" />
                             </Button>
                         </div>
