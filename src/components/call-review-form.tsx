@@ -194,7 +194,7 @@ export default function CallReviewForm() {
                       </Label>
                       <div className="flex flex-col sm:flex-row gap-2">
                           <div className='w-full space-y-1'>
-                              <Label htmlFor="agentFirstName" className="text-sm font-semibold text-muted-foreground">First Name</Label>
+                              <Label htmlFor="agentFirstName" className="text-sm font-semibold text-primary">First Name</Label>
                               <Input
                                   id="agentFirstName"
                                   className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
@@ -204,7 +204,7 @@ export default function CallReviewForm() {
                               />
                           </div>
                           <div className='w-full space-y-1'>
-                              <Label htmlFor="agentLastName" className="text-sm font-semibold text-muted-foreground">Surname</Label>
+                              <Label htmlFor="agentLastName" className="text-sm font-semibold text-primary">Surname</Label>
                               <Input
                                   id="agentLastName"
                                   className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
