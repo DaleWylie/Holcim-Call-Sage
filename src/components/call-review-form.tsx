@@ -1,13 +1,13 @@
 
 "use client";
 
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, User, Fingerprint, Settings, List, Info, Users } from 'lucide-react';
+import { Loader2, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, User, Fingerprint, Settings, List, Info } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from './ui/badge';
 import { ReviewDisplay } from './review-display';
@@ -30,13 +30,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
 import { SettingsDialog } from '@/components/settings-dialog';
 import { generateNonBiasedReview, GenerateNonBiasedReviewOutput } from '@/ai/flows/generate-non-biased-review';
 import { useToast } from '@/hooks/use-toast';
@@ -68,10 +61,7 @@ const fileToDataUri = (file: File): Promise<string> => {
 
 
 export default function CallReviewForm() {
-  const { profiles, activeProfileId, setActiveProfileId } = useScoringMatrixStore();
-  const activeProfile = useMemo(() => profiles.find(p => p.id === activeProfileId), [profiles, activeProfileId]);
-  const scoringMatrix = activeProfile?.scoringMatrix || [];
-
+  const { scoringMatrix } = useScoringMatrixStore();
   const [agentFirstName, setAgentFirstName] = useState('');
   const [agentLastName, setAgentLastName] = useState('');
   const [interactionId, setInteractionId] = useState('');
@@ -94,7 +84,7 @@ export default function CallReviewForm() {
     if (scoringMatrix.length === 0) {
         setError({
             title: "Scoring Matrix is Empty",
-            message: "The selected profile has no scoring criteria. Please add criteria in the settings before generating a review.",
+            message: "There are no scoring criteria defined. Please add criteria in the settings before generating a review.",
         });
         setIsLoading(false);
         return;
@@ -177,21 +167,6 @@ export default function CallReviewForm() {
               {/* Left Column */}
               <div className="md:w-1/2 space-y-4 flex flex-col items-center">
                 <Label className="text-lg font-semibold text-primary flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Scoring Profile
-                </Label>
-                <Select value={activeProfileId || ''} onValueChange={setActiveProfileId}>
-                    <SelectTrigger className="w-full max-w-md text-muted-foreground">
-                        <SelectValue placeholder="Select a profile" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {profiles.map(profile => (
-                            <SelectItem key={profile.id} value={profile.id}>{profile.name}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-
-                <Label className="text-lg font-semibold text-primary flex items-center gap-2 pt-4">
                   <List className="h-5 w-5" />
                   Call Scoring Matrix
                 </Label>
@@ -224,7 +199,7 @@ export default function CallReviewForm() {
                           ))}
                         </ul>
                       ) : (
-                        <p className="text-muted-foreground text-center p-4">This profile is empty. Add criteria in Settings.</p>
+                        <p className="text-muted-foreground text-center p-4">The scoring matrix is empty. Add criteria in Settings.</p>
                       )}
                    </CardContent>
                 </Card>
