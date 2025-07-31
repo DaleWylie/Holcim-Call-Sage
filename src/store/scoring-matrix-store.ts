@@ -2,18 +2,28 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-type ScoringItem = {
+export type ScoringItem = {
   id: string;
   criterion: string;
   description: string;
 };
 
+export type ScoringProfile = {
+    id: string;
+    name: string;
+    scoringMatrix: ScoringItem[];
+    isDefault?: boolean;
+};
+
 interface ScoringMatrixState {
-  scoringMatrix: ScoringItem[];
-  setScoringMatrix: (matrix: ScoringItem[]) => void;
-  addCriterion: (criterion: ScoringItem) => void;
-  updateCriterion: (id: string, updatedCriterion: Partial<ScoringItem>) => void;
-  removeCriterion: (id: string) => void;
+  profiles: ScoringProfile[];
+  activeProfileId: string | null;
+  setActiveProfileId: (id: string) => void;
+  addProfile: (name: string) => void;
+  removeProfile: (id: string) => void;
+  updateProfileName: (id: string, name: string) => void;
+  setScoringMatrixForProfile: (profileId: string, matrix: ScoringItem[]) => void;
+  resetToDefaults: () => void;
 }
 
 const defaultScoringMatrix: ScoringItem[] = [
@@ -27,28 +37,66 @@ const defaultScoringMatrix: ScoringItem[] = [
     { id: "8", criterion: "8. Compliance & System Use", description: "Checked adherence to internal procedures and documentation: Logged or updated the ticket appropriately during/after call; followed internal procedures, security/compliance checks." },
 ];
 
+const defaultProfiles: ScoringProfile[] = [
+    {
+        id: 'default-1',
+        name: 'General Customer Service',
+        scoringMatrix: defaultScoringMatrix,
+        isDefault: true,
+    }
+];
+
+const initialState = {
+    profiles: defaultProfiles,
+    activeProfileId: defaultProfiles[0].id,
+};
+
+
 export const useScoringMatrixStore = create<ScoringMatrixState>()(
   persist(
-    (set) => ({
-      scoringMatrix: defaultScoringMatrix,
-      setScoringMatrix: (matrix) => set({ scoringMatrix: matrix }),
-      addCriterion: (criterion) =>
+    (set, get) => ({
+      ...initialState,
+      setActiveProfileId: (id) => set({ activeProfileId: id }),
+      addProfile: (name) =>
+        set((state) => {
+            const newProfile: ScoringProfile = {
+                id: crypto.randomUUID(),
+                name,
+                scoringMatrix: [],
+            };
+            return {
+                profiles: [...state.profiles, newProfile],
+                activeProfileId: newProfile.id,
+            };
+        }),
+      removeProfile: (id) =>
+        set((state) => {
+            const newProfiles = state.profiles.filter((p) => p.id !== id);
+            let newActiveProfileId = state.activeProfileId;
+            if (state.activeProfileId === id) {
+                newActiveProfileId = newProfiles.length > 0 ? newProfiles[0].id : null;
+            }
+            return {
+                profiles: newProfiles,
+                activeProfileId: newActiveProfileId,
+            };
+        }),
+      updateProfileName: (id, name) =>
         set((state) => ({
-          scoringMatrix: [...state.scoringMatrix, criterion],
+            profiles: state.profiles.map((p) => (p.id === id ? { ...p, name } : p)),
         })),
-      updateCriterion: (id, updatedCriterion) =>
+      setScoringMatrixForProfile: (profileId, matrix) =>
         set((state) => ({
-          scoringMatrix: state.scoringMatrix.map((item) =>
-            item.id === id ? { ...item, ...updatedCriterion } : item
-          ),
+            profiles: state.profiles.map((p) =>
+                p.id === profileId ? { ...p, scoringMatrix: matrix } : p
+            ),
         })),
-      removeCriterion: (id) =>
-        set((state) => ({
-          scoringMatrix: state.scoringMatrix.filter((item) => item.id !== id),
-        })),
+      resetToDefaults: () => {
+          set(initialState);
+      }
     }),
     {
-      name: 'scoring-matrix-storage', // name of the item in storage (must be unique)
+      name: 'scoring-matrix-storage-v2', // name of the item in storage (must be unique)
       storage: createJSONStorage(() => sessionStorage), // Use sessionStorage to reset on new session
     }
   )
