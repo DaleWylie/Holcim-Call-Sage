@@ -71,12 +71,13 @@ const nonBiasedReviewPrompt = ai.definePrompt({
     2.  **Carry over Interaction ID**: If an 'interactionId' is provided in the input, you MUST include it in the 'interactionId' field of your output.
     3.  **Analyze the Interaction**: Carefully review the provided call data. If an audio file is provided, it is the primary source; transcribe and analyse it. If only a transcript is provided, use that.
     4.  **Extract Timestamps**: When providing a 'justification', 'goodPoints', or 'areasForImprovement', you MUST look for a corresponding timestamp in the transcript (e.g., [00:01:23] or a similar format). If you find a relevant timestamp, you must extract it and place it in the 'timestamp' field. If no specific timestamp is applicable or available, leave the field blank.
-    5.  **Score the Call**: Use the provided scoring matrix to evaluate the agent's performance. For each criterion in the matrix, provide a score as a whole number (integer) from 0 to 5 and a detailed justification.
-    6.  **Justification Rule**: The 'justification.text' must explain the reasoning for the score by referencing specific parts of the conversation. It must NOT include the score number itself (e.g., do not write "Score: 4/5" in the justification).
-    7.  **Calculate Overall Score**: Calculate the average of all the individual scores and set it as the 'overallScore'. This can be a decimal.
-    8.  **Summarise**: Provide a concise "quick summary" and a more "overall summary" of the interaction.
-    9.  **Highlight Strengths**: Identify and list specific things the agent did well under 'goodPoints'.
-    10. **Provide Feedback**: List specific, actionable 'areasForImprovement'.
+    5.  **Timestamp Uniqueness**: Avoid referencing the exact same timestamp multiple times within the same list (e.g., in 'goodPoints' or 'areasForImprovement'), unless it is to highlight a completely different aspect of the interaction. Each reference should ideally provide new value.
+    6.  **Score the Call**: Use the provided scoring matrix to evaluate the agent's performance. For each criterion in the matrix, provide a score as a whole number (integer) from 0 to 5 and a detailed justification.
+    7.  **Justification Rule**: The 'justification.text' must explain the reasoning for the score by referencing specific parts of the conversation. It must NOT include the score number itself (e.g., do not write "Score: 4/5" in the justification).
+    8.  **Calculate Overall Score**: Calculate the average of all the individual scores and set it as the 'overallScore'. This can be a decimal.
+    9.  **Summarise**: Provide a concise "quick summary" and a more "overall summary" of the interaction.
+    10. **Highlight Strengths**: Identify and list specific things the agent did well under 'goodPoints'.
+    11. **Provide Feedback**: List specific, actionable 'areasForImprovement'.
 
     **Scoring Matrix to Use:**
     {{#each scoringMatrix}}

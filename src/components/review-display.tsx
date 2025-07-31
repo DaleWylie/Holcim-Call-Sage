@@ -109,7 +109,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
     style.innerHTML = `
         @media print {
             .printable-hidden { display: none !important; }
-            .printable-only { display: inline !important; }
+            .printable-only { display: inline !important; font-weight: 600 !important; }
         }
         .printable-hidden { display: inline-flex; }
         .printable-only { display: none; }
@@ -349,7 +349,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                                                     <Clock className="h-3 w-3 mr-1" />
                                                     {item.justification.timestamp}
                                                 </Badge>
-                                                <span className="printable-only mr-2 font-semibold text-muted-foreground">{item.justification.timestamp}</span>
+                                                <span className="printable-only mr-2 text-muted-foreground">{item.justification.timestamp}</span>
                                             </>
                                         )}
                                         {item.justification.text}
@@ -447,7 +447,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                                     <Clock className="h-3 w-3 mr-1" />
                                     {item.timestamp}
                                 </Badge>
-                                <span className="printable-only mr-2 font-semibold text-muted-foreground">{item.timestamp}</span>
+                                <span className="printable-only mr-2 text-muted-foreground">{item.timestamp}</span>
                             </>
                         )}
                         {item.text}
@@ -479,7 +479,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                                 <Clock className="h-3 w-3 mr-1" />
                                 {item.timestamp}
                             </Badge>
-                             <span className="printable-only mr-2 font-semibold text-muted-foreground">{item.timestamp}</span>
+                             <span className="printable-only mr-2 text-muted-foreground">{item.timestamp}</span>
                         </>
                     )}
                     {item.text}
@@ -531,7 +531,3 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
     </div>
   )
 }
-
-    
-
-    
