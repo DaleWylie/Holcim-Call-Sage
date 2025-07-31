@@ -78,6 +78,7 @@ const nonBiasedReviewPrompt = ai.definePrompt({
     8.  **Calculate Overall Score**: You MUST calculate the 'overallScore'. Take the score for each criterion (from 0 to 5) and multiply it by its respective weight. The sum of these weighted scores divided by the sum of the maximum possible weighted score will give you a total out of 100. This will be the “Overall Score” as a percentage. Only criteria with a weight > 0 should be included.
     9.  **Summarise**: Provide a concise "quick summary" and a more "overall summary" of the interaction. The 'overallSummary' MUST touch upon every single criterion from the scoring matrix.
     10. **Highlight Strengths & Feedback**: Identify specific things the agent did well under 'goodPoints' and list actionable 'areasForImprovement'. Every point you list under 'goodPoints' and 'areasForImprovement' must clearly relate to one of the criteria from the scoring matrix.
+    11. **Timestamp Integrity**: The timestamps you extract MUST exist in the provided transcript. Do not invent or hallucinate timestamps. If you refer to an event at a specific time, that time must be present in the source text.
 
     **Scoring Matrix to Use:**
     {{#each scoringMatrix}}
