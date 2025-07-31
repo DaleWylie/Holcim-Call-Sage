@@ -18,6 +18,7 @@ import { CheckCircle2, ListChecks, Printer, Sparkles, Target, Pencil, Check, X, 
 import { cn, getScoreColor } from "@/lib/utils";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
+import { Textarea } from "./ui/textarea";
 
 interface ReviewDisplayProps {
   review: GenerateNonBiasedReviewOutput
@@ -40,25 +41,35 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
   };
 
   const handleSave = (field: string) => {
-    const [type, index] = field.split('-');
-
-    if (type === 'score') {
-      const scoreIndex = parseInt(index, 10);
-      setReview(prev => {
+    setReview(prev => {
         if (!prev) return null;
-        const newScores = [...prev.scores];
-        // Ensure the score is a whole number
-        const newScoreValue = Math.round(Number(tempValue));
-        newScores[scoreIndex] = { ...newScores[scoreIndex], score: newScoreValue };
         
-        const totalScore = newScores.reduce((acc, s) => acc + s.score, 0);
-        const newOverallScore = totalScore / newScores.length;
+        const [type, indexStr] = field.split('-');
+        const index = parseInt(indexStr, 10);
+        let newReview = { ...prev };
 
-        return { ...prev, scores: newScores, overallScore: newOverallScore };
-      });
-    }
+        if (type === 'score') {
+            const newScores = [...prev.scores];
+            const newScoreValue = Math.round(Number(tempValue));
+            newScores[index] = { ...newScores[index], score: newScoreValue };
+            
+            const totalScore = newScores.reduce((acc, s) => acc + s.score, 0);
+            const newOverallScore = totalScore / newScores.length;
+
+            newReview = { ...newReview, scores: newScores, overallScore: newOverallScore };
+        } else if (type === 'justification') {
+            const newScores = [...prev.scores];
+            newScores[index] = { ...newScores[index], justification: String(tempValue) };
+            newReview = { ...newReview, scores: newScores };
+        } else if (type === 'overallSummary') {
+            newReview = { ...newReview, overallSummary: String(tempValue) };
+        }
+
+        return newReview;
+    });
+
     setEditingField(null);
-  };
+};
   
   const handleCancel = () => {
     setEditingField(null);
@@ -239,7 +250,45 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
                             </div>
                         </div>
                         <div className="pl-12">
-                            <p className="text-sm text-muted-foreground">{item.justification}</p>
+                             {editingField === `justification-${index}` ? (
+                                <div className="flex flex-col gap-2">
+                                    <Textarea
+                                        value={String(tempValue)}
+                                        onChange={(e) => setTempValue(e.target.value)}
+                                        rows={4}
+                                        className="text-sm"
+                                        autoFocus
+                                    />
+                                    <div className="flex items-center gap-2 justify-end action-button">
+                                        <Button
+                                            size="sm"
+                                            className="bg-green-500 hover:bg-green-600"
+                                            onClick={() => handleSave(`justification-${index}`)}
+                                        >
+                                            <Check className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={handleCancel}
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex items-start gap-2">
+                                    <p className="text-sm text-muted-foreground flex-1">{item.justification}</p>
+                                    <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        className="h-8 w-8 text-muted-foreground hover:bg-primary hover:text-primary-foreground action-button shrink-0"
+                                        onClick={() => handleEditClick(`justification-${index}`, item.justification)}
+                                    >
+                                        <Pencil className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                         {index < review.scores.length - 1 && <Separator className="mt-4" />}
                     </div>
@@ -249,15 +298,50 @@ export function ReviewDisplay({ review, setReview }: ReviewDisplayProps) {
         </Card>
 
         <Card data-printable-section className="mb-6">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-primary" />
-              <CardTitle className="text-xl">Overall Summary</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-base whitespace-pre-wrap">{review.overallSummary}</p>
-          </CardContent>
+            <CardHeader>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-5 w-5 text-primary" />
+                        <CardTitle className="text-xl">Overall Summary</CardTitle>
+                    </div>
+                    {editingField !== 'overallSummary' && (
+                        <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-muted-foreground hover:bg-primary hover:text-primary-foreground action-button"
+                            onClick={() => handleEditClick('overallSummary', review.overallSummary)}
+                        >
+                            <Pencil className="h-4 w-4" />
+                        </Button>
+                    )}
+                </div>
+            </CardHeader>
+            <CardContent>
+                {editingField === 'overallSummary' ? (
+                    <div className="flex flex-col gap-2">
+                        <Textarea
+                            value={String(tempValue)}
+                            onChange={(e) => setTempValue(e.target.value)}
+                            rows={6}
+                            autoFocus
+                        />
+                        <div className="flex items-center gap-2 justify-end action-button">
+                            <Button
+                                size="sm"
+                                className="bg-green-500 hover:bg-green-600"
+                                onClick={() => handleSave('overallSummary')}
+                            >
+                                <Check className="h-4 w-4" />
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={handleCancel}>
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </div>
+                ) : (
+                    <p className="text-base whitespace-pre-wrap">{review.overallSummary}</p>
+                )}
+            </CardContent>
         </Card>
         
         {review.goodPoints && review.goodPoints.length > 0 && (
