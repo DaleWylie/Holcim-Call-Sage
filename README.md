@@ -1,4 +1,4 @@
-# Holcim Call Sage (v1.0)
+# Holcim Call Sage (v1.1)
 
 **AI-Powered Quality Assistant for Holcim**
 
@@ -11,22 +11,25 @@ Holcim Call Sage is an internal tool designed to assist in the quality managemen
 -   **AI-Powered Review Generation**: Automatically generates a structured and objective review of a call, including scores, justifications, and an overall summary.
 -   **Customizable Scoring Matrix**: Allows quality managers to define their own evaluation criteria through a user-friendly interface. A default matrix is provided as a starting point, which can be easily modified, extended, or shortened to fit specific needs.
 -   **Transcript & Audio Input**: Users can either paste a call transcript directly (e.g., from Genesys Cloud) or upload a `.wav` audio recording for the AI to transcribe and analyze.
+-   **Integrated Audio Player**: When a `.wav` file is used, an audio player appears, allowing for direct playback of the call recording within the app.
+-   **Clickable Timestamps**: The generated review includes timestamps for justifications, good points, and areas for improvement. Clicking on a timestamp in the web view jumps the audio player to that exact moment in the call, making verification seamless.
 -   **Analyst Identification**: The AI is instructed to intelligently extract the analyst's name from call metadata, ensuring accurate reporting even if the name is not clearly captured in the dialogue.
--   **Structured Feedback**: The output includes a clear breakdown of scores for each criterion, a concise summary, and actionable areas for improvement, making it easy to digest and act upon.
--   **PDF Export**: The final, human-verified review can be exported as a professional PDF document, including the checker's name and the date of review.
+-   **Structured Feedback**: The output includes a clear breakdown of scores for each criterion, a list of "Good Points," a concise summary, and actionable "Areas for Improvement," making it easy to digest and act upon.
+-   **PDF Export**: The final, human-verified review can be exported as a professional PDF document, including the checker's name and the date of review. The exported report is clean and does not include interactive elements like the audio player.
 
 ## How to Use the Application
 
-1.  **Define the Call Scoring Matrix**:
-    -   On the left side of the screen, you will find the scoring criteria.
-    -   You can click on any criterion to expand it and edit its name and description.
+1.  **Define the Call Scoring Matrix (Optional)**:
+    -   The application comes with a pre-defined scoring matrix. To edit it, click the **Settings** (gear) icon in the top-right corner.
+    -   In the settings panel, you can click on any criterion to expand it and edit its name and description.
     -   Click the **"Add Criterion"** button to add a new item to the list.
     -   Click the trash can icon next to a criterion to delete it (a confirmation will be required).
+    -   Click "Save Changes" to apply your modifications.
 
 2.  **Provide the Call Data**:
     -   On the right side of the screen, fill in the required details:
+    -   **Agent Name**: Enter the agent's first name and surname. This is a mandatory field.
     -   **Interaction ID**: Enter the unique identifier for the call (e.g., from Genesys Cloud). This is a mandatory field.
-    -   **Agent Name (Optional)**: Provide the agent's name if you want to ensure it's captured correctly. Otherwise, the AI will attempt to extract it.
     -   **Input Call Transcript OR Upload Audio**:
         -   **Option A: Paste Transcript**: Copy the call transcript from its source and paste it into the "Input Call Transcript" text area.
         -   **Option B: Upload Audio**: Click the "Select .wav file" button to upload a call recording. The AI will handle the transcription automatically.
@@ -34,11 +37,14 @@ Holcim Call Sage is an internal tool designed to assist in the quality managemen
 
 3.  **Generate the Review**:
     -   Click the **"Generate Call Review"** button at the bottom.
-    -   The button will become active once an Interaction ID and either a transcript or a `.wav` file have been provided. A loading indicator will show that the analysis is in progress.
+    -   The button will become active once an Interaction ID, agent name, and either a transcript or a `.wav` file have been provided. A loading indicator will show that the analysis is in progress.
 
 4.  **Verify and Print the Review**:
     -   Once the AI has completed its analysis, the generated review will appear at the bottom of the page.
-    -   Review the generated scores and summaries. You can click the pencil icon next to any score to amend it if necessary.
+    -   If you uploaded a `.wav` file, an **audio player** will appear above the report.
+    -   Review the generated scores, summaries, and feedback.
+    -   Click the **timestamp badges** (e.g., `[00:01:23]`) next to a comment to jump the audio player to that specific point in the call.
+    -   You can click the **pencil icon** next to any score or text block to amend it if necessary.
     -   In the "Checked By" section at the bottom of the review, enter your name.
     -   Click the **"Print to PDF"** button to save a final, verified copy of the report.
 
