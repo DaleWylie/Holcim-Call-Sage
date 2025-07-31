@@ -19,6 +19,7 @@ import { cn, getScoreColor } from "@/lib/utils";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
 import { Textarea } from "./ui/textarea";
+import { useScoringMatrixStore } from "@/store/scoring-matrix-store";
 
 interface ReviewDisplayProps {
   review: GenerateNonBiasedReviewOutput;
@@ -42,6 +43,9 @@ const timeToSeconds = (timeStr: string): number => {
 
 
 export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplayProps) {
+  const { defaultScoringMatrix, customScoringMatrix } = useScoringMatrixStore();
+  const fullMatrix = [...defaultScoringMatrix, ...customScoringMatrix];
+
   const reviewRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPrinting, setIsPrinting] = React.useState(false);
@@ -76,10 +80,22 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
             const newScoreValue = Math.round(Number(tempValue));
             newScores[index] = { ...newScores[index], score: newScoreValue };
             
-            const totalScore = newScores.reduce((acc, s) => acc + s.score, 0);
-            const newOverallScore = totalScore / newScores.length;
+            // Recalculate weighted score
+            let totalWeightedScore = 0;
+            const scoringMap = new Map(fullMatrix.map(item => [item.criterion, item.weight]));
+            let totalWeight = 0;
 
+            for (const scoreItem of newScores) {
+                const weight = scoringMap.get(scoreItem.criterion);
+                if (weight !== undefined) {
+                    totalWeightedScore += scoreItem.score * (weight / 5);
+                    totalWeight += weight;
+                }
+            }
+
+            const newOverallScore = (totalWeight > 0) ? (totalWeightedScore / totalWeight) * 100 : 0;
             newReview = { ...newReview, scores: newScores, overallScore: newOverallScore };
+
         } else if (type === 'justification') {
             const newScores = [...prev.scores];
             newScores[index] = { ...newScores[index], justification: { ...newScores[index].justification, text: String(tempValue) } };
@@ -224,7 +240,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
               </div>
               <div className="text-right">
                 <Label className="text-sm font-medium">Overall Score</Label>
-                <Badge variant="secondary" className="text-lg font-bold ml-2">{review.overallScore.toFixed(1)}/5</Badge>
+                <Badge variant="secondary" className="text-lg font-bold ml-2">{review.overallScore.toFixed(0)}%</Badge>
               </div>
             </div>
            </CardHeader>
@@ -253,7 +269,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                             <div
                                 className={cn(
                                 'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white',
-                                getScoreColor(item.score)
+                                getScoreColor(item.score, 5) // Use 0-5 scale for individual item color
                                 )}
                             >
                                 {item.score}
