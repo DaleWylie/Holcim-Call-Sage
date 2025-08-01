@@ -340,7 +340,7 @@ export default function CallReviewForm() {
                       </CollapsibleContent>
                   </Collapsible>
                   
-                  <Separator className="my-6" />
+                  <Separator className="my-6 w-1/2 mx-auto" />
 
                   <div className="space-y-4 text-center">
                       <Label htmlFor="conversationId" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
