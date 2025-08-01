@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -21,12 +21,28 @@ interface ChatPanelProps {
 
 export function ChatPanel({ isOpen, setIsOpen, reviewInput, reviewOutput }: ChatPanelProps) {
   const agentFirstName = reviewOutput.agentName.split(' ')[0] || 'the agent';
-  const initialMessage: ChatMessage = {
-    role: 'model',
-    content: `Hey, do you want to discuss the Generated Review for ${agentFirstName}? Let me know if you have any questions!`
-  };
+  
+  // Memoize the initial messages to prevent re-creation on every render
+  const initialMessages = useMemo(() => {
+    const context = `
+      CONTEXT FOR OUR CONVERSATION:
+      - Call Transcript: ${reviewInput.callTranscript || 'Audio was provided, the transcript is not available in text.'}
+      - Generated Review: ${JSON.stringify(reviewOutput, null, 2)}
+      - Scoring Matrix: ${JSON.stringify(reviewInput.scoringMatrix, null, 2)}
+    `;
+    return [
+      {
+        role: 'user' as const,
+        content: context
+      },
+      {
+        role: 'model' as const,
+        content: `Hey, do you want to discuss the Generated Review for ${agentFirstName}? I have the full transcript and review details. Let me know if you have any questions!`
+      }
+    ];
+  }, [reviewInput, reviewOutput, agentFirstName]);
 
-  const [messages, setMessages] = useState<ChatMessage[]>([initialMessage]);
+  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [currentMessage, setCurrentMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -52,9 +68,7 @@ export function ChatPanel({ isOpen, setIsOpen, reviewInput, reviewOutput }: Chat
 
     try {
         const result = await chatAboutReview({
-            reviewInput,
-            reviewOutput,
-            chatHistory: newMessages,
+            chatHistory: newMessages, // Pass the full history, including our context
             question: userMessage.content,
         });
 
@@ -86,32 +100,39 @@ export function ChatPanel({ isOpen, setIsOpen, reviewInput, reviewOutput }: Chat
         <CardContent className="flex-1 overflow-y-auto p-0">
              <ScrollArea className="h-full" ref={scrollAreaRef}>
                 <div className="space-y-4 p-4">
-                    {messages.map((msg, index) => (
-                    <div
-                        key={index}
-                        className={cn(
-                        "flex items-start gap-3",
-                        msg.role === 'user' ? 'justify-end' : 'justify-start'
-                        )}
-                    >
-                        {msg.role === 'model' && (
-                        <Avatar className="h-8 w-8">
-                            <AvatarImage src="/holcim-logo.png" alt="Call Sage" />
-                            <AvatarFallback>CS</AvatarFallback>
-                        </Avatar>
-                        )}
+                    {messages.map((msg, index) => {
+                      // Do not render the initial context message to the user
+                      if (index === 0 && msg.role === 'user') {
+                        return null;
+                      }
+                      
+                      return (
                         <div
-                        className={cn(
-                            "max-w-xs rounded-lg px-3 py-2 text-sm",
-                            msg.role === 'user'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted text-muted-foreground'
-                        )}
+                          key={index}
+                          className={cn(
+                            "flex items-start gap-3",
+                            msg.role === 'user' ? 'justify-end' : 'justify-start'
+                          )}
                         >
-                           <p className="whitespace-pre-wrap">{msg.content}</p>
+                          {msg.role === 'model' && (
+                            <Avatar className="h-8 w-8">
+                                <AvatarImage src="/holcim-logo.png" alt="Call Sage" />
+                                <AvatarFallback>CS</AvatarFallback>
+                            </Avatar>
+                          )}
+                          <div
+                            className={cn(
+                              "max-w-xs rounded-lg px-3 py-2 text-sm",
+                              msg.role === 'user'
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted text-muted-foreground'
+                            )}
+                          >
+                            <p className="whitespace-pre-wrap">{msg.content}</p>
+                          </div>
                         </div>
-                    </div>
-                    ))}
+                      )
+                    })}
                     {isLoading && (
                         <div className="flex items-start gap-3 justify-start">
                              <Avatar className="h-8 w-8">
@@ -129,15 +150,15 @@ export function ChatPanel({ isOpen, setIsOpen, reviewInput, reviewOutput }: Chat
         <CardFooter className="p-4 border-t">
             <div className="flex items-center gap-2 w-full">
                 <Input
-                value={currentMessage}
-                onChange={(e) => setCurrentMessage(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder="Ask about the review..."
-                className="flex-1"
-                disabled={isLoading}
+                  value={currentMessage}
+                  onChange={(e) => setCurrentMessage(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                  placeholder="Ask about the review..."
+                  className="flex-1"
+                  disabled={isLoading}
                 />
                 <Button onClick={handleSendMessage} disabled={isLoading || !currentMessage.trim()}>
-                <Send className="h-4 w-4" />
+                  <Send className="h-4 w-4" />
                 </Button>
             </div>
         </CardFooter>

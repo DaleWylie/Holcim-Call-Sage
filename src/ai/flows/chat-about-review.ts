@@ -20,8 +20,7 @@ export type ChatMessage = z.infer<typeof ChatMessageSchema>;
 
 // Define the input schema for the chat flow
 const ChatAboutReviewInputSchema = z.object({
-  reviewInput: z.any().describe("The original input object used to generate the review."),
-  reviewOutput: z.any().describe("The original output object from the review generation."),
+  // The full context (transcript, etc) will now be passed in the chat history.
   chatHistory: z.array(ChatMessageSchema).describe("The history of the conversation so far."),
   question: z.string().describe("The user's latest question about the review."),
 });
@@ -49,18 +48,15 @@ const chatAboutReviewFlow = ai.defineFlow(
   },
   async (input) => {
     
-    // Simplified prompt to improve stability
-    const fullPrompt = `You are an AI Quality Analyst Assistant named "Call Sage". Your task is to answer questions about a call review that has already been generated. The user is providing you with the full context of the original call (transcript), the scoring criteria they used, and the review you previously generated.
+    // The prompt is now much simpler. The transcript and review context are expected to be in the history.
+    const fullPrompt = `You are an AI Quality Analyst Assistant named "Call Sage". Your task is to answer questions based on the provided conversation history, which contains a call transcript and a generated review.
 
       **CRITICAL INSTRUCTIONS:**
-      1.  **Primary Source of Truth**: Your primary source of information is the **Call Data** (the transcript). You MUST freshly analyse the transcript to answer the user's question, even if it seems to be answered in the generated review. The review is for context only.
+      1.  **Primary Source of Truth**: Your primary source of information is the **Call Transcript** provided in the chat history. You MUST freshly analyse the transcript to answer the user's question.
       2.  **Be Specific**: When the user asks for specific details (like a timestamp), you MUST find that detail in the transcript. Do not state that you don't have access to it.
       3.  **Use British English**: You MUST use British English spelling and grammar at all times (e.g., "summarise", "behaviour", "centre").
       4.  **Stay on Topic**: Be helpful, concise, and directly answer the user's question based on the facts from the call data. If the user asks for an opinion or something outside the provided context, politely state that you can only answer questions based on the call data.
 
-      **Call Transcript:**
-      ${input.reviewInput.callTranscript || 'The review was based on an audio file. The full transcript is available in the chat history.'}
-      
       **USER'S NEW QUESTION:**
       ${input.question}`;
 
