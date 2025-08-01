@@ -165,7 +165,11 @@ export function Chatbot({ review }: ChatbotProps) {
                         
                         {messages.length > 1 && (
                              <div className="px-4 py-2 border-t flex justify-center">
-                                <Button variant="ghost" onClick={handleDownloadTranscript}>
+                                <Button
+                                    variant="ghost"
+                                    onClick={handleDownloadTranscript}
+                                    className="text-muted-foreground hover:bg-primary hover:text-primary-foreground"
+                                >
                                     <Download className="mr-2 h-4 w-4" />
                                     Download Transcript
                                 </Button>
