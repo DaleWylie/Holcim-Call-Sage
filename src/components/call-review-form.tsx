@@ -352,6 +352,7 @@ export default function CallReviewForm() {
                     review={review}
                     setReview={setReview}
                     audioDataUri={audioDataUriForPlayer}
+                    transcript={callTranscript}
                   />
               </div>
           )}
