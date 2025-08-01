@@ -293,7 +293,7 @@ export default function CallReviewForm() {
                       {audioFile && (
                           <div className="flex items-center justify-center gap-2 mt-2">
                               <Badge variant="secondary">{audioFile.name}</Badge>
-                              <Button variant="ghost" size="icon" onClick={() => {
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-transparent hover:text-red-500" onClick={() => {
                                   setAudioFile(null);
                                   if (fileInputRef.current) {
                                   fileInputRef.current.value = '';
