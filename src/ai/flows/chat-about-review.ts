@@ -66,6 +66,20 @@ export async function chatAboutReview(input: ChatAboutReviewInput): Promise<Chat
   return chatAboutReviewFlow(input);
 }
 
+// Define the tool for amending the review at the top level of the module
+const amendGeneratedReview = ai.defineTool(
+    {
+        name: 'amendGeneratedReview',
+        description: 'If the user challenges a part of the generated review and you agree there is an error, use this tool to propose a set of changes to the review. You MUST ask for the user\'s permission before using this tool.',
+        inputSchema: AmendReviewInputSchema,
+        outputSchema: z.void(),
+    },
+    async () => {
+      // This tool doesn't need to do anything on the server side.
+      // Its purpose is to signal to the client that an amendment should occur.
+      // The frontend will receive the tool_code and its arguments.
+    }
+);
 
 // Define the main Genkit flow for the chat
 const chatAboutReviewFlow = ai.defineFlow(
@@ -76,21 +90,6 @@ const chatAboutReviewFlow = ai.defineFlow(
   },
   async (input) => {
     const model = googleAI.model('gemini-2.0-flash');
-
-    // Define the tool for amending the review
-    const amendGeneratedReview = ai.defineTool(
-        {
-            name: 'amendGeneratedReview',
-            description: 'If the user challenges a part of the generated review and you agree there is an error, use this tool to propose a set of changes to the review. You MUST ask for the user\'s permission before using this tool.',
-            inputSchema: AmendReviewInputSchema,
-            outputSchema: z.void(),
-        },
-        async () => {
-          // This tool doesn't need to do anything on the server side.
-          // Its purpose is to signal to the client that an amendment should occur.
-          // The frontend will receive the tool_code and its arguments.
-        }
-    );
 
     try {
       const response = await ai.generate({
