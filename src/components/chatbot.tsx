@@ -28,6 +28,8 @@ export function Chatbot({ review }: ChatbotProps) {
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+
 
     const { defaultScoringMatrix, customScoringMatrix } = useScoringMatrixStore();
     const scoringMatrix = [...defaultScoringMatrix, ...customScoringMatrix];
@@ -47,13 +49,16 @@ export function Chatbot({ review }: ChatbotProps) {
 
     // Auto-scroll to bottom of messages
     useEffect(() => {
-        if (isOpen && scrollAreaRef.current) {
-            const viewport = scrollAreaRef.current.querySelector('div[data-radix-scroll-area-viewport]');
+        if (isOpen) {
+            // Scroll to bottom of chat
+            const viewport = scrollAreaRef.current?.querySelector('div[data-radix-scroll-area-viewport]');
             if (viewport) {
                 setTimeout(() => {
                     viewport.scrollTop = viewport.scrollHeight;
                 }, 0);
             }
+            // Focus input
+            inputRef.current?.focus();
         }
     }, [messages, isOpen]);
 
@@ -84,13 +89,14 @@ export function Chatbot({ review }: ChatbotProps) {
             setMessages(prev => [...prev, errorMessage]);
         } finally {
             setIsLoading(false);
+            inputRef.current?.focus();
         }
     };
 
     return (
-        <div className="fixed bottom-4 right-4 z-50">
+        <div className="fixed bottom-6 right-6 z-50">
             {isOpen ? (
-                <Card className="w-80 h-[28rem] shadow-2xl flex flex-col">
+                <Card className="w-96 h-[32rem] shadow-2xl flex flex-col">
                     <CardHeader className="flex flex-row items-center justify-between p-4 border-b">
                         <CardTitle className="text-lg font-bold text-primary flex items-center gap-2">
                             <FaRobot />
@@ -140,6 +146,7 @@ export function Chatbot({ review }: ChatbotProps) {
                         <form onSubmit={handleSendMessage} className="p-4 border-t">
                             <div className="flex items-center gap-2">
                                 <Input
+                                    ref={inputRef}
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
                                     placeholder="Ask a question..."
@@ -155,9 +162,9 @@ export function Chatbot({ review }: ChatbotProps) {
             ) : (
                 <Button
                     onClick={() => setIsOpen(true)}
-                    className="rounded-full w-14 h-14 shadow-lg flex items-center justify-center bg-primary hover:bg-primary/90"
+                    className="rounded-full w-12 h-12 shadow-lg flex items-center justify-center bg-primary hover:bg-primary/90"
                 >
-                    <FaRobot className="h-7 w-7 text-primary-foreground" />
+                    <FaRobot className="h-6 w-6 text-primary-foreground" />
                 </Button>
             )}
         </div>
