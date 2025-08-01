@@ -310,7 +310,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
           <CardHeader>
             <div className="flex justify-between items-start">
               <div className="flex-1">
-                <Label className="text-sm font-medium text-muted-foreground">Agent Name</Label>
+                <Label className="text-sm font-bold text-muted-foreground">Agent Name</Label>
                  <div className="flex items-center gap-2">
                     <h3 className="text-2xl font-bold text-primary">{review.agentName}</h3>
                   </div>
@@ -334,13 +334,13 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                 <div>
                   {conversationId && (
                     <>
-                      <Label className="font-medium text-muted-foreground">Conversation ID</Label>
+                      <Label className="text-sm font-bold text-muted-foreground">Conversation ID</Label>
                       <p className="font-semibold text-primary">{conversationId}</p>
                     </>
                   )}
                 </div>
                 <div className="text-right">
-                  <Label className="font-medium text-muted-foreground">Conversation Duration</Label>
+                  <Label className="text-sm font-bold text-muted-foreground">Conversation Duration</Label>
                   <p className="font-semibold text-primary flex items-center justify-end gap-1">
                       <Timer className="h-4 w-4" />
                       {conversationDuration}
