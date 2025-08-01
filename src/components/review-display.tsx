@@ -20,6 +20,7 @@ import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
 import { Textarea } from "./ui/textarea";
 import { useScoringMatrixStore } from "@/store/scoring-matrix-store";
+import { Chatbot } from "./chatbot";
 
 interface ReviewDisplayProps {
   review: GenerateNonBiasedReviewOutput;
@@ -242,7 +243,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
             });
 
             const imgData = canvas.toDataURL('image/png');
-            const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+            const imgHeight = (canvas.height * (pdfWidth - margin*2)) / canvas.width;
             
             if (yPos + imgHeight > pdfHeight - margin) {
                 pdf.addPage();
@@ -622,6 +623,8 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
             </CardContent>
         </Card>
       </div>
+      
+      {review && <Chatbot review={review} />}
     </div>
   )
 }
