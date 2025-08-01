@@ -613,7 +613,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                             placeholder="Enter your name to enable printing"
                             value={checkerName}
                             onChange={(e) => setCheckerName(e.target.value)}
-                            className="flex-grow max-w-xs"
+                            className="flex-grow"
                         />
                         <Button onClick={handlePrint} disabled={isPrinting || !checkerName.trim()} className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0">
                             <Printer className="mr-2 h-4 w-4" />
@@ -632,5 +632,3 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
     </div>
   )
 }
-
-    
