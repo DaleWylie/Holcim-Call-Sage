@@ -101,7 +101,7 @@ export function Chatbot({ review }: ChatbotProps) {
                     <CardHeader className="flex flex-row items-center justify-between p-4 border-b">
                         <CardTitle className="text-lg font-bold text-primary flex items-center gap-2">
                             <FaRobot />
-                            Call Sage Chat
+                            Call Sage Chat (Beta)
                         </CardTitle>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-primary hover:text-primary-foreground" onClick={() => setIsOpen(false)}>
                             <X className="h-4 w-4" />
