@@ -373,7 +373,6 @@ export default function CallReviewForm() {
             setIsOpen={setIsChatOpen}
             reviewInput={reviewInput}
             reviewOutput={review}
-            onReviewAmended={setReview}
         />
         <Button
             onClick={() => setIsChatOpen(prev => !prev)}
