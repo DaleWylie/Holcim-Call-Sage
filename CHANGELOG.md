@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2024-08-02
+
+### Added
+- **Chatbot Transcript Download**: A "Download Transcript" button has been added to the chatbot interface, allowing users to save the full conversation with the AI as a `.txt` file for their records.
+
+### Changed
+- **UI Consistency**: The hover style for the new "Download Transcript" button in the chatbot now aligns with the application's primary color theme.
+
+### Fixed
+- **React Hook Error**: Resolved a `useEffect` dependency array error in the settings dialog that was causing issues between component renders.
+- **Development Server Script**: Removed a redundant port argument from the `dev` script in `package.json` to prevent potential startup conflicts.
+
 ## [1.3.1] - 2024-08-02
 
 ### Changed
