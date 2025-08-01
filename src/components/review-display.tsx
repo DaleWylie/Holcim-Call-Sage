@@ -319,7 +319,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                 <p className="text-foreground">{review.quickSummary}</p>
               </div>
               <div className="text-center ml-4">
-                  <Label className="text-sm font-bold text-muted-foreground whitespace-nowrap">Overall Score</Label>
+                  <Label className="text-sm font-bold text-muted-foreground">Overall Score</Label>
                   <div className={cn(
                     "mt-1 flex items-center justify-center w-18 h-18 rounded-full text-white text-2xl font-bold",
                     getScoreColor(review.overallScore, 100)
@@ -330,24 +330,24 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
             </div>
            </CardHeader>
            <CardContent className="pt-4 pb-4">
-              <div className="flex justify-between items-end gap-4 text-sm">
-                <div>
-                  {conversationId && (
-                    <>
-                      <Label className="text-sm font-bold text-muted-foreground">Conversation ID</Label>
-                      <p className="font-semibold text-primary">{conversationId}</p>
-                    </>
-                  )}
-                </div>
-                <div className="text-right">
-                  <Label className="text-sm font-bold text-muted-foreground">Conversation Duration</Label>
-                  <p className="font-semibold text-primary flex items-center justify-end gap-1">
-                      <Timer className="h-4 w-4" />
-                      {conversationDuration}
-                  </p>
-                </div>
-              </div>
-          </CardContent>
+               <div className="flex justify-between items-end gap-4 text-sm">
+                 <div>
+                   {conversationId && (
+                     <>
+                       <Label className="text-sm font-bold text-muted-foreground">Conversation ID</Label>
+                       <p className="font-semibold text-primary">{conversationId}</p>
+                     </>
+                   )}
+                 </div>
+                 <div className="text-right">
+                   <Label className="text-sm font-bold text-muted-foreground">Conversation Duration</Label>
+                   <p className="font-semibold text-primary flex items-center justify-end gap-1">
+                       <Timer className="h-4 w-4" />
+                       {conversationDuration}
+                   </p>
+                 </div>
+               </div>
+           </CardContent>
         </Card>
 
         <Card data-printable-section="true" className="mb-6">
