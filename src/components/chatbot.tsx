@@ -48,7 +48,10 @@ export function Chatbot({ review }: ChatbotProps) {
     // Auto-scroll to bottom of messages
     useEffect(() => {
         if (scrollAreaRef.current) {
-            scrollAreaRef.current.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: 'smooth' });
+            const viewport = scrollAreaRef.current.querySelector('div[data-radix-scroll-area-viewport]');
+            if (viewport) {
+                viewport.scrollTop = viewport.scrollHeight;
+            }
         }
     }, [messages]);
 
@@ -95,7 +98,7 @@ export function Chatbot({ review }: ChatbotProps) {
                             <X className="h-4 w-4" />
                         </Button>
                     </CardHeader>
-                    <CardContent className="p-0 flex-1 flex flex-col">
+                    <CardContent className="p-0 flex-1 flex flex-col overflow-hidden">
                         <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
                             <div className="space-y-4">
                                 {messages.map((message, index) => (
