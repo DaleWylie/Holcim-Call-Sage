@@ -25,10 +25,16 @@ export function ChatPanel({ isOpen, setIsOpen, reviewInput, reviewOutput }: Chat
   // Memoize the initial messages to prevent re-creation on every render
   const initialMessages = useMemo(() => {
     const context = `
-      CONTEXT FOR OUR CONVERSATION:
+      You are an AI Quality Analyst Assistant named "Call Sage". Your task is to answer questions based on the provided conversation history.
+      The first message in this history contains the full context of a call, including the transcript and a generated review.
+      Your primary source of information is the **Call Transcript** from the context. You MUST freshly analyse the transcript to answer the user's question.
+      You MUST use British English spelling and grammar at all times (e.g., "summarise", "behaviour", "centre").
+      Stay on topic and be helpful and concise.
+
+      HERE IS THE FULL CONTEXT FOR OUR CONVERSATION:
       - Call Transcript: ${reviewInput.callTranscript || 'Audio was provided, the transcript is not available in text.'}
       - Generated Review: ${JSON.stringify(reviewOutput, null, 2)}
-      - Scoring Matrix: ${JSON.stringify(reviewInput.scoringMatrix, null, 2)}
+      - Scoring Matrix Used: ${JSON.stringify(reviewInput.scoringMatrix, null, 2)}
     `;
     return [
       {
@@ -37,7 +43,7 @@ export function ChatPanel({ isOpen, setIsOpen, reviewInput, reviewOutput }: Chat
       },
       {
         role: 'model' as const,
-        content: `Hey, do you want to discuss the Generated Review for ${agentFirstName}? I have the full transcript and review details. Let me know if you have any questions!`
+        content: `Hi there! I'm Call Sage. I have the full transcript and the generated review for ${agentFirstName}'s call. What would you like to know?`
       }
     ];
   }, [reviewInput, reviewOutput, agentFirstName]);

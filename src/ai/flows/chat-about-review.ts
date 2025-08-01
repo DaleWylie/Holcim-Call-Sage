@@ -46,22 +46,10 @@ const chatAboutReviewFlow = ai.defineFlow(
   },
   async (input) => {
     
-    // Construct the full prompt including the fixed instructions and the new user question.
-    const fullPrompt = `You are an AI Quality Analyst Assistant named "Call Sage". Your task is to answer questions based on the provided conversation history, which contains a call transcript and a generated review.
-
-      **CRITICAL INSTRUCTIONS:**
-      1.  **Primary Source of Truth**: Your primary source of information is the **Call Transcript** provided in the chat history. You MUST freshly analyse the transcript to answer the user's question.
-      2.  **Be Specific**: When the user asks for specific details (like a timestamp), you MUST find that detail in the transcript. Do not state that you don't have access to it.
-      3.  **Use British English**: You MUST use British English spelling and grammar at all times (e.g., "summarise", "behaviour", "centre").
-      4.  **Stay on Topic**: Be helpful, concise, and directly answer the user's question based on the facts from the call data. If the user asks for an opinion or something outside the provided context, politely state that you can only answer questions based on the call data.
-
-      **USER'S NEW QUESTION:**
-      ${input.question}`;
-
     try {
       const response = await ai.generate({
         model: googleAI.model('gemini-2.0-flash'),
-        prompt: fullPrompt,
+        prompt: input.question,
         history: input.chatHistory.map(m => ({ role: m.role, parts: [{ text: m.content }] })),
         config: {
             temperature: 0,
