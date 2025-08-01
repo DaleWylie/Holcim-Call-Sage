@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, User, Fingerprint, Settings, List, Info } from 'lucide-react';
+import { Loader2, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, User, Fingerprint, Settings, List, Info, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from './ui/badge';
 import { ReviewDisplay } from './review-display';
@@ -35,6 +35,7 @@ import { generateNonBiasedReview, GenerateNonBiasedReviewOutput, GenerateNonBias
 import { useToast } from '@/hooks/use-toast';
 import { useScoringMatrixStore } from '@/store/scoring-matrix-store';
 import { ScrollArea } from './ui/scroll-area';
+import { cn } from '@/lib/utils';
 
 
 type ErrorState = {
@@ -76,6 +77,7 @@ export default function CallReviewForm() {
   const [error, setError] = useState<ErrorState | null>(null);
   const [review, setReview] = useState<GenerateNonBiasedReviewOutput | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isTranscriptOpen, setIsTranscriptOpen] = useState(false);
   const { toast } = useToast();
 
   const handleGenerateReview = async () => {
@@ -256,20 +258,25 @@ export default function CallReviewForm() {
 
                   <div className="text-center font-bold text-muted-foreground">OR</div>
 
-                  <div className="space-y-4 text-center">
-                      <Label htmlFor="callTranscript" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
-                          <ClipboardPaste className="h-5 w-5" />
-                          Input Call Transcript
-                      </Label>
-                      <Textarea
-                          id="callTranscript"
-                          className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-left"
-                          rows={5}
-                          value={callTranscript}
-                          onChange={(e) => setCallTranscript(e.target.value)}
-                          placeholder="Paste the complete transcript here..."
-                      />
-                  </div>
+                  <Collapsible open={isTranscriptOpen} onOpenChange={setIsTranscriptOpen} className="space-y-2 text-center">
+                      <CollapsibleTrigger className="w-full">
+                          <div className="text-lg font-semibold text-primary flex items-center justify-center gap-2 cursor-pointer hover:underline">
+                              <ClipboardPaste className="h-5 w-5" />
+                              Input Call Transcript
+                              <ChevronDown className={cn("h-4 w-4 transition-transform", isTranscriptOpen && "rotate-180")} />
+                          </div>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <Textarea
+                            id="callTranscript"
+                            className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-left mt-2"
+                            rows={5}
+                            value={callTranscript}
+                            onChange={(e) => setCallTranscript(e.target.value)}
+                            placeholder="Paste the complete transcript here..."
+                        />
+                      </CollapsibleContent>
+                  </Collapsible>
                   
                   <div className="space-y-4 text-center">
                       <Label className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
@@ -378,3 +385,5 @@ export default function CallReviewForm() {
     </>
   );
 }
+
+    
