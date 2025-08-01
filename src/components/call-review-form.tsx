@@ -286,7 +286,7 @@ export default function CallReviewForm() {
               </div>
 
               {/* Right Column */}
-              <div className="md:w-1/2 space-y-4 md:border-l md:pl-8 border-border">
+              <div className="md:w-1/2 space-y-4 md:border-l md:pl-8 border-border flex flex-col">
                   <div className="space-y-4 text-center">
                       <Label htmlFor="audioFile" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
                           <FileAudio className="h-5 w-5" />
@@ -349,7 +349,7 @@ export default function CallReviewForm() {
                       </Label>
                       <Input
                           id="conversationId"
-                          className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
+                          className="w-full max-w-sm mx-auto p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
                           value={conversationId}
                           onChange={(e) => setConversationId(e.target.value)}
                           placeholder="e.g. df14f08f-0377-4e25-875f-8f07140de97d"
@@ -361,9 +361,9 @@ export default function CallReviewForm() {
                         <User className="h-5 w-5" />
                         Agent Name
                       </Label>
-                      <div className="flex flex-col sm:flex-row gap-2">
+                      <div className="flex flex-col sm:flex-row gap-2 max-w-sm mx-auto">
                           <div className='w-full space-y-1'>
-                              <Label htmlFor="agentFirstName" className="text-sm font-semibold text-primary">First Name</Label>
+                              <Label htmlFor="agentFirstName" className="text-sm font-semibold text-primary text-center block">First Name</Label>
                               <Input
                                   id="agentFirstName"
                                   className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
@@ -373,7 +373,7 @@ export default function CallReviewForm() {
                               />
                           </div>
                           <div className='w-full space-y-1'>
-                              <Label htmlFor="agentLastName" className="text-sm font-semibold text-primary">Surname</Label>
+                              <Label htmlFor="agentLastName" className="text-sm font-semibold text-primary text-center block">Surname</Label>
                               <Input
                                   id="agentLastName"
                                   className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
