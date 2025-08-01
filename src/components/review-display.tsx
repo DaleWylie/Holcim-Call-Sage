@@ -426,7 +426,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                                     )}
                                 </div>
                             </div>
-                            <div className="pl-12">
+                            <div className="pl-14">
                                 {editingField === `justification-${index}` ? (
                                     <div className="flex flex-col gap-2">
                                         <Textarea
