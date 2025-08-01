@@ -9,7 +9,6 @@
 import { ai } from '@/ai/genkit';
 import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
-import type { GenerateNonBiasedReviewInput, GenerateNonBiasedReviewOutput } from './generate-non-biased-review';
 
 // Define the schema for a single chat message
 const ChatMessageSchema = z.object({
@@ -20,7 +19,6 @@ export type ChatMessage = z.infer<typeof ChatMessageSchema>;
 
 // Define the input schema for the chat flow
 const ChatAboutReviewInputSchema = z.object({
-  // The full context (transcript, etc) will now be passed in the chat history.
   chatHistory: z.array(ChatMessageSchema).describe("The history of the conversation so far."),
   question: z.string().describe("The user's latest question about the review."),
 });
@@ -48,7 +46,7 @@ const chatAboutReviewFlow = ai.defineFlow(
   },
   async (input) => {
     
-    // The prompt is now much simpler. The transcript and review context are expected to be in the history.
+    // Construct the full prompt including the fixed instructions and the new user question.
     const fullPrompt = `You are an AI Quality Analyst Assistant named "Call Sage". Your task is to answer questions based on the provided conversation history, which contains a call transcript and a generated review.
 
       **CRITICAL INSTRUCTIONS:**
