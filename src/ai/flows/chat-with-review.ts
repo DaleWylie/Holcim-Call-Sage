@@ -101,7 +101,7 @@ const chatWithReviewFlow = ai.defineFlow(
     }));
 
     try {
-      const { output } = await ai.generate({
+      const response = await ai.generate({
         model: googleAI.model('gemini-2.0-flash'),
         system: systemPrompt,
         history: history,
@@ -110,7 +110,12 @@ const chatWithReviewFlow = ai.defineFlow(
             temperature: 0.3,
         }
       });
-      return output.text;
+      
+      if (!response.text) {
+          throw new Error("The AI service returned an empty response.");
+      }
+      return response.text;
+
     } catch (err: any) {
       console.error(`Chat flow failed:`, err);
       throw new Error(`AI_CHAT_FAILED: The AI service was unable to process the chat request. Raw error: ${err.message}`);
