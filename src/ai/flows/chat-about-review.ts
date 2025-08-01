@@ -79,6 +79,10 @@ const chatAboutReviewFlow = ai.defineFlow(
         }
       });
       
+      if (!response.choices || response.choices.length === 0) {
+        throw new Error('The AI service returned a response with no choices. This may be due to safety filters or other content restrictions.');
+      }
+      
       const choice = response.choices[0];
       
       if (choice && choice.message.content && choice.message.content[0]?.text) {
