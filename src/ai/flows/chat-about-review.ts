@@ -56,13 +56,13 @@ const chatAboutReviewFlow = ai.defineFlow(
         }
       });
       
-      if (!response.choices || response.choices.length === 0) {
+      if (!response.choices || response.choices.length === 0 || !response.choices[0].message?.content) {
         throw new Error('The AI service returned a response with no choices. This may be due to safety filters or other content restrictions.');
       }
       
       const choice = response.choices[0];
       
-      if (choice && choice.message.content && choice.message.content[0]?.text) {
+      if (choice.message.content[0]?.text) {
          return {
             answer: choice.message.content[0].text,
          };

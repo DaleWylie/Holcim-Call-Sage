@@ -22,31 +22,14 @@ interface ChatPanelProps {
 export function ChatPanel({ isOpen, setIsOpen, reviewInput, reviewOutput }: ChatPanelProps) {
   const agentFirstName = reviewOutput.agentName.split(' ')[0] || 'the agent';
   
-  // Memoize the initial messages to prevent re-creation on every render
-  const initialMessages = useMemo(() => {
-    const context = `
-      You are an AI Quality Analyst Assistant named "Call Sage". Your task is to answer questions based on the provided conversation history.
-      The first message in this history contains the full context of a call, including the transcript and a generated review.
-      Your primary source of information is the **Call Transcript** from the context. You MUST freshly analyse the transcript to answer the user's question.
-      You MUST use British English spelling and grammar at all times (e.g., "summarise", "behaviour", "centre").
-      Stay on topic and be helpful and concise.
-
-      HERE IS THE FULL CONTEXT FOR OUR CONVERSATION:
-      - Call Transcript: ${reviewInput.callTranscript || 'Audio was provided, the transcript is not available in text.'}
-      - Generated Review: ${JSON.stringify(reviewOutput, null, 2)}
-      - Scoring Matrix Used: ${JSON.stringify(reviewInput.scoringMatrix, null, 2)}
-    `;
-    return [
-      {
-        role: 'user' as const,
-        content: context
-      },
-      {
-        role: 'model' as const,
-        content: `Hi there! I'm Call Sage. I have the full transcript and the generated review for ${agentFirstName}'s call. What would you like to know?`
-      }
-    ];
-  }, [reviewInput, reviewOutput, agentFirstName]);
+  const initialMessages: ChatMessage[] = useMemo(() => {
+      return [
+          {
+              role: 'model',
+              content: `Hi there! I'm Call Sage. Ask me anything about ${agentFirstName}'s call.`
+          }
+      ];
+  }, [agentFirstName]);
 
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [currentMessage, setCurrentMessage] = useState('');
@@ -62,19 +45,48 @@ export function ChatPanel({ isOpen, setIsOpen, reviewInput, reviewOutput }: Chat
         }
     }
   }, [messages, isLoading]);
+  
+  // When the chat panel is opened, we'll create the initial context message.
+  // This "primes" the AI with all the necessary information about the call.
+  const fullContextHistory: ChatMessage[] = useMemo(() => {
+    const context = `
+      You are an AI Quality Analyst Assistant named "Call Sage".
+      The user has just generated a review for a call and may have questions.
+      Your answers must be based on the following context. Do not make up information.
+      You MUST use British English spelling and grammar at all times (e.g., "summarise", "behaviour", "centre").
+
+      HERE IS THE FULL CONTEXT FOR OUR CONVERSATION:
+      - Call Transcript: ${reviewInput.callTranscript || 'An audio file was provided, so the full transcript is not available in this text context. Base your answers on the generated review.'}
+      - Generated Review: ${JSON.stringify(reviewOutput, null, 2)}
+      - Scoring Matrix Used: ${JSON.stringify(reviewInput.scoringMatrix, null, 2)}
+    `;
+    
+    return [
+      { role: 'user', content: context },
+      ...initialMessages
+    ];
+
+  }, [reviewInput, reviewOutput, initialMessages]);
+
 
   const handleSendMessage = async () => {
     if (!currentMessage.trim() || isLoading) return;
 
     const userMessage: ChatMessage = { role: 'user', content: currentMessage };
-    const newMessages = [...messages, userMessage];
-    setMessages(newMessages);
+    
+    // Add the user's message to the visible chat
+    const newVisibleMessages = [...messages, userMessage];
+    setMessages(newVisibleMessages);
+    
+    // The history for the AI includes the hidden context
+    const historyForAI = [...fullContextHistory.slice(0, 1), ...newVisibleMessages];
+
     setCurrentMessage('');
     setIsLoading(true);
 
     try {
         const result = await chatAboutReview({
-            chatHistory: newMessages, // Pass the full history, including our context
+            chatHistory: historyForAI,
             question: userMessage.content,
         });
 
@@ -107,11 +119,6 @@ export function ChatPanel({ isOpen, setIsOpen, reviewInput, reviewOutput }: Chat
              <ScrollArea className="h-full" ref={scrollAreaRef}>
                 <div className="space-y-4 p-4">
                     {messages.map((msg, index) => {
-                      // Do not render the initial context message to the user
-                      if (index === 0 && msg.role === 'user') {
-                        return null;
-                      }
-                      
                       return (
                         <div
                           key={index}
