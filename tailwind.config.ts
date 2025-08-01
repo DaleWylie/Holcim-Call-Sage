@@ -19,39 +19,6 @@ export default {
         headline: ['Arial', 'PT Sans', 'sans-serif'],
         code: ['monospace'],
       },
-      typography: (theme) => ({
-        DEFAULT: {
-          css: {
-            '--tw-prose-body': theme('colors.foreground'),
-            '--tw-prose-headings': theme('colors.primary.DEFAULT'),
-            '--tw-prose-lead': theme('colors.foreground'),
-            '--tw-prose-links': theme('colors.primary.DEFAULT'),
-            '--tw-prose-bold': theme('colors.foreground'),
-            '--tw-prose-counters': theme('colors.muted.foreground'),
-            '--tw-prose-bullets': theme('colors.primary.DEFAULT'),
-            '--tw-prose-hr': theme('colors.border'),
-            '--tw-prose-quotes': theme('colors.foreground'),
-            '--tw-prose-quote-borders': theme('colors.primary.DEFAULT'),
-            '--tw-prose-captions': theme('colors.muted.foreground'),
-            '--tw-prose-code': theme('colors.foreground'),
-            '--tw-prose-pre-code': theme('colors.foreground'),
-            '--tw-prose-pre-bg': theme('colors.muted.DEFAULT'),
-            '--tw-prose-th-borders': theme('colors.border'),
-            '--tw-prose-td-borders': theme('colors.border'),
-            'p, ul, ol': {
-                margin: '0',
-                padding: '0',
-            },
-            'ul, ol': {
-                paddingLeft: '1.5em',
-            },
-            'li': {
-                marginTop: '0.25em',
-                marginBottom: '0.25em',
-            },
-          },
-        },
-      }),
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
