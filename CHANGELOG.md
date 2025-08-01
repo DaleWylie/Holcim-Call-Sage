@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4.0] - 2024-08-02
 
 ### Added
+- **"Call Sage" Chatbot (Beta)**: After a review is generated, a new chatbot is available to discuss the review in detail, providing follow-up analysis and answering questions about the scoring.
 - **Chatbot Transcript Download**: A "Download Transcript" button has been added to the chatbot interface, allowing users to save the full conversation with the AI as a `.txt` file for their records.
 
 ### Changed

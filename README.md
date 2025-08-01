@@ -19,7 +19,7 @@ Holcim Call Sage is an internal tool designed to assist in the quality managemen
 -   **Clickable Timestamps**: The generated review includes timestamps for justifications, good points, and areas for improvement. Clicking on a timestamp in the web view jumps the audio player to that exact moment in the call, making verification seamless.
 -   **Structured Feedback**: The output includes a clear breakdown of scores for each criterion, a list of "Good Points," a concise summary, and actionable "Areas for Improvement."
 -   **Human Verification & Override**: All AI-generated text and scores can be edited directly in the UI, giving the human checker full control over the final report.
--   **Chatbot with Transcript Download**: After a review is generated, a chatbot appears, allowing you to ask follow-up questions about the review. The entire chat conversation can be downloaded as a `.txt` file.
+-   **Chatbot with Transcript Download (Beta)**: After a review is generated, a chatbot appears, allowing you to ask follow-up questions about the review. The entire chat conversation can be downloaded as a `.txt` file.
 -   **PDF Export**: The final, human-verified review can be exported as a professional multi-page PDF document, including the checker's name and the date of review. The exported report is cleanly formatted and does not include interactive elements like the audio player.
 
 ## How to Use the Application
@@ -51,7 +51,7 @@ Holcim Call Sage is an internal tool designed to assist in the quality managemen
     -   In the "Checked By" section at the bottom of the review, enter your name.
     -   Click the **"Print to PDF"** button to save a final, verified copy of the report.
 
-5.  **Discuss with the Chatbot**:
+5.  **Discuss with the Chatbot (Beta)**:
     -   After a review is generated, a **Chatbot** icon will appear in the bottom-right corner.
     -   Click it to open the chat window and ask follow-up questions about the review.
     -   Use the **Download Transcript** button inside the chat window to save your conversation.
