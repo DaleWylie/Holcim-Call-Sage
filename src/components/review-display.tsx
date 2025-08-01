@@ -194,18 +194,36 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
   };
   
  const handlePrint = async () => {
-    const mainElement = reviewRef.current;
-    if (!mainElement) return;
+    const printContainer = reviewRef.current;
+    if (!printContainer) return;
 
     setIsPrinting(true);
 
     try {
-        const canvas = await html2canvas(mainElement, {
-            scale: 2,
-            useCORS: true,
-            onclone: (doc) => {
-                const clonedElement = doc.querySelector<HTMLElement>(`[data-review-id="${mainElement.dataset.reviewId}"]`);
-                if (clonedElement) {
+        const originalBackgroundColor = printContainer.style.backgroundColor;
+        printContainer.style.backgroundColor = 'white';
+        
+        const pdf = new jsPDF({
+            orientation: 'p',
+            unit: 'pt',
+            format: 'a4'
+        });
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const margin = 40;
+        let yPos = margin;
+
+        const sections = Array.from(printContainer.querySelectorAll<HTMLElement>('[data-printable-section="true"]'));
+
+        for (const section of sections) {
+             const canvas = await html2canvas(section, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: null,
+                onclone: (doc) => {
+                    const clonedElement = doc.body;
+                    clonedElement.style.backgroundColor = 'white';
                     clonedElement.querySelectorAll('[data-printable="false"]').forEach(el => {
                         (el as HTMLElement).style.display = 'none';
                     });
@@ -221,43 +239,25 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                     const checkerText = clonedElement.querySelector<HTMLParagraphElement>('#checkerNameDisplay');
                     if (checkerText) checkerText.style.display = 'block';
                 }
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+            
+            if (yPos + imgHeight > pdfHeight - margin) {
+                pdf.addPage();
+                yPos = margin;
             }
-        });
 
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF({
-            orientation: 'p',
-            unit: 'pt',
-            format: 'a4'
-        });
-
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        
-        const canvasWidth = canvas.width;
-        const canvasHeight = canvas.height;
-        
-        const ratio = canvasWidth / pdfWidth;
-        const imgHeight = canvasHeight / ratio;
-
-        let heightLeft = imgHeight;
-        let position = 0;
-        
-        // Add the first page
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-        heightLeft -= pdfHeight;
-
-        // Add subsequent pages if content is taller than one page
-        while (heightLeft > 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-            heightLeft -= pdfHeight;
+            pdf.addImage(imgData, 'PNG', margin, yPos, pdfWidth - (margin * 2), imgHeight);
+            yPos += imgHeight + 15; // Add some padding between sections
         }
 
         const safeAgentName = review.agentName.replace(/\s+/g, '-');
         const safeConversationId = conversationId.replace(/\s+/g, '');
         pdf.save(`${safeAgentName}_${safeConversationId}.pdf`);
+
+        printContainer.style.backgroundColor = originalBackgroundColor;
 
     } catch (error) {
         console.error("Failed to generate PDF:", error);
