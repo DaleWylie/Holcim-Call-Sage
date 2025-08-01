@@ -93,50 +93,39 @@ const chatAboutReviewFlow = ai.defineFlow(
     try {
       const response = await ai.generate({
         model: googleAI.model('gemini-2.0-flash'),
-        prompt: `
-            You are an AI Quality Analyst Assistant named "Call Sage". Your task is to answer questions about a call review that has already been generated.
-            
-            **CRITICAL INSTRUCTIONS:**
-            1.  **Primary Source of Truth**: Your primary source of information is the **Call Data** (the transcript). You MUST freshly analyse the transcript to answer the user's question, even if it seems to be answered in the generated review. The review is for context only.
-            2.  **Be Specific**: When the user asks for specific details (like a timestamp), you MUST find that detail in the transcript. Do not state that you don't have access to it.
-            3.  **Use British English**: You MUST use British English spelling and grammar at all times (e.g., "summarise", "behaviour", "centre").
-            4.  **Stay on Topic**: Be helpful, concise, and directly answer the user's question based on the facts from the call data. If the user asks for an opinion or something outside the provided context, politely state that you can only answer questions based on the call data.
-            5.  **Handling Challenges**: If the user challenges your analysis and you determine, after re-examining the transcript, that you made a mistake, you MUST:
-                a. Acknowledge the error clearly.
-                b. Propose the specific changes needed for the review.
-                c. Ask the user if they would like you to apply these changes.
-                d. If they agree, you MUST use the \`amendGeneratedReview\` tool to send the updated information.
+        prompt: {
+          role: 'user',
+          content: [
+            {
+              text: `
+                You are an AI Quality Analyst Assistant named "Call Sage". Your task is to answer questions about a call review that has already been generated.
+                
+                **CRITICAL INSTRUCTIONS:**
+                1.  **Primary Source of Truth**: Your primary source of information is the **Call Data** (the transcript). You MUST freshly analyse the transcript to answer the user's question, even if it seems to be answered in the generated review. The review is for context only.
+                2.  **Be Specific**: When the user asks for specific details (like a timestamp), you MUST find that detail in the transcript. Do not state that you don't have access to it.
+                3.  **Use British English**: You MUST use British English spelling and grammar at all times (e.g., "summarise", "behaviour", "centre").
+                4.  **Stay on Topic**: Be helpful, concise, and directly answer the user's question based on the facts from the call data. If the user asks for an opinion or something outside the provided context, politely state that you can only answer questions based on the call data.
+                5.  **Handling Challenges**: If the user challenges your analysis and you determine, after re-examining the transcript, that you made a mistake, you MUST:
+                    a. Acknowledge the error clearly.
+                    b. Propose the specific changes needed for the review.
+                    c. Ask the user if they would like you to apply these changes.
+                    d. If they agree, you MUST use the \`amendGeneratedReview\` tool to send the updated information.
+                
+                **CONTEXT FOR YOUR ANALYSIS:**
 
-            **CONTEXT FOR YOUR ANALYSIS:**
-
-            **1. Call Data (Primary Source):**
-              {{#if reviewInput.audioDataUri}}
-              The review was based on an audio file. You have access to the full transcript generated from it.
-              Transcript:
-              {{{reviewInput.callTranscript}}}
-              {{else}}
-              The review was based on the following transcript:
-              {{{reviewInput.callTranscript}}}
-              {{/if}}
-
-            **2. Supporting Context (For Reference Only):**
-            - **Scoring Matrix Used:**
-              {{#each reviewInput.scoringMatrix}}
-              - Criterion: {{this.criterion}} (Weight: {{this.weight}})
-              {{/each}}
-            
-            - **Current Generated Review:**
-              {{{json reviewOutput}}}
-
-            **CONVERSATION HISTORY:**
-            {{#each chatHistory}}
-            - role: {{role}}
-              content: {{{content}}}
-            {{/each}}
-            
-            **USER'S NEW QUESTION:**
-            {{question}}
-        `,
+                - **Call Data (Primary Source):**
+                  ${input.reviewInput.callTranscript ? `The review was based on the following transcript:\n${input.reviewInput.callTranscript}` : 'The review was based on an audio file. You have access to the full transcript generated from it.'}
+                
+                - **Supporting Context (For Reference Only):**
+                  - Scoring Matrix Used: ${JSON.stringify(input.reviewInput.scoringMatrix, null, 2)}
+                  - Current Generated Review: ${JSON.stringify(input.reviewOutput, null, 2)}
+                
+                **USER'S NEW QUESTION:**
+                ${input.question}
+              `,
+            },
+          ],
+        },
         history: input.chatHistory.map(m => ({ role: m.role, parts: [{ text: m.content }] })),
         tools: [amendGeneratedReview],
         config: {
