@@ -106,6 +106,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
     
     return () => {
       if (audioRef.current) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         audioRef.current.removeEventListener('loadedmetadata', getDuration);
       }
     };
@@ -631,3 +632,5 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
     </div>
   )
 }
+
+    
