@@ -8,6 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
 import type { GenerateNonBiasedReviewInput, GenerateNonBiasedReviewOutput } from './generate-non-biased-review';
 
@@ -95,8 +96,11 @@ const chatAboutReviewFlow = ai.defineFlow(
     outputSchema: ChatAboutReviewOutputSchema,
   },
   async (input) => {
+    const model = googleAI.model('gemini-2.0-flash');
+
     try {
       const { output } = await chatAboutReviewPrompt(input, {
+        model,
         config: {
             temperature: 0.1,
         }
