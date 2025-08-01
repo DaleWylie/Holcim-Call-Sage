@@ -36,6 +36,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useScoringMatrixStore } from '@/store/scoring-matrix-store';
 import { ScrollArea } from './ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { Separator } from './ui/separator';
 
 
 type ErrorState = {
@@ -278,6 +279,8 @@ export default function CallReviewForm() {
                       </CollapsibleContent>
                   </Collapsible>
                   
+                  <Separator className="my-6" />
+
                   <div className="space-y-4 text-center">
                       <Label className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
                         <User className="h-5 w-5" />
