@@ -1,23 +1,25 @@
-# Holcim Call Sage (v1.3.0)
+# Holcim Call Sage (v1.3.1)
 
 **AI-Powered Quality Assistant for Holcim**
 
 ## Overview
 
-Holcim Call Sage is an internal tool designed to assist in the quality management process for call center interactions. It leverages Generative AI to provide a non-biased review of call transcripts or recordings based on a structured scoring matrix. The application analyzes the conversation, scores the analyst against predefined criteria, extracts key information, and provides actionable feedback for improvement.
+Holcim Call Sage is an internal tool designed to assist in the quality management process for call center interactions. It leverages Generative AI to provide a non-biased, gender-neutral review of call transcripts or recordings based on a structured scoring matrix. The application analyzes the conversation, scores the analyst against predefined criteria, extracts key information, and provides actionable feedback for improvement.
 
 ## Core Features
 
 -   **AI-Powered Review Generation**: Automatically generates a structured and objective review of a call, including scores, justifications, an overall summary, and refers to the agent by their first name for a friendlier tone.
+-   **Gender-Neutral Language**: The AI is instructed to use gender-neutral pronouns (they/them), ensuring an unbiased and professional review.
 -   **Standardised Scoring Matrix**: The application uses a core, rigid scoring matrix to ensure a consistent evaluation baseline for all standard reviews.
 -   **Ad-Hoc Custom Criteria**: Quality managers can add their own temporary criteria via the Settings panel for specific, one-off evaluations. These criteria are session-based and reset on page reload.
 -   **Transcript & Audio Input**: Users can either paste a call transcript directly or upload a `.wav` audio recording for the AI to transcribe and analyze.
 -   **Automatic Conversation ID Extraction**: When uploading a `.wav` file, the tool automatically extracts a UUID (e.g., `4c531619-...`) from the filename and populates the Conversation ID field.
 -   **Integrated Audio Player**: When a `.wav` file is used, an audio player appears, allowing for direct playback of the call recording within the app. The generated review also includes the total "Conversation Duration".
+-   **Accurate Timestamps**: The AI is given the total call duration to prevent it from hallucinating timestamps that are outside the bounds of the actual conversation.
 -   **Clickable Timestamps**: The generated review includes timestamps for justifications, good points, and areas for improvement. Clicking on a timestamp in the web view jumps the audio player to that exact moment in the call, making verification seamless.
 -   **Structured Feedback**: The output includes a clear breakdown of scores for each criterion, a list of "Good Points," a concise summary, and actionable "Areas for Improvement."
 -   **Human Verification & Override**: All AI-generated text and scores can be edited directly in the UI, giving the human checker full control over the final report.
--   **PDF Export**: The final, human-verified review can be exported as a professional PDF document, including the checker's name and the date of review. The exported report is clean and does not include interactive elements like the audio player.
+-   **PDF Export**: The final, human-verified review can be exported as a professional multi-page PDF document, including the checker's name and the date of review. The exported report is cleanly formatted and does not include interactive elements like the audio player.
 
 ## How to Use the Application
 
@@ -32,8 +34,8 @@ Holcim Call Sage is an internal tool designed to assist in the quality managemen
         -   **Option A (Recommended): Upload Audio**: Click the "Select .wav file" button to upload a call recording. The AI will handle the transcription automatically. If the filename contains a UUID, the **Conversation ID** field will be auto-filled.
         -   **Option B: Paste Transcript**: Click the "Input Call Transcript" text to reveal a text area. Copy the call transcript from its source and paste it in.
     -   *Note: If a `.wav` file is uploaded, it will take priority, and any text in the transcript box will be disregarded.*
-    -   **Agent Name**: Enter the agent's first name and surname. This is a mandatory field.
     -   **Conversation ID**: Enter the unique identifier for the call (e.g., from Genesys Cloud). This is a mandatory field.
+    -   **Agent Name**: Enter the agent's first name and surname. This is a mandatory field.
 
 3.  **Generate the Review**:
     -   Click the **"Generate Call Review"** button at the bottom.

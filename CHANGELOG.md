@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2024-08-02
+
+### Changed
+- **AI Timestamp Accuracy**: The AI is now provided with the total conversation duration and is explicitly instructed not to hallucinate timestamps that fall outside of the actual call length.
+- **Gender-Neutral Language**: Updated the AI prompt to ensure it uses gender-neutral pronouns (they/them) when referring to the agent, avoiding any assumptions about gender.
+- **UI/UX Refinements**:
+    - The labels for "Agent Name," "Overall Score," "Conversation ID," and "Conversation Duration" in the generated review now have a consistent, bold style for better visual hierarchy.
+    - Text colors for justifications and summaries have been unified for improved readability.
+    - Key data points like the Agent's Name and Conversation ID now use the primary theme color to stand out.
+- **Workflow Improvement**: On the main form, the "Conversation ID" input field now appears before the "Agent Name" fields for a more logical workflow.
+
+### Fixed
+- **PDF Export Rendering**: Refactored the PDF generation logic to render each major section of the report individually. This prevents page breaks from occurring in the middle of a content block, resulting in a cleaner and more professional multi-page document.
+
 ## [1.3.0] - 2024-08-02
 
 ### Added
