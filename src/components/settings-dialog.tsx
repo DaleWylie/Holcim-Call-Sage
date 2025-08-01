@@ -54,7 +54,7 @@ export function SettingsDialog({ setOpen }: SettingsDialogProps) {
   useEffect(() => {
     // When the dialog opens, initialize local state with the current custom criteria
     setLocalCustomMatrix(customScoringMatrix);
-  }, [customScoringMatrix, setOpen]);
+  }, [customScoringMatrix]);
 
   const handleMatrixChange = (id: string, field: 'criterion' | 'description', value: string) => {
     const newMatrix = localCustomMatrix.map(item => 
@@ -67,7 +67,8 @@ export function SettingsDialog({ setOpen }: SettingsDialogProps) {
     const newItem: ScoringItem = {
       id: crypto.randomUUID(),
       criterion: `New Custom Criterion ${localCustomMatrix.length + 1}`,
-      description: ""
+      description: "",
+      weight: 0,
     };
     
     const newMatrix = [...localCustomMatrix, newItem];
