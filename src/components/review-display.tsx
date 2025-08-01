@@ -10,7 +10,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardFooter
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -194,7 +193,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
     setEditingField(null);
   };
   
-  const handlePrint = async () => {
+ const handlePrint = async () => {
     const mainElement = reviewRef.current;
     if (!mainElement) return;
 
@@ -202,27 +201,21 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
 
     try {
         const canvas = await html2canvas(mainElement, {
-            scale: 2, // Higher scale for better quality
+            scale: 2,
             useCORS: true,
             onclone: (doc) => {
-                // This function runs on the cloned document before rendering
-                // We can use it to apply print-specific styles
                 const clonedElement = doc.querySelector<HTMLElement>(`[data-review-id="${mainElement.dataset.reviewId}"]`);
                 if (clonedElement) {
-                    // Hide non-printable elements like audio player and action buttons
                     clonedElement.querySelectorAll('[data-printable="false"]').forEach(el => {
                         (el as HTMLElement).style.display = 'none';
                     });
-                    // Show elements that are only for printing
                     clonedElement.querySelectorAll('.printable-only').forEach(el => {
                          (el as HTMLElement).style.display = 'inline';
                          (el as HTMLElement).style.fontWeight = '600';
                     });
-                    // Hide the standard interactive elements
                     clonedElement.querySelectorAll('.printable-hidden').forEach(el => {
                         (el as HTMLElement).style.display = 'none';
                     });
-                    // Hide checker input, show static text
                     const checkerInput = clonedElement.querySelector<HTMLInputElement>('#checkerName');
                     if(checkerInput) checkerInput.style.display = 'none';
                     const checkerText = clonedElement.querySelector<HTMLParagraphElement>('#checkerNameDisplay');
@@ -240,38 +233,26 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
 
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
+        
         const canvasWidth = canvas.width;
         const canvasHeight = canvas.height;
-        const canvasAspectRatio = canvasWidth / canvasHeight;
         
-        const margin = 20;
-        let imgWidth = pdfWidth - margin * 2;
-        let imgHeight = imgWidth / canvasAspectRatio;
+        const ratio = canvasWidth / pdfWidth;
+        const imgHeight = canvasHeight / ratio;
 
-        // If the content is too tall, it needs to be split across pages
         let heightLeft = imgHeight;
-        let yPos = margin;
+        let position = 0;
+        
+        // Add the first page
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+        heightLeft -= pdfHeight;
 
+        // Add subsequent pages if content is taller than one page
         while (heightLeft > 0) {
-            // Check if it's not the first page
-            if (yPos > margin) {
-                pdf.addPage();
-                yPos = margin;
-            }
-            
-            let pageHeight = pdfHeight - margin * 2;
-            let currentChunkHeight = Math.min(heightLeft, pageHeight);
-
-            pdf.addImage(
-                imgData,
-                'PNG',
-                margin, // x
-                yPos - ((imgHeight - heightLeft)), // y (this is the tricky part for slicing)
-                imgWidth,
-                imgHeight
-            );
-            
-            heightLeft -= pageHeight;
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+            heightLeft -= pdfHeight;
         }
 
         const safeAgentName = review.agentName.replace(/\s+/g, '-');
@@ -285,6 +266,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
     }
   };
 
+
   const reviewId = useMemo(() => `review-${conversationId}`, [conversationId]);
 
 
@@ -293,7 +275,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
       <div 
         ref={reviewRef} 
         data-review-id={reviewId}
-        className="bg-gray-50/50 dark:bg-background/50 p-6 rounded-lg border border-border shadow-inner text-left mt-8"
+        className="bg-white p-6 rounded-lg border border-border shadow-lg mt-8 print-container"
       >
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold text-foreground font-headline flex items-center gap-2">
@@ -313,19 +295,20 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
         <Card data-printable-section="true" className="mb-6">
           <CardHeader>
             <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <Label className="text-sm font-bold text-muted-foreground">Agent Name</Label>
-                 <div className="flex items-center gap-2">
+              <div className="flex-1 space-y-2">
+                <div>
+                    <Label className="text-sm font-bold text-muted-foreground">Agent Name</Label>
                     <h3 className="text-2xl font-bold text-primary">{review.agentName}</h3>
-                  </div>
-                
-                <Label className="text-sm font-bold text-muted-foreground pt-4 block">Quick Summary</Label>
-                <p className="text-foreground">{review.quickSummary}</p>
+                </div>
+                <div>
+                    <Label className="text-sm font-bold text-muted-foreground">Quick Summary</Label>
+                    <p className="text-foreground">{review.quickSummary}</p>
+                </div>
               </div>
-              <div className="text-center ml-4">
+              <div className="text-center ml-4 flex-shrink-0">
                   <Label className="text-sm font-bold text-muted-foreground block text-center">Overall Score</Label>
                   <div className={cn(
-                    "mt-1 flex items-center justify-center w-16 h-16 rounded-full text-white text-xl font-bold",
+                    "mt-1 flex items-center justify-center w-20 h-20 rounded-full text-white text-2xl font-bold",
                     getScoreColor(review.overallScore, 100)
                   )}>
                     {review.overallScore.toFixed(0)}%
@@ -333,9 +316,9 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
               </div>
             </div>
            </CardHeader>
-           <CardContent className="pt-4 pb-4">
-               <div className="flex justify-between items-end gap-4 text-sm">
-                 <div>
+           <CardContent className="pt-2 pb-4 border-t">
+               <div className="flex justify-between items-center gap-4 text-sm mt-2">
+                 <div className="space-y-1">
                    {conversationId && (
                      <>
                        <Label className="text-sm font-bold text-muted-foreground">Conversation ID</Label>
@@ -343,7 +326,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                      </>
                    )}
                  </div>
-                 <div className="text-right">
+                 <div className="text-right space-y-1">
                    <Label className="text-sm font-bold text-muted-foreground">Conversation Duration</Label>
                    <p className="font-semibold text-primary flex items-center justify-end gap-1">
                        <Timer className="h-4 w-4" />
