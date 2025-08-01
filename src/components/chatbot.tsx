@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { chatWithReview, ChatWithReviewInput } from '@/ai/flows/chat-with-review';
 import { useScoringMatrixStore } from '@/store/scoring-matrix-store';
 import type { GenerateNonBiasedReviewOutput } from '@/ai/flows/generate-non-biased-review';
+import ReactMarkdown from 'react-markdown';
 
 interface ChatbotProps {
     review: GenerateNonBiasedReviewOutput;
@@ -110,31 +111,32 @@ export function Chatbot({ review }: ChatbotProps) {
                         <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
                             <div className="space-y-4">
                                 {messages.map((message, index) => (
-                                    <div key={index} className={cn("flex items-end gap-2", message.role === 'user' ? "justify-end" : "justify-start")}>
+                                    <div key={index} className={cn("flex items-start gap-2", message.role === 'user' ? "justify-end" : "justify-start")}>
                                         {message.role === 'model' && (
-                                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                                                <FaRobot className="h-4 w-4" />
+                                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                                                <FaRobot className="h-5 w-5" />
                                             </div>
                                         )}
                                         <div className={cn(
-                                            "rounded-lg px-3 py-2 max-w-[80%] text-sm",
+                                            "rounded-lg px-3 py-2 max-w-[80%] text-sm prose prose-sm",
                                             message.role === 'user'
                                                 ? "bg-primary text-primary-foreground"
-                                                : "bg-muted text-muted-foreground"
+                                                : "bg-muted text-muted-foreground",
+                                            "prose-headings:text-inherit prose-p:text-inherit prose-strong:text-inherit prose-ul:text-inherit prose-ol:text-inherit prose-li:text-inherit"
                                         )}>
-                                            {message.content}
+                                            <ReactMarkdown>{message.content}</ReactMarkdown>
                                         </div>
                                          {message.role === 'user' && (
-                                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
-                                                <User className="h-4 w-4" />
+                                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
+                                                <User className="h-5 w-5" />
                                             </div>
                                         )}
                                     </div>
                                 ))}
                                 {isLoading && (
-                                    <div className="flex items-end gap-2 justify-start">
-                                         <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                                             <FaRobot className="h-4 w-4" />
+                                    <div className="flex items-start gap-2 justify-start">
+                                         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                                             <FaRobot className="h-5 w-5" />
                                          </div>
                                          <div className="rounded-lg px-3 py-2 bg-muted text-muted-foreground">
                                             <Loader2 className="h-4 w-4 animate-spin" />

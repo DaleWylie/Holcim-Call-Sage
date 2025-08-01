@@ -83,6 +83,8 @@ const chatWithReviewFlow = ai.defineFlow(
       You have access to the full generated review and the scoring matrix that was used. Use this information to answer questions and explain your reasoning.
       When the user asks a question, ground your answer in the facts from the provided JSON data.
 
+      **CRITICAL FORMATTING INSTRUCTION:** You MUST format your responses using Markdown to improve readability. Use lists, bold text, and other formatting where appropriate to break up text and present information clearly.
+
       **Review Context:**
       \`\`\`json
       ${JSON.stringify(input.reviewContext, null, 2)}
