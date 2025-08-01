@@ -20,7 +20,13 @@ interface ChatPanelProps {
 }
 
 export function ChatPanel({ isOpen, setIsOpen, reviewInput, reviewOutput }: ChatPanelProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const agentFirstName = reviewOutput.agentName.split(' ')[0] || 'the agent';
+  const initialMessage: ChatMessage = {
+    role: 'model',
+    content: `Hey, do you want to discuss the Generated Review for ${agentFirstName}? Let me know if you have any questions!`
+  };
+
+  const [messages, setMessages] = useState<ChatMessage[]>([initialMessage]);
   const [currentMessage, setCurrentMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
