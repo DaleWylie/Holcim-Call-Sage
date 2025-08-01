@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, Send, X } from 'lucide-react';
+import { Loader2, Send, X, User } from 'lucide-react';
 import { FaRobot } from 'react-icons/fa';
 import { cn } from '@/lib/utils';
 import { chatWithReview, ChatWithReviewInput } from '@/ai/flows/chat-with-review';
@@ -47,13 +47,15 @@ export function Chatbot({ review }: ChatbotProps) {
 
     // Auto-scroll to bottom of messages
     useEffect(() => {
-        if (scrollAreaRef.current) {
+        if (isOpen && scrollAreaRef.current) {
             const viewport = scrollAreaRef.current.querySelector('div[data-radix-scroll-area-viewport]');
             if (viewport) {
-                viewport.scrollTop = viewport.scrollHeight;
+                setTimeout(() => {
+                    viewport.scrollTop = viewport.scrollHeight;
+                }, 0);
             }
         }
-    }, [messages]);
+    }, [messages, isOpen]);
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -86,15 +88,15 @@ export function Chatbot({ review }: ChatbotProps) {
     };
 
     return (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className="fixed bottom-4 right-4 z-50">
             {isOpen ? (
-                <Card className="w-80 h-96 shadow-2xl flex flex-col">
+                <Card className="w-80 h-[28rem] shadow-2xl flex flex-col">
                     <CardHeader className="flex flex-row items-center justify-between p-4 border-b">
                         <CardTitle className="text-lg font-bold text-primary flex items-center gap-2">
                             <FaRobot />
                             Call Sage Chat
                         </CardTitle>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsOpen(false)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-primary hover:text-primary-foreground" onClick={() => setIsOpen(false)}>
                             <X className="h-4 w-4" />
                         </Button>
                     </CardHeader>
@@ -102,7 +104,12 @@ export function Chatbot({ review }: ChatbotProps) {
                         <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
                             <div className="space-y-4">
                                 {messages.map((message, index) => (
-                                    <div key={index} className={cn("flex", message.role === 'user' ? "justify-end" : "justify-start")}>
+                                    <div key={index} className={cn("flex items-end gap-2", message.role === 'user' ? "justify-end" : "justify-start")}>
+                                        {message.role === 'model' && (
+                                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                                                <FaRobot className="h-4 w-4" />
+                                            </div>
+                                        )}
                                         <div className={cn(
                                             "rounded-lg px-3 py-2 max-w-[80%] text-sm",
                                             message.role === 'user'
@@ -111,10 +118,18 @@ export function Chatbot({ review }: ChatbotProps) {
                                         )}>
                                             {message.content}
                                         </div>
+                                         {message.role === 'user' && (
+                                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
+                                                <User className="h-4 w-4" />
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                                 {isLoading && (
-                                    <div className="flex justify-start">
+                                    <div className="flex items-end gap-2 justify-start">
+                                         <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                                             <FaRobot className="h-4 w-4" />
+                                         </div>
                                          <div className="rounded-lg px-3 py-2 bg-muted text-muted-foreground">
                                             <Loader2 className="h-4 w-4 animate-spin" />
                                          </div>
@@ -140,9 +155,9 @@ export function Chatbot({ review }: ChatbotProps) {
             ) : (
                 <Button
                     onClick={() => setIsOpen(true)}
-                    className="rounded-full w-16 h-16 shadow-lg flex items-center justify-center bg-primary hover:bg-primary/90"
+                    className="rounded-full w-14 h-14 shadow-lg flex items-center justify-center bg-primary hover:bg-primary/90"
                 >
-                    <FaRobot className="h-8 w-8 text-primary-foreground" />
+                    <FaRobot className="h-7 w-7 text-primary-foreground" />
                 </Button>
             )}
         </div>
