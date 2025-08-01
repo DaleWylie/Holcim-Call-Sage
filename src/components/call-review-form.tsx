@@ -224,6 +224,54 @@ export default function CallReviewForm() {
               {/* Right Column */}
               <div className="md:w-1/2 space-y-4 md:border-l md:pl-8 border-border">
                   <div className="space-y-4 text-center">
+                      <Label htmlFor="audioFile" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
+                          <FileAudio className="h-5 w-5" />
+                          Upload Call Recording
+                      </Label>
+                      <Input
+                          id="audioFile"
+                          type="file"
+                          accept="audio/wav"
+                          onChange={handleFileChange}
+                          ref={fileInputRef}
+                          className="hidden"
+                      />
+                      <Button onClick={() => fileInputRef.current?.click()} variant="default">
+                          Select .wav file
+                      </Button>
+                      {audioFile && (
+                          <div className="flex items-center justify-center gap-2 mt-2">
+                              <Badge variant="secondary">{audioFile.name}</Badge>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-transparent hover:text-red-500" onClick={() => {
+                                  setAudioFile(null);
+                                  if (fileInputRef.current) {
+                                  fileInputRef.current.value = '';
+                                  }
+                              }}>
+                                  <X className="h-4 w-4" />
+                              </Button>
+                          </div>
+                      )}
+                  </div>
+
+                  <div className="text-center font-bold text-muted-foreground">OR</div>
+
+                  <div className="space-y-4 text-center">
+                      <Label htmlFor="callTranscript" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
+                          <ClipboardPaste className="h-5 w-5" />
+                          Input Call Transcript
+                      </Label>
+                      <Textarea
+                          id="callTranscript"
+                          className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-left"
+                          rows={5}
+                          value={callTranscript}
+                          onChange={(e) => setCallTranscript(e.target.value)}
+                          placeholder="Paste the complete transcript here..."
+                      />
+                  </div>
+                  
+                  <div className="space-y-4 text-center">
                       <Label className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
                         <User className="h-5 w-5" />
                         Agent Name
@@ -264,54 +312,6 @@ export default function CallReviewForm() {
                           onChange={(e) => setConversationId(e.target.value)}
                           placeholder="e.g. df14f08f-0377-4e25-875f-8f07140de97d"
                       />
-                  </div>
-
-                  <div className="space-y-4 text-center">
-                      <Label htmlFor="callTranscript" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
-                          <ClipboardPaste className="h-5 w-5" />
-                          Input Call Transcript
-                      </Label>
-                      <Textarea
-                          id="callTranscript"
-                          className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-left"
-                          rows={5}
-                          value={callTranscript}
-                          onChange={(e) => setCallTranscript(e.target.value)}
-                          placeholder="Paste the complete transcript here..."
-                      />
-                  </div>
-
-                  <div className="text-center font-bold text-muted-foreground">OR</div>
-                  
-                  <div className="space-y-4 text-center">
-                      <Label htmlFor="audioFile" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
-                          <FileAudio className="h-5 w-5" />
-                          Upload Call Recording
-                      </Label>
-                      <Input
-                          id="audioFile"
-                          type="file"
-                          accept="audio/wav"
-                          onChange={handleFileChange}
-                          ref={fileInputRef}
-                          className="hidden"
-                      />
-                      <Button onClick={() => fileInputRef.current?.click()} variant="default">
-                          Select .wav file
-                      </Button>
-                      {audioFile && (
-                          <div className="flex items-center justify-center gap-2 mt-2">
-                              <Badge variant="secondary">{audioFile.name}</Badge>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-transparent hover:text-red-500" onClick={() => {
-                                  setAudioFile(null);
-                                  if (fileInputRef.current) {
-                                  fileInputRef.current.value = '';
-                                  }
-                              }}>
-                                  <X className="h-4 w-4" />
-                              </Button>
-                          </div>
-                      )}
                   </div>
               </div>
           </div>
