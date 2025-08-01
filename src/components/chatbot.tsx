@@ -7,12 +7,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Loader2, Send, X, User, Download } from 'lucide-react';
-import { FaRobot } from 'react-icons/fa';
 import { cn } from '@/lib/utils';
 import { chatWithReview, ChatWithReviewInput } from '@/ai/flows/chat-with-review';
 import { useScoringMatrixStore } from '@/store/scoring-matrix-store';
 import type { GenerateNonBiasedReviewOutput } from '@/ai/flows/generate-non-biased-review';
 import ReactMarkdown from 'react-markdown';
+
+const RobotIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M12 8V4H8"/>
+      <rect width="16" height="12" x="4" y="8" rx="2"/>
+      <path d="M2 14h2"/>
+      <path d="M20 14h2"/>
+      <path d="M15 13v2"/>
+      <path d="M9 13v2"/>
+    </svg>
+);
+
 
 interface ChatbotProps {
     review: GenerateNonBiasedReviewOutput;
@@ -117,7 +128,7 @@ export function Chatbot({ review }: ChatbotProps) {
                 <Card className="w-96 h-[32rem] shadow-2xl flex flex-col">
                     <CardHeader className="flex flex-row items-center justify-between p-4 border-b">
                         <CardTitle className="text-lg font-bold text-primary flex items-center gap-2">
-                            <FaRobot />
+                            <RobotIcon />
                             Call Sage Chat (Beta)
                         </CardTitle>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-primary hover:text-primary-foreground" onClick={() => setIsOpen(false)}>
@@ -131,7 +142,7 @@ export function Chatbot({ review }: ChatbotProps) {
                                     <div key={index} className="group relative flex items-start gap-2">
                                         {message.role === 'model' && (
                                             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                                                <FaRobot className="h-5 w-5" />
+                                                <RobotIcon className="h-5 w-5" />
                                             </div>
                                         )}
                                         <div className={cn(
@@ -153,7 +164,7 @@ export function Chatbot({ review }: ChatbotProps) {
                                 {isLoading && (
                                     <div className="flex items-start gap-2 justify-start">
                                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                                             <FaRobot className="h-5 w-5" />
+                                             <RobotIcon className="h-5 w-5" />
                                          </div>
                                          <div className="rounded-lg px-3 py-2 bg-muted text-muted-foreground">
                                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -197,7 +208,7 @@ export function Chatbot({ review }: ChatbotProps) {
                     onClick={() => setIsOpen(true)}
                     className="rounded-full w-12 h-12 shadow-lg flex items-center justify-center bg-primary hover:bg-primary/90"
                 >
-                    <FaRobot className="h-6 w-6 text-primary-foreground" />
+                    <RobotIcon className="h-6 w-6 text-primary-foreground" />
                 </Button>
             )}
         </div>
