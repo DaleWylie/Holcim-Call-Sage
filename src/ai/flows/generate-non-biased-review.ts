@@ -84,7 +84,7 @@ const nonBiasedReviewPrompt = ai.definePrompt({
     
     **Scoring Matrix to Use:**
     {{#each scoringMatrix}}
-    -   **Criterion**: {{criterion}} (Weight: {{weight}})
+    -   **Criterion**: {{criterion}} (Overall Weighting: {{weight}})
         **Description**: {{description}}
     {{/each}}
 
