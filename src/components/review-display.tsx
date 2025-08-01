@@ -319,7 +319,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                 <p className="text-foreground">{review.quickSummary}</p>
               </div>
               <div className="text-center ml-4">
-                  <Label className="text-sm font-medium text-muted-foreground whitespace-nowrap">Overall Score</Label>
+                  <Label className="text-sm font-bold text-muted-foreground whitespace-nowrap">Overall Score</Label>
                   <div className={cn(
                     "mt-1 flex items-center justify-center w-18 h-18 rounded-full text-white text-2xl font-bold",
                     getScoreColor(review.overallScore, 100)
