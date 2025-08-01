@@ -24,6 +24,7 @@ const GenerateNonBiasedReviewInputSchema = z.object({
   scoringMatrix: z.array(ScoringItemSchema).describe('The list of criteria to score the call against.'),
   agentName: z.string().describe("The name of the agent being reviewed. This name MUST be used."),
   conversationId: z.string().optional().describe('An optional unique identifier for the call conversation.'),
+  conversationDuration: z.string().optional().describe('The total duration of the conversation in HH:MM:SS format. This is the maximum possible timestamp.'),
   callTranscript: z.string().optional().describe('The full text transcript of the call.'),
   audioDataUri: z.string().optional().describe("An audio recording of the call, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
 });
@@ -73,11 +74,12 @@ const nonBiasedReviewPrompt = ai.definePrompt({
     3.  **Use Agent's First Name**: Throughout all generated text fields ('quickSummary', 'justification', 'overallSummary', 'goodPoints', 'areasForImprovement'), you MUST refer to the agent by their first name (e.g., "Scott was helpful" not "The agent was helpful"). This creates a friendlier, more personal review. The full agent name is provided in the 'agentName' input field; you should extract the first name from it.
     4.  **Carry over Conversation ID**: If a 'conversationId' is provided in the input, you MUST include it in the 'conversationId' field of your output.
     5.  **Extract Timestamps (Conditional)**: When providing 'goodPoints' or 'areasForImprovement', you MUST look for a corresponding timestamp in the transcript (e.g., [00:01:23] or a similar format). If you find a relevant timestamp, you must extract it and place it in the 'timestamp' field. For the 'justification' field in the 'scores' array, you MUST NOT include a timestamp.
-    6.  **Timestamp Uniqueness**: Avoid referencing the exact same timestamp multiple times within the same list (e.g., in 'goodPoints' or 'areasForImprovement'), unless it is to highlight a completely different aspect of the interaction. Each reference should ideally provide new value.
-    7.  **Justification Rule**: The 'justification' text must explain the reasoning for the score by referencing specific parts of the conversation. It must NOT include the score number itself (e.g., do not write "Score: 4/5" in the justification).
-    8.  **Calculate Overall Score**: You MUST calculate the 'overallScore'. Take the score for each criterion (from 0 to 5) and multiply it by its respective weight. The sum of these weighted scores divided by the sum of the maximum possible weighted score will give you a total out of 100. This will be the “Overall Score” as a percentage. Only criteria with a weight > 0 should be included.
-    9.  **Summarise**: Provide a concise "quick summary" and a more "overall summary" of the interaction. The 'overallSummary' MUST touch upon every single criterion from the scoring matrix.
-    10. **Highlight Strengths & Feedback**: Identify specific things the agent did well under 'goodPoints' and list actionable 'areasForImprovement'. Every point you list under 'goodPoints' and 'areasForImprovement' must clearly relate to one of the criteria from the scoring matrix.
+    6.  **Timestamp Boundary**: The total duration of the call is provided in 'conversationDuration'. You MUST NOT generate or hallucinate a timestamp that is greater than this total duration. All timestamps MUST be within the call's timeframe.
+    7.  **Timestamp Uniqueness**: Avoid referencing the exact same timestamp multiple times within the same list (e.g., in 'goodPoints' or 'areasForImprovement'), unless it is to highlight a completely different aspect of the interaction. Each reference should ideally provide new value.
+    8.  **Justification Rule**: The 'justification' text must explain the reasoning for the score by referencing specific parts of the conversation. It must NOT include the score number itself (e.g., do not write "Score: 4/5" in the justification).
+    9.  **Calculate Overall Score**: You MUST calculate the 'overallScore'. Take the score for each criterion (from 0 to 5) and multiply it by its respective weight. The sum of these weighted scores divided by the sum of the maximum possible weighted score will give you a total out of 100. This will be the “Overall Score” as a percentage. Only criteria with a weight > 0 should be included.
+    10. **Summarise**: Provide a concise "quick summary" and a more "overall summary" of the interaction. The 'overallSummary' MUST touch upon every single criterion from the scoring matrix.
+    11. **Highlight Strengths & Feedback**: Identify specific things the agent did well under 'goodPoints' and list actionable 'areasForImprovement'. Every point you list under 'goodPoints' and 'areasForImprovement' must clearly relate to one of the criteria from the scoring matrix.
     
     **Scoring Matrix to Use:**
     {{#each scoringMatrix}}
@@ -89,6 +91,9 @@ const nonBiasedReviewPrompt = ai.definePrompt({
     Agent's Name (to be used): {{agentName}}
     {{#if conversationId}}
     Conversation ID (to be used): {{conversationId}}
+    {{/if}}
+    {{#if conversationDuration}}
+    Total Conversation Duration (Maximum Timestamp): {{conversationDuration}}
     {{/if}}
     {{#if audioDataUri}}
     Audio Recording:

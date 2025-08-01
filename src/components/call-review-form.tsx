@@ -62,6 +62,39 @@ const fileToDataUri = (file: File): Promise<string> => {
   });
 };
 
+// Converts [HH:MM:SS] or MM:SS to seconds
+const timeToSeconds = (timeStr: string): number => {
+    if (!timeStr) return 0;
+    const time = timeStr.replace(/[\[\]]/g, ''); // Remove brackets
+    const parts = time.split(':').map(Number);
+    if (parts.some(isNaN)) return 0;
+
+    if (parts.length === 3) { // [HH:MM:SS]
+        return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    }
+    if (parts.length === 2) { // MM:SS
+        return parts[0] * 60 + parts[1];
+    }
+    return 0;
+};
+
+// Formats seconds into HH:MM:SS
+const formatDuration = (totalSeconds: number): string => {
+    if (isNaN(totalSeconds) || totalSeconds < 0) {
+        return "N/A";
+    }
+
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = Math.floor(totalSeconds % 60);
+
+    const hh = String(hours).padStart(2, '0');
+    const mm = String(minutes).padStart(2, '0');
+    const ss = String(seconds).padStart(2, '0');
+
+    return `${hh}:${mm}:${ss}`;
+};
+
 
 export default function CallReviewForm() {
   const { defaultScoringMatrix, customScoringMatrix } = useScoringMatrixStore();
@@ -80,6 +113,32 @@ export default function CallReviewForm() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isTranscriptOpen, setIsTranscriptOpen] = useState(false);
   const { toast } = useToast();
+
+  const getConversationDuration = async (): Promise<string | undefined> => {
+    if (audioFile) {
+        return new Promise((resolve) => {
+            const audioElement = document.createElement('audio');
+            audioElement.src = URL.createObjectURL(audioFile);
+            audioElement.addEventListener('loadedmetadata', () => {
+                resolve(formatDuration(audioElement.duration));
+                URL.revokeObjectURL(audioElement.src);
+            });
+            audioElement.addEventListener('error', () => {
+                resolve(undefined); // Could not determine duration
+                URL.revokeObjectURL(audioElement.src);
+            });
+        });
+    }
+    if (callTranscript) {
+        const timestamps = callTranscript.match(/\[(\d{2}:\d{2}:\d{2})\]/g);
+        if (timestamps && timestamps.length > 0) {
+            const lastTimestamp = timestamps[timestamps.length - 1];
+            return formatDuration(timeToSeconds(lastTimestamp));
+        }
+    }
+    return undefined;
+  };
+
 
   const handleGenerateReview = async () => {
     setIsLoading(true);
@@ -102,7 +161,8 @@ export default function CallReviewForm() {
       if (audioDataUri) {
         setAudioDataUriForPlayer(audioDataUri);
       }
-
+      
+      const conversationDuration = await getConversationDuration();
       const agentName = `${agentFirstName.trim()} ${agentLastName.trim()}`;
       
       const inputForAI: GenerateNonBiasedReviewInput = {
@@ -111,6 +171,7 @@ export default function CallReviewForm() {
         conversationId: conversationId.trim(),
         callTranscript: callTranscript.trim() || undefined,
         audioDataUri,
+        conversationDuration,
       };
       
       const result = await generateNonBiasedReview(inputForAI);
@@ -388,5 +449,3 @@ export default function CallReviewForm() {
     </>
   );
 }
-
-    
