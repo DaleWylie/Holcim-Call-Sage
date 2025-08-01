@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, User, Fingerprint, Settings, List, Info } from 'lucide-react';
+import { Loader2, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, User, Fingerprint, Settings, List, Info, MessageSquare } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from './ui/badge';
 import { ReviewDisplay } from './review-display';
@@ -31,10 +31,11 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { SettingsDialog } from '@/components/settings-dialog';
-import { generateNonBiasedReview, GenerateNonBiasedReviewOutput } from '@/ai/flows/generate-non-biased-review';
+import { generateNonBiasedReview, GenerateNonBiasedReviewOutput, GenerateNonBiasedReviewInput } from '@/ai/flows/generate-non-biased-review';
 import { useToast } from '@/hooks/use-toast';
 import { useScoringMatrixStore } from '@/store/scoring-matrix-store';
 import { ScrollArea } from './ui/scroll-area';
+import { ChatPanel } from './chat-panel';
 
 
 type ErrorState = {
@@ -75,13 +76,16 @@ export default function CallReviewForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ErrorState | null>(null);
   const [review, setReview] = useState<GenerateNonBiasedReviewOutput | null>(null);
+  const [reviewInput, setReviewInput] = useState<GenerateNonBiasedReviewInput | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const { toast } = useToast();
 
   const handleGenerateReview = async () => {
     setIsLoading(true);
     setError(null);
     setReview(null);
+    setReviewInput(null);
     setAudioDataUriForPlayer(null);
     
     if (scoringMatrix.length === 0) {
@@ -102,13 +106,16 @@ export default function CallReviewForm() {
 
       const agentName = `${agentFirstName.trim()} ${agentLastName.trim()}`;
       
-      const result = await generateNonBiasedReview({
+      const inputForAI: GenerateNonBiasedReviewInput = {
         scoringMatrix,
         agentName,
         interactionId: interactionId.trim(),
         callTranscript: callTranscript.trim() || undefined,
         audioDataUri,
-      });
+      };
+      
+      setReviewInput(inputForAI);
+      const result = await generateNonBiasedReview(inputForAI);
 
       setReview(result);
     } catch (e) {
@@ -358,6 +365,25 @@ export default function CallReviewForm() {
       </Card>
       <SettingsDialog setOpen={setIsSettingsOpen} />
     </Dialog>
+    
+    {review && reviewInput && !isLoading && (
+      <>
+        <ChatPanel 
+            isOpen={isChatOpen}
+            setIsOpen={setIsChatOpen}
+            reviewInput={reviewInput}
+            reviewOutput={review}
+        />
+        <Button
+            onClick={() => setIsChatOpen(true)}
+            className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg"
+            size="icon"
+        >
+            <MessageSquare className="h-7 w-7" />
+        </Button>
+      </>
+    )}
+
     <footer className="text-center mt-8 text-sm text-muted-foreground">
         <p>© 2025 Dale Wylie. "Call Sage" is an AI Call Quality Management Assistant, powered by Gemini, providing objective call and transcript analysis. AI-generated insights require human validation.</p>
     </footer>
