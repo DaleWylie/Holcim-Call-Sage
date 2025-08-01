@@ -13,8 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **UI Consistency**: The hover style for the new "Download Transcript" button in the chatbot now aligns with the application's primary color theme.
+- **UI Consistency**: The "(Weight: X)" label in the detailed score view has been corrected to "(Overall Weighting: X)" to match the terminology used in the AI's instructions.
 
 ### Fixed
+- **Development Server Stability**: Resolved a recurring server crash in the development environment (`MaxListenersExceededWarning`) by ensuring the Genkit AI instance is initialized only once, preventing memory leaks during hot-reloading.
+- **Runtime Error**: Fixed a Next.js chunk loading error related to the `react-icons` library by replacing the problematic icon with a more reliable inline SVG.
 - **React Hook Error**: Resolved a `useEffect` dependency array error in the settings dialog that was causing issues between component renders.
 - **Development Server Script**: Removed a redundant port argument from the `dev` script in `package.json` to prevent potential startup conflicts.
 
