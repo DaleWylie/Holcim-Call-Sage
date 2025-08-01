@@ -42,7 +42,7 @@ const defaultScoringMatrix: ScoringItem[] = [
         criterion: "2. Communication Style",
         weight: 10,
         description: `
-- Description: The agent's communication was positive, professional, and clear. They spoke at an appropriate pace, avoided jargon, and used language that was easy for the caller to understand. The agent demonstrated active listening throughout the call by verbally acknowledging the caller's points, summarising the issue, and not speaking over them.
+- Description: The agent's communication was positive, professional, and a good pace was maintained. They avoided jargon and used language that was easy for the caller to understand. The agent demonstrated active listening throughout the call by verbally acknowledging the caller's points, summarising the issue, and not speaking over them.
 
 - Tool Analysis Focus:
     o Tone: Sentiment analysis to detect a positive, professional, and empathetic tone.
@@ -85,23 +85,22 @@ const defaultScoringMatrix: ScoringItem[] = [
         criterion: "4. Hold Procedure",
         weight: 10,
         description: `
-- Description: The agent followed a professional hold procedure. They asked the caller for permission before placing them on hold, explained the reason for the hold, thanked the caller upon returning, and provided a clear update on their progress.
+- Description: If a hold was necessary, the agent followed a professional hold procedure. They asked the caller for permission before placing them on hold, explained the reason, thanked the caller upon returning, and provided a clear update.
 
 - Tool Analysis Focus:
-    o Hold Detection: The tool will first check for the presence of hold music or a notation in the transcript indicating a hold occurred.
-    o Permission: If a hold is detected, the tool will then check for phrases like "Is it okay if I place you on hold?" or "Do you mind holding for a moment?"
-    o Reason: It will detect if the agent provided a reason for the hold (e.g., "I need to check your account details," "I'm just looking up that information for you.").
-    o Thank you: The tool will listen for phrases such as "Thank you for holding" or "Thanks for your patience."
-    o Update: It will analyse whether a clear update on the progress was given after the hold.
+    o Hold Detection: The tool MUST first check for conclusive evidence of a hold. This evidence is either the **unmistakable sound of hold music** in the audio or an **explicit transcript notation** (e.g., [ON-HOLD]). Do NOT infer a hold from periods of silence or conversational pauses. If there is no clear evidence of a hold, the score MUST be 5.
+    o Permission: If a hold is detected, the tool will check for phrases like "Is it okay if I place you on hold?"
+    o Reason: It will detect if the agent provided a reason for the hold (e.g., "I need to check your account details.").
+    o Thank You & Update: The tool will listen for phrases like "Thank you for holding" and analyse whether a clear progress update was given after the hold.
 
 - Scoring Criteria (0-5):
-    o Score 5 (Default): The agent did not place the caller on hold at all during the call.
-    o Score 0: A hold was used, but the agent placed the caller on hold without permission, explanation, or an update upon returning. The hold was handled unprofessionally.
-    o Score 1: A hold was used, but the agent only performed one of the required steps (e.g., they asked for permission but gave no reason or update).
+    o Score 5 (Default): The agent did not place the caller on hold at all, OR there is no conclusive evidence of a hold. This is the default score.
+    o Score 0: A hold was used, but the agent placed the caller on hold without permission, explanation, or an update. The hold was handled unprofessionally.
+    o Score 1: A hold was used, but the agent only performed one of the required steps (e.g., they asked for permission but gave no reason).
     o Score 2: A hold was used, and the agent performed two of the required steps, but was missing a key component (e.g., they asked for permission and gave a reason, but didn't provide an update upon returning).
     o Score 3: A hold was used, and the agent performed all four steps, but one of them was weak. For instance, the update was vague or the reason for the hold was not very clear.
-    o Score 4: A hold was used, and the agent followed the full hold procedure correctly and professionally, asking permission, explaining the reason, thanking the caller, and providing a clear update upon returning.
-    o Score 5: A hold was used, and the agent not only followed the procedure perfectly but also managed the hold with exceptional skill. For example, they might have given an estimated hold time, or checked in with the customer if the hold was unexpectedly long, making the customer feel valued throughout the process.`
+    o Score 4: A hold was used, and the agent followed the full hold procedure correctly and professionally.
+    o Score 5: A hold was used, and the agent managed it with exceptional skill. For example, they might have given an estimated hold time, or checked in with the customer if the hold was unexpectedly long.`
     },
     {
         id: "5",
