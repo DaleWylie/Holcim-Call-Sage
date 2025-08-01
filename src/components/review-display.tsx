@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { GenerateNonBiasedReviewOutput } from "@/ai/flows/generate-non-biased-review"
-import { CheckCircle2, ListChecks, Printer, Sparkles, Target, Pencil, Check, X, UserCheck, Calendar, ThumbsUp, Clock, Hourglass } from "lucide-react"
+import { CheckCircle2, ListChecks, Printer, Sparkles, Target, Pencil, Check, X, UserCheck, Calendar, ThumbsUp, Clock } from "lucide-react"
 import { cn, getScoreColor } from "@/lib/utils";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
@@ -25,7 +25,6 @@ interface ReviewDisplayProps {
   review: GenerateNonBiasedReviewOutput;
   setReview: React.Dispatch<React.SetStateAction<GenerateNonBiasedReviewOutput | null>>;
   audioDataUri: string | null;
-  transcript: string; // Pass the transcript for length calculation
 }
 
 // Converts [HH:MM:SS] or MM:SS to seconds
@@ -44,18 +43,8 @@ const timeToSeconds = (timeStr: string): number => {
     return 0;
 };
 
-const secondsToHMS = (seconds: number): string => {
-    if (isNaN(seconds) || seconds < 0) return "N/A";
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = Math.floor(seconds % 60);
-    return [h, m, s]
-        .map(v => v.toString().padStart(2, '0'))
-        .join(':');
-};
 
-
-export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: ReviewDisplayProps) {
+export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplayProps) {
   const { defaultScoringMatrix, customScoringMatrix } = useScoringMatrixStore();
   const fullMatrix = [...defaultScoringMatrix, ...customScoringMatrix];
 
@@ -65,40 +54,8 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState<string | number>('');
   const [checkerName, setCheckerName] = useState('');
-  const [conversationLength, setConversationLength] = useState<string>("N/A");
-  
+
   const interactionId = review.interactionId || '';
-
-  useEffect(() => {
-    if (audioRef.current) {
-        const handleMetadataLoaded = () => {
-            setConversationLength(secondsToHMS(audioRef.current!.duration));
-        };
-        audioRef.current.addEventListener('loadedmetadata', handleMetadataLoaded);
-        // If metadata is already loaded
-        if (audioRef.current.duration) {
-            handleMetadataLoaded();
-        }
-        return () => {
-            if (audioRef.current) {
-                // eslint-disable-next-line react-hooks/exhaustive-deps
-                audioRef.current.removeEventListener('loadedmetadata', handleMetadataLoaded);
-            }
-        };
-    } else if (transcript) {
-        const timestamps = transcript.match(/\[(\d{2}:\d{2}:\d{2})\]/g);
-        if (timestamps && timestamps.length > 0) {
-            const lastTimestamp = timestamps[timestamps.length - 1];
-            const lengthInSeconds = timeToSeconds(lastTimestamp);
-            setConversationLength(secondsToHMS(lengthInSeconds));
-        } else {
-            setConversationLength("N/A");
-        }
-    } else {
-        setConversationLength("N/A");
-    }
-  }, [audioDataUri, transcript]);
-
 
   const sortedGoodPoints = useMemo(() => {
     return [...review.goodPoints].sort((a, b) => {
@@ -279,7 +236,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
     <div className="relative">
       <div ref={reviewRef} className="bg-gray-50/50 dark:bg-background/50 p-6 rounded-lg border border-border shadow-inner text-left mt-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold text-foreground font-headline flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-black font-headline flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-accent" />
             Generated Review
           </h2>
@@ -299,7 +256,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
               <div className="flex-1">
                 <Label className="text-sm font-medium text-muted-foreground">Agent Name</Label>
                  <div className="flex items-center gap-2">
-                    <h3 className="text-2xl font-bold text-foreground">{review.agentName}</h3>
+                    <h3 className="text-2xl font-bold">{review.agentName}</h3>
                   </div>
                 
                 <Label className="text-sm font-bold text-muted-foreground pt-4 block">Quick Summary</Label>
@@ -317,18 +274,12 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
             </div>
            </CardHeader>
            <CardContent>
-             <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-                {interactionId && (
-                    <div className="flex flex-col">
-                        <Label className="font-medium text-muted-foreground">Interaction ID</Label>
-                        <p className="font-semibold text-foreground">{interactionId}</p>
-                    </div>
-                )}
-                <div className="flex flex-col">
-                    <Label className="font-medium text-muted-foreground flex items-center gap-1.5"><Hourglass className="h-3 w-3" />Conversation Length</Label>
-                    <p className="font-semibold text-foreground">{conversationLength}</p>
+             {interactionId && (
+                <div>
+                  <Label className="font-medium text-muted-foreground">Interaction ID</Label>
+                  <p className="font-semibold">{interactionId}</p>
                 </div>
-             </div>
+              )}
           </CardContent>
         </Card>
 
@@ -336,7 +287,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
           <CardHeader>
             <div className="flex items-center gap-2">
               <ListChecks className="h-5 w-5 text-primary" />
-              <CardTitle className="text-xl text-foreground">Detailed Scores</CardTitle>
+              <CardTitle className="text-xl">Detailed Scores</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
@@ -357,7 +308,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                                     {item.score}/5
                                 </div>
                                 <div className="flex-1">
-                                    <span className="font-medium text-foreground">{item.criterion}</span>
+                                    <span className="font-medium">{item.criterion}</span>
                                     {weight > 0 && (
                                         <span className="text-xs text-muted-foreground ml-2">(Overall Weighting: {weight}%)</span>
                                     )}
@@ -466,7 +417,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <CheckCircle2 className="h-5 w-5 text-primary" />
-                        <CardTitle className="text-xl text-foreground">Overall Summary</CardTitle>
+                        <CardTitle className="text-xl">Overall Summary</CardTitle>
                     </div>
                     {editingField !== 'overallSummary' && (
                         <Button
@@ -509,7 +460,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                         </div>
                     </div>
                 ) : (
-                    <p className="text-base whitespace-pre-wrap text-foreground">{review.overallSummary}</p>
+                    <p className="text-base whitespace-pre-wrap">{review.overallSummary}</p>
                 )}
             </CardContent>
         </Card>
@@ -519,11 +470,11 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
             <CardHeader>
               <div className="flex items-center gap-2">
                 <ThumbsUp className="h-5 w-5 text-primary" />
-                <CardTitle className="text-xl text-foreground">Good Points</CardTitle>
+                <CardTitle className="text-xl">Good Points</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
-              <ul className="list-disc pl-5 space-y-2 text-foreground">
+              <ul className="list-disc pl-5 space-y-2">
                 {sortedGoodPoints.map((item, index) => (
                    <li key={index} className="text-base">
                         {item.timestamp && audioDataUri && (
@@ -551,11 +502,11 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
           <CardHeader>
             <div className="flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
-              <CardTitle className="text-xl text-foreground">Areas for Improvement</CardTitle>
+              <CardTitle className="text-xl">Areas for Improvement</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <ul className="list-disc pl-5 space-y-2 text-foreground">
+            <ul className="list-disc pl-5 space-y-2">
               {sortedAreasForImprovement.map((item, index) => (
                  <li key={index} className="text-base">
                     {item.timestamp && audioDataUri && (
@@ -583,7 +534,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                 <div className="flex justify-between items-start">
                     <div className="flex items-center gap-2">
                         <UserCheck className="h-5 w-5 text-primary" />
-                        <CardTitle className="text-xl text-foreground">Checked By</CardTitle>
+                        <CardTitle className="text-xl">Checked By</CardTitle>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
@@ -606,7 +557,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                             {isPrinting ? "Printing..." : "Print to PDF"}
                         </Button>
                     </div>
-                    <p id="checkerNameDisplay" style={{display: 'none'}} className="font-semibold text-foreground">{checkerName}</p>
+                    <p id="checkerNameDisplay" style={{display: 'none'}} className="font-semibold">{checkerName}</p>
 
                     <p className="text-sm text-muted-foreground text-center">
                         This review is generated by AI and has been checked/amended where necessary by the human above.
