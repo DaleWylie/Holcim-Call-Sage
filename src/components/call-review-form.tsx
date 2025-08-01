@@ -343,6 +343,20 @@ export default function CallReviewForm() {
                   <Separator className="my-6" />
 
                   <div className="space-y-4 text-center">
+                      <Label htmlFor="conversationId" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
+                          <Fingerprint className="h-5 w-5" />
+                          Conversation ID
+                      </Label>
+                      <Input
+                          id="conversationId"
+                          className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
+                          value={conversationId}
+                          onChange={(e) => setConversationId(e.target.value)}
+                          placeholder="e.g. df14f08f-0377-4e25-875f-8f07140de97d"
+                      />
+                  </div>
+                  
+                  <div className="space-y-4 text-center">
                       <Label className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
                         <User className="h-5 w-5" />
                         Agent Name
@@ -369,20 +383,6 @@ export default function CallReviewForm() {
                               />
                           </div>
                       </div>
-                  </div>
-
-                  <div className="space-y-4 text-center">
-                      <Label htmlFor="conversationId" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
-                          <Fingerprint className="h-5 w-5" />
-                          Conversation ID
-                      </Label>
-                      <Input
-                          id="conversationId"
-                          className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
-                          value={conversationId}
-                          onChange={(e) => setConversationId(e.target.value)}
-                          placeholder="e.g. df14f08f-0377-4e25-875f-8f07140de97d"
-                      />
                   </div>
               </div>
           </div>
