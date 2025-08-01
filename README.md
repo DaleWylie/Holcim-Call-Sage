@@ -1,28 +1,30 @@
-# Holcim Call Sage (v1.1)
+# Holcim Call Sage (v1.2.2)
 
 **AI-Powered Quality Assistant for Holcim**
 
 ## Overview
 
-Holcim Call Sage is an internal tool designed to assist in the quality management process for call center interactions. It leverages Generative AI to provide a non-biased review of call transcripts or recordings based on a customizable scoring matrix. The application analyzes the conversation, scores the analyst against predefined criteria, extracts key information, and provides actionable feedback for improvement.
+Holcim Call Sage is an internal tool designed to assist in the quality management process for call center interactions. It leverages Generative AI to provide a non-biased review of call transcripts or recordings based on a structured scoring matrix. The application analyzes the conversation, scores the analyst against predefined criteria, extracts key information, and provides actionable feedback for improvement.
 
 ## Core Features
 
 -   **AI-Powered Review Generation**: Automatically generates a structured and objective review of a call, including scores, justifications, and an overall summary.
--   **Customizable Scoring Matrix**: Allows quality managers to define their own evaluation criteria through a user-friendly interface. A default matrix is provided as a starting point, which can be easily modified, extended, or shortened to fit specific needs.
+-   **Standardised Scoring Matrix**: The application uses a core, rigid scoring matrix to ensure a consistent evaluation baseline for all standard reviews.
+-   **Ad-Hoc Custom Criteria**: Quality managers can add their own temporary criteria via the Settings panel for specific, one-off evaluations. These criteria are session-based and reset on page reload.
 -   **Transcript & Audio Input**: Users can either paste a call transcript directly (e.g., from Genesys Cloud) or upload a `.wav` audio recording for the AI to transcribe and analyze.
 -   **Integrated Audio Player**: When a `.wav` file is used, an audio player appears, allowing for direct playback of the call recording within the app.
 -   **Clickable Timestamps**: The generated review includes timestamps for justifications, good points, and areas for improvement. Clicking on a timestamp in the web view jumps the audio player to that exact moment in the call, making verification seamless.
--   **Analyst Identification**: The AI is instructed to intelligently extract the analyst's name from call metadata, ensuring accurate reporting even if the name is not clearly captured in the dialogue.
--   **Structured Feedback**: The output includes a clear breakdown of scores for each criterion, a list of "Good Points," a concise summary, and actionable "Areas for Improvement," making it easy to digest and act upon.
+-   **Analyst Identification**: The AI is instructed to intelligently extract the analyst's name from call metadata, ensuring accurate reporting.
+-   **Structured Feedback**: The output includes a clear breakdown of scores for each criterion, a list of "Good Points," a concise summary, and actionable "Areas for Improvement."
+-   **Human Verification & Override**: All AI-generated text and scores can be edited directly in the UI, giving the human checker full control over the final report.
 -   **PDF Export**: The final, human-verified review can be exported as a professional PDF document, including the checker's name and the date of review. The exported report is clean and does not include interactive elements like the audio player.
 
 ## How to Use the Application
 
-1.  **Review the Call Scoring Matrix (Optional: Edit if needed)**:
-    -   The application comes with a pre-defined scoring matrix, which is displayed on the left side of the main screen. You can click the **Info** icon next to each criterion to see its full description.
-    -   To edit the matrix, click the **Settings** (gear) icon in the top-right corner. This is an optional step if the default criteria meet your needs.
-    -   In the settings panel, you can click on any criterion to expand it and edit its name and description. You can also add new criteria or delete existing ones. Click "Save Changes" to apply your modifications.
+1.  **Review the Call Scoring Matrix**:
+    -   The application's core scoring matrix is displayed on the left side of the main screen. Click the **Info** icon next to any criterion to see its full description in a scrollable popup.
+    -   To add temporary criteria for a specific review, click the **Settings** (gear) icon in the top-right corner.
+    -   In the settings panel, you can add new custom criteria. These will be included in the AI analysis for the current session only.
 
 2.  **Provide the Call Data**:
     -   On the right side of the screen, fill in the required details:
