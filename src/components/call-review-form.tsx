@@ -373,16 +373,15 @@ export default function CallReviewForm() {
             setIsOpen={setIsChatOpen}
             reviewInput={reviewInput}
             reviewOutput={review}
+            onReviewAmended={setReview}
         />
-        {!isChatOpen && (
-             <Button
-                onClick={() => setIsChatOpen(true)}
-                className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-20"
-                size="icon"
-            >
-                <MessageSquare className="h-7 w-7" />
-            </Button>
-        )}
+        <Button
+            onClick={() => setIsChatOpen(prev => !prev)}
+            className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-lg z-20"
+            size="icon"
+        >
+            {isChatOpen ? <X className="h-8 w-8" /> : <MessageSquare className="h-8 w-8" />}
+        </Button>
       </>
     )}
 

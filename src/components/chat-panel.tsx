@@ -17,9 +17,10 @@ interface ChatPanelProps {
   setIsOpen: (isOpen: boolean) => void;
   reviewInput: GenerateNonBiasedReviewInput;
   reviewOutput: GenerateNonBiasedReviewOutput;
+  onReviewAmended: (newReview: GenerateNonBiasedReviewOutput) => void;
 }
 
-export function ChatPanel({ isOpen, setIsOpen, reviewInput, reviewOutput }: ChatPanelProps) {
+export function ChatPanel({ isOpen, setIsOpen, reviewInput, reviewOutput, onReviewAmended }: ChatPanelProps) {
   const agentFirstName = reviewOutput.agentName.split(' ')[0] || 'the agent';
   const initialMessage: ChatMessage = {
     role: 'model',
@@ -60,6 +61,13 @@ export function ChatPanel({ isOpen, setIsOpen, reviewInput, reviewOutput }: Chat
 
         const modelMessage: ChatMessage = { role: 'model', content: result.answer };
         setMessages(prev => [...prev, modelMessage]);
+
+        if (result.amendedReview) {
+            onReviewAmended(result.amendedReview);
+            // Optionally, add another message confirming the update
+            const confirmationMessage: ChatMessage = { role: 'model', content: "I've updated the review for you. You should see the changes reflected on the main page." };
+            setMessages(prev => [...prev, confirmationMessage]);
+        }
 
     } catch (error) {
         console.error("Chat error:", error);
