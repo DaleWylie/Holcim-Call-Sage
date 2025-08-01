@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2024-08-02
+
+### Added
+- **Conversation Duration Display**: The quick summary card in the generated review now displays the "Conversation Duration", automatically calculated from the audio file length or estimated from transcript timestamps.
+- **Automatic Conversation ID Extraction**: When a `.wav` file is uploaded, the system now automatically extracts a UUID from the filename and populates the "Conversation ID" field, streamlining the input process.
+
+### Changed
+- **Terminology**: Renamed "Interaction ID" to "Conversation ID" throughout the application for consistency.
+- **AI Personalization**: Updated the AI prompt to refer to the agent by their first name in all generated review text, creating a more personal and friendly tone.
+- **UI Workflow**: The main form has been rearranged for a more logical workflow:
+    1. Upload Call Recording / Input Transcript
+    2. Agent Name
+    3. Conversation ID
+- **Collapsible Transcript Input**: The text area for pasting a transcript is now hidden by default within a collapsible section to create a cleaner and tidier interface.
+- **UI Layout**:
+    - The "Conversation ID" and "Conversation Duration" now appear on the same line in the summary card for a more compact layout.
+    - Added a horizontal separator on the main form for better visual distinction between input sections.
+
 ## [1.2.2] - 2024-08-02
 
 ### Changed
