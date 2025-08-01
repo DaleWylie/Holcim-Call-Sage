@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useRef, useState, useMemo } from "react";
+import React, { useRef, useState, useMemo, useEffect } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { Button } from "@/components/ui/button";
@@ -10,11 +10,12 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CardFooter
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { GenerateNonBiasedReviewOutput } from "@/ai/flows/generate-non-biased-review"
-import { CheckCircle2, ListChecks, Printer, Sparkles, Target, Pencil, Check, X, UserCheck, Calendar, ThumbsUp, Clock } from "lucide-react"
+import { CheckCircle2, ListChecks, Printer, Sparkles, Target, Pencil, Check, X, UserCheck, Calendar, ThumbsUp, Clock, Timer } from "lucide-react"
 import { cn, getScoreColor } from "@/lib/utils";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
@@ -25,6 +26,7 @@ interface ReviewDisplayProps {
   review: GenerateNonBiasedReviewOutput;
   setReview: React.Dispatch<React.SetStateAction<GenerateNonBiasedReviewOutput | null>>;
   audioDataUri: string | null;
+  transcript: string;
 }
 
 // Converts [HH:MM:SS] or MM:SS to seconds
@@ -43,8 +45,25 @@ const timeToSeconds = (timeStr: string): number => {
     return 0;
 };
 
+// Formats seconds into HH:MM:SS
+const formatDuration = (totalSeconds: number): string => {
+    if (isNaN(totalSeconds) || totalSeconds < 0) {
+        return "N/A";
+    }
 
-export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplayProps) {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = Math.floor(totalSeconds % 60);
+
+    const hh = String(hours).padStart(2, '0');
+    const mm = String(minutes).padStart(2, '0');
+    const ss = String(seconds).padStart(2, '0');
+
+    return `${hh}:${mm}:${ss}`;
+};
+
+
+export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: ReviewDisplayProps) {
   const { defaultScoringMatrix, customScoringMatrix } = useScoringMatrixStore();
   const fullMatrix = [...defaultScoringMatrix, ...customScoringMatrix];
 
@@ -54,8 +73,45 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState<string | number>('');
   const [checkerName, setCheckerName] = useState('');
+  const [conversationDuration, setConversationDuration] = useState<string>("N/A");
 
   const interactionId = review.interactionId || '';
+
+  useEffect(() => {
+    if (audioRef.current) {
+        const setAudioDuration = () => {
+            if (audioRef.current && !isNaN(audioRef.current.duration) && audioRef.current.duration > 0) {
+                setConversationDuration(formatDuration(audioRef.current.duration));
+            }
+        };
+        // Set duration initially
+        setAudioDuration();
+        // Add event listener for when metadata (including duration) is loaded
+        audioRef.current.addEventListener('loadedmetadata', setAudioDuration);
+
+        return () => {
+            // Clean up event listener
+            if (audioRef.current) {
+                audioRef.current.removeEventListener('loadedmetadata', setAudioDuration);
+            }
+        };
+    } else if (transcript) {
+        // Find all timestamps in the transcript
+        const timestamps = transcript.match(/\[(\d{2}:\d{2}:\d{2})\]|(\d{2}:\d{2})/g);
+        if (timestamps && timestamps.length > 0) {
+            // Get the last timestamp
+            const lastTimestamp = timestamps[timestamps.length - 1];
+            // Convert it to seconds and then format it
+            const durationInSeconds = timeToSeconds(lastTimestamp);
+            setConversationDuration(formatDuration(durationInSeconds));
+        } else {
+            setConversationDuration("N/A");
+        }
+    } else {
+        setConversationDuration("N/A");
+    }
+}, [audioDataUri, transcript]);
+
 
   const sortedGoodPoints = useMemo(() => {
     return [...review.goodPoints].sort((a, b) => {
@@ -274,13 +330,22 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
             </div>
            </CardHeader>
            <CardContent>
-             {interactionId && (
-                <div>
-                  <Label className="font-medium text-muted-foreground">Interaction ID</Label>
-                  <p className="font-semibold">{interactionId}</p>
-                </div>
-              )}
+             <div className="grid grid-cols-2 gap-4">
+                {interactionId && (
+                  <div>
+                    <Label className="font-medium text-muted-foreground">Interaction ID</Label>
+                    <p className="font-semibold">{interactionId}</p>
+                  </div>
+                )}
+             </div>
           </CardContent>
+          <CardFooter className="flex justify-end pt-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Timer className="h-4 w-4" />
+                    <span>Conversation Duration:</span>
+                    <span className="font-semibold">{conversationDuration}</span>
+                </div>
+          </CardFooter>
         </Card>
 
         <Card data-printable-section="true" className="mb-6">
@@ -543,7 +608,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="flex flex-col items-center gap-4">
+                 <div className="flex flex-col items-center gap-4">
                     <div className="flex w-full items-center gap-2 action-button">
                         <Input
                             id="checkerName"
@@ -569,5 +634,3 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
     </div>
   )
 }
-
-    
