@@ -243,7 +243,7 @@ export default function CallReviewForm() {
         <CardContent className="p-6 sm:p-8 space-y-8">
           <div className="flex flex-col md:flex-row gap-8">
               {/* Left Column */}
-              <div className="md:w-1/2 space-y-4 flex flex-col items-center">
+              <div className="md:w-1/2 space-y-4 flex flex-col items-center md:pr-4">
                 <Label className="text-lg font-semibold text-primary flex items-center gap-2">
                   <List className="h-5 w-5" />
                   Call Scoring Matrix
@@ -286,7 +286,7 @@ export default function CallReviewForm() {
               </div>
 
               {/* Right Column */}
-              <div className="md:w-1/2 space-y-4 md:border-l md:pl-8 border-border flex flex-col">
+              <div className="md:w-1/2 space-y-4 md:border-l md:pl-4 border-border flex flex-col">
                   <div className="space-y-4 text-center">
                       <Label htmlFor="audioFile" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
                           <FileAudio className="h-5 w-5" />
