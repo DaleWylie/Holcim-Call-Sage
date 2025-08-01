@@ -73,10 +73,8 @@ const chatWithReviewFlow = ai.defineFlow(
     outputSchema: z.string(),
   },
   async (input) => {
-    const model = googleAI.model('gemini-2.0-flash');
-    
     // Construct the prompt with system instructions and context
-    const prompt = `
+    const systemPrompt = `
       You are "Call Sage", a friendly and helpful AI Quality Management assistant for Holcim.
       Your role is to discuss the call review you have previously generated. You must be concise, helpful, and refer to the specific data from the review context provided.
       Use British English spelling and grammar (e.g., "summarise", "behaviour").
@@ -99,12 +97,13 @@ const chatWithReviewFlow = ai.defineFlow(
     // Format the chat history for the model
     const history = input.history.map(msg => ({
         role: msg.role,
-        parts: [{ text: msg.content }],
+        content: [{ text: msg.content }],
     }));
 
     try {
-      const { output } = await model.generate({
-        system: prompt,
+      const { output } = await ai.generate({
+        model: googleAI.model('gemini-2.0-flash'),
+        system: systemPrompt,
         history: history,
         prompt: input.question,
         config: {
