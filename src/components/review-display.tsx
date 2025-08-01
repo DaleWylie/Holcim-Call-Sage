@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useRef, useState, useMemo, useEffect } from "react";
+import React, { useRef, useState, useMemo } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { Button } from "@/components/ui/button";
@@ -569,3 +569,5 @@ export function ReviewDisplay({ review, setReview, audioDataUri }: ReviewDisplay
     </div>
   )
 }
+
+    
