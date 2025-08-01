@@ -188,7 +188,7 @@ export default function CallReviewForm() {
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
-                                    <AlertDialogTitle>{item.criterion}</AlertDialogTitle>
+                                    <AlertDialogTitle className="text-primary">{item.criterion}</AlertDialogTitle>
                                     <ScrollArea className="max-h-[60vh] pr-4">
                                       <AlertDialogDescription className="text-left whitespace-pre-wrap pt-2">
                                         {item.description}
