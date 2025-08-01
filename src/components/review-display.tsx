@@ -316,7 +316,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                   </div>
                 
                 <Label className="text-sm font-bold text-muted-foreground pt-4 block">Quick Summary</Label>
-                <p className="text-muted-foreground">{review.quickSummary}</p>
+                <p className="text-foreground">{review.quickSummary}</p>
               </div>
               <div className="text-center ml-4">
                   <Label className="text-sm font-medium text-muted-foreground whitespace-nowrap">Overall Score</Label>
@@ -330,19 +330,23 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
             </div>
            </CardHeader>
            <CardContent className="pt-0">
-             <div className="flex justify-between items-end gap-4 text-sm">
-                {conversationId && (
-                  <div>
-                    <Label className="font-medium text-muted-foreground">Conversation ID</Label>
-                    <p className="font-semibold text-foreground">{conversationId}</p>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 text-muted-foreground">
-                    <Timer className="h-4 w-4" />
-                    <span>Conversation Duration:</span>
-                    <span className="font-semibold text-foreground">{conversationDuration}</span>
+              <div className="flex justify-between items-end gap-4 text-sm">
+                <div>
+                  {conversationId && (
+                    <>
+                      <Label className="font-medium text-muted-foreground">Conversation ID</Label>
+                      <p className="font-semibold text-foreground">{conversationId}</p>
+                    </>
+                  )}
                 </div>
-             </div>
+                <div className="text-right">
+                  <Label className="font-medium text-muted-foreground">Conversation Duration</Label>
+                  <p className="font-semibold text-foreground flex items-center justify-end gap-1">
+                      <Timer className="h-4 w-4" />
+                      {conversationDuration}
+                  </p>
+                </div>
+              </div>
           </CardContent>
         </Card>
 
@@ -453,7 +457,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                                     </div>
                                 ) : (
                                     <div className="flex items-start gap-2">
-                                        <p className="text-sm text-muted-foreground flex-1">
+                                        <p className="text-sm text-foreground flex-1">
                                             {item.justification}
                                         </p>
                                         <Button
