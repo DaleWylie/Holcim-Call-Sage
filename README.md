@@ -1,4 +1,4 @@
-# Holcim Call Sage (v1.3.0)
+# Holcim Call Sage (v1.2.2)
 
 **AI-Powered Quality Assistant for Holcim**
 
@@ -9,7 +9,6 @@ Holcim Call Sage is an internal tool designed to assist in the quality managemen
 ## Core Features
 
 -   **AI-Powered Review Generation**: Automatically generates a structured and objective review of a call, including scores, justifications, and an overall summary.
--   **Interactive Chat Assistant**: After a review is generated, users can open a chat panel to ask the AI follow-up questions about the review, the transcript, or the call itself, enabling deeper, conversational analysis.
 -   **Standardised Scoring Matrix**: The application uses a core, rigid scoring matrix to ensure a consistent evaluation baseline for all standard reviews.
 -   **Ad-Hoc Custom Criteria**: Quality managers can add their own temporary criteria via the Settings panel for specific, one-off evaluations. These criteria are session-based and reset on page reload.
 -   **Transcript & Audio Input**: Users can either paste a call transcript directly (e.g., from Genesys Cloud) or upload a `.wav` audio recording for the AI to transcribe and analyze.
@@ -40,12 +39,7 @@ Holcim Call Sage is an internal tool designed to assist in the quality managemen
     -   Click the **"Generate Call Review"** button at the bottom.
     -   The button will become active once an Interaction ID, agent name, and either a transcript or a `.wav` file have been provided. A loading indicator will show that the analysis is in progress.
 
-4.  **Chat with the AI (Optional)**:
-    -   Once the review is displayed, a floating **chat icon** will appear in the bottom-right corner.
-    -   Click this icon to open the chat panel.
-    -   You can now ask the AI questions about the review, such as "At what point in the call did the agent place the customer on hold?" or "Can you clarify why you gave a score of 3 for 'Issue Handling'?"
-
-5.  **Verify and Print the Review**:
+4.  **Verify and Print the Review**:
     -   Once the AI has completed its analysis, the generated review will appear at the bottom of the page.
     -   If you uploaded a `.wav` file, an **audio player** will appear above the report.
     -   Review the generated scores, summaries, and feedback.

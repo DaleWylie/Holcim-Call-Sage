@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, User, Fingerprint, Settings, List, Info, MessageSquare } from 'lucide-react';
+import { Loader2, ClipboardPaste, Sparkles, AlertCircle, FileAudio, X, User, Fingerprint, Settings, List, Info } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from './ui/badge';
 import { ReviewDisplay } from './review-display';
@@ -35,7 +35,6 @@ import { generateNonBiasedReview, GenerateNonBiasedReviewOutput, GenerateNonBias
 import { useToast } from '@/hooks/use-toast';
 import { useScoringMatrixStore } from '@/store/scoring-matrix-store';
 import { ScrollArea } from './ui/scroll-area';
-import { ChatPanel } from './chat-panel';
 
 
 type ErrorState = {
@@ -76,16 +75,13 @@ export default function CallReviewForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ErrorState | null>(null);
   const [review, setReview] = useState<GenerateNonBiasedReviewOutput | null>(null);
-  const [reviewInput, setReviewInput] = useState<GenerateNonBiasedReviewInput | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isChatOpen, setIsChatOpen] = useState(false);
   const { toast } = useToast();
 
   const handleGenerateReview = async () => {
     setIsLoading(true);
     setError(null);
     setReview(null);
-    setReviewInput(null);
     setAudioDataUriForPlayer(null);
     
     if (scoringMatrix.length === 0) {
@@ -114,7 +110,6 @@ export default function CallReviewForm() {
         audioDataUri,
       };
       
-      setReviewInput(inputForAI);
       const result = await generateNonBiasedReview(inputForAI);
 
       setReview(result);
@@ -366,24 +361,6 @@ export default function CallReviewForm() {
       <SettingsDialog setOpen={setIsSettingsOpen} />
     </Dialog>
     
-    {review && reviewInput && !isLoading && (
-      <>
-        <ChatPanel 
-            isOpen={isChatOpen}
-            setIsOpen={setIsChatOpen}
-            reviewInput={reviewInput}
-            reviewOutput={review}
-        />
-        <Button
-            onClick={() => setIsChatOpen(prev => !prev)}
-            className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-lg z-20"
-            size="icon"
-        >
-            {isChatOpen ? <X className="h-8 w-8" /> : <MessageSquare className="h-8 w-8" />}
-        </Button>
-      </>
-    )}
-
     <footer className="text-center mt-8 text-sm text-muted-foreground">
         <p>© 2025 Dale Wylie. "Call Sage" is an AI Call Quality Management Assistant, powered by Gemini, providing objective call and transcript analysis. AI-generated insights require human validation.</p>
     </footer>
