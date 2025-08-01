@@ -34,6 +34,7 @@ import { SettingsDialog } from '@/components/settings-dialog';
 import { generateNonBiasedReview, GenerateNonBiasedReviewOutput } from '@/ai/flows/generate-non-biased-review';
 import { useToast } from '@/hooks/use-toast';
 import { useScoringMatrixStore } from '@/store/scoring-matrix-store';
+import { ScrollArea } from './ui/scroll-area';
 
 
 type ErrorState = {
@@ -188,9 +189,11 @@ export default function CallReviewForm() {
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>{item.criterion}</AlertDialogTitle>
-                                    <AlertDialogDescription className="text-left whitespace-pre-wrap pt-2">
-                                      {item.description}
-                                    </AlertDialogDescription>
+                                    <ScrollArea className="max-h-[60vh] pr-4">
+                                      <AlertDialogDescription className="text-left whitespace-pre-wrap pt-2">
+                                        {item.description}
+                                      </AlertDialogDescription>
+                                    </ScrollArea>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
                                     <AlertDialogAction>Close</AlertDialogAction>
