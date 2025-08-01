@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, Send, X, User } from 'lucide-react';
+import { Loader2, Send, X, User, Download } from 'lucide-react';
 import { FaRobot } from 'react-icons/fa';
 import { cn } from '@/lib/utils';
 import { chatWithReview, ChatWithReviewInput } from '@/ai/flows/chat-with-review';
@@ -94,6 +94,23 @@ export function Chatbot({ review }: ChatbotProps) {
         }
     };
 
+    const handleDownloadTranscript = () => {
+        const transcript = messages.map(msg => {
+            const prefix = msg.role === 'user' ? 'User:' : 'Call Sage:';
+            return `${prefix}\n${msg.content}\n`;
+        }).join('\n');
+
+        const blob = new Blob([transcript], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `call-sage-transcript-${review.conversationId || 'chat'}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <div className="fixed bottom-6 right-6 z-50">
             {isOpen ? (
@@ -111,18 +128,18 @@ export function Chatbot({ review }: ChatbotProps) {
                         <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
                             <div className="space-y-4">
                                 {messages.map((message, index) => (
-                                    <div key={index} className={cn("flex items-start gap-2", message.role === 'user' ? "justify-end" : "justify-start")}>
+                                    <div key={index} className="group relative flex items-start gap-2">
                                         {message.role === 'model' && (
                                             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
                                                 <FaRobot className="h-5 w-5" />
                                             </div>
                                         )}
                                         <div className={cn(
-                                            "rounded-lg px-3 py-2 max-w-[80%] text-sm prose prose-sm",
+                                            "rounded-lg px-3 py-2 max-w-[80%]",
                                             message.role === 'user'
-                                                ? "bg-primary text-primary-foreground"
+                                                ? "bg-primary text-primary-foreground ml-auto"
                                                 : "bg-muted text-muted-foreground",
-                                            "prose-headings:text-inherit prose-p:text-inherit prose-strong:text-inherit prose-ul:text-inherit prose-ol:text-inherit prose-li:text-inherit"
+                                            "prose prose-sm prose-headings:text-inherit prose-p:text-inherit prose-strong:text-inherit prose-ul:text-inherit prose-ol:text-inherit prose-li:text-inherit"
                                         )}>
                                             <ReactMarkdown>{message.content}</ReactMarkdown>
                                         </div>
@@ -145,6 +162,16 @@ export function Chatbot({ review }: ChatbotProps) {
                                 )}
                             </div>
                         </ScrollArea>
+                        
+                        {messages.length > 1 && (
+                             <div className="px-4 py-2 border-t flex justify-center">
+                                <Button variant="ghost" onClick={handleDownloadTranscript}>
+                                    <Download className="mr-2 h-4 w-4" />
+                                    Download Transcript
+                                </Button>
+                            </div>
+                        )}
+
                         <form onSubmit={handleSendMessage} className="p-4 border-t">
                             <div className="flex items-center gap-2">
                                 <Input
