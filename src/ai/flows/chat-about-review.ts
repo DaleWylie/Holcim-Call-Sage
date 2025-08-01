@@ -122,7 +122,7 @@ const chatAboutReviewFlow = ai.defineFlow(
         history: input.chatHistory.map(m => ({ role: m.role, parts: [{ text: m.content }] })),
         tools: [amendGeneratedReview],
         config: {
-            temperature: 0.1,
+            temperature: 0,
         }
       });
       
