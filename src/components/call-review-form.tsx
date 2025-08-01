@@ -132,17 +132,26 @@ export default function CallReviewForm() {
     }
   };
 
-
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.type === "audio/wav") {
+    if (file && file.type === 'audio/wav') {
       setAudioFile(file);
+
+      // Regex to find a UUID in the filename
+      const uuidRegex = /[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i;
+      const match = file.name.match(uuidRegex);
+
+      if (match) {
+        setConversationId(match[0]);
+      }
     } else {
       setAudioFile(null);
+      // Clear conversation ID if file is invalid or removed
+      setConversationId(''); 
       toast({
-        variant: "destructive",
-        title: "Invalid File Type",
-        description: "Please select a .wav file.",
+        variant: 'destructive',
+        title: 'Invalid File Type',
+        description: 'Please select a .wav file.',
       });
     }
   };
