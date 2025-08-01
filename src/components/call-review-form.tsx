@@ -67,7 +67,7 @@ export default function CallReviewForm() {
 
   const [agentFirstName, setAgentFirstName] = useState('');
   const [agentLastName, setAgentLastName] = useState('');
-  const [interactionId, setInteractionId] = useState('');
+  const [conversationId, setConversationId] = useState('');
   const [callTranscript, setCallTranscript] = useState('');
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [audioDataUriForPlayer, setAudioDataUriForPlayer] = useState<string | null>(null);
@@ -105,7 +105,7 @@ export default function CallReviewForm() {
       const inputForAI: GenerateNonBiasedReviewInput = {
         scoringMatrix,
         agentName,
-        interactionId: interactionId.trim(),
+        conversationId: conversationId.trim(),
         callTranscript: callTranscript.trim() || undefined,
         audioDataUri,
       };
@@ -147,7 +147,7 @@ export default function CallReviewForm() {
     }
   };
 
-  const canGenerate = !isLoading && !!agentFirstName.trim() && !!agentLastName.trim() && !!interactionId.trim() && (!!callTranscript.trim() || !!audioFile);
+  const canGenerate = !isLoading && !!agentFirstName.trim() && !!agentLastName.trim() && !!conversationId.trim() && (!!callTranscript.trim() || !!audioFile);
 
   return (
     <>
@@ -244,15 +244,15 @@ export default function CallReviewForm() {
                   </div>
 
                   <div className="space-y-4 text-center">
-                      <Label htmlFor="interactionId" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
+                      <Label htmlFor="conversationId" className="text-lg font-semibold text-primary flex items-center justify-center gap-2">
                           <Fingerprint className="h-5 w-5" />
-                          Interaction ID
+                          Conversation ID
                       </Label>
                       <Input
-                          id="interactionId"
+                          id="conversationId"
                           className="w-full p-3 border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent transition duration-200 ease-in-out text-base text-center"
-                          value={interactionId}
-                          onChange={(e) => setInteractionId(e.target.value)}
+                          value={conversationId}
+                          onChange={(e) => setConversationId(e.target.value)}
                           placeholder="e.g. df14f08f-0377-4e25-875f-8f07140de97d"
                       />
                   </div>

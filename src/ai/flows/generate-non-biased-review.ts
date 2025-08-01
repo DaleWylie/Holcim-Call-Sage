@@ -23,7 +23,7 @@ const ScoringItemSchema = z.object({
 const GenerateNonBiasedReviewInputSchema = z.object({
   scoringMatrix: z.array(ScoringItemSchema).describe('The list of criteria to score the call against.'),
   agentName: z.string().describe("The name of the agent being reviewed. This name MUST be used."),
-  interactionId: z.string().optional().describe('An optional unique identifier for the call interaction.'),
+  conversationId: z.string().optional().describe('An optional unique identifier for the call conversation.'),
   callTranscript: z.string().optional().describe('The full text transcript of the call.'),
   audioDataUri: z.string().optional().describe("An audio recording of the call, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
 });
@@ -38,7 +38,7 @@ const TimestampedStringSchema = z.object({
 // Define the output schema for the AI flow
 const GenerateNonBiasedReviewOutputSchema = z.object({
   agentName: z.string().describe("The name of the agent who handled the call. Use the 'agentName' from the input as it is mandatory."),
-  interactionId: z.string().optional().describe("The interaction ID from the input. Return it as provided."),
+  conversationId: z.string().optional().describe("The conversation ID from the input. Return it as provided."),
   quickSummary: z.string().describe("A very brief, one or two-sentence summary of the call's outcome and the agent's performance."),
   overallScore: z.number().describe("The overall weighted score for the call, calculated based on the weights provided in the input. The score should be a percentage from 0 to 100. It can be a decimal."),
   scores: z.array(z.object({
@@ -70,8 +70,8 @@ const nonBiasedReviewPrompt = ai.definePrompt({
     **CRITICAL Instructions:**
     1.  **Analyse the Interaction**: Carefully review the provided call data. If an audio file is provided, it is the primary source; transcribe and analyse it. If only a transcript is provided, use that.
     2.  **Score Strictly by Description**: You MUST evaluate the agent's performance for each criterion based exclusively on its 'description', which includes a detailed 0-5 scoring guide. Do NOT use your own general knowledge of customer service.
-    3.  **Identify the Agent**: The 'agentName' is provided in the input, and you MUST use that name for the 'agentName' in your output.
-    4.  **Carry over Interaction ID**: If an 'interactionId' is provided in the input, you MUST include it in the 'interactionId' field of your output.
+    3.  **Use Agent's First Name**: Throughout all generated text fields ('quickSummary', 'justification', 'overallSummary', 'goodPoints', 'areasForImprovement'), you MUST refer to the agent by their first name (e.g., "Scott was helpful" not "The agent was helpful"). This creates a friendlier, more personal review. The full agent name is provided in the 'agentName' input field; you should extract the first name from it.
+    4.  **Carry over Conversation ID**: If a 'conversationId' is provided in the input, you MUST include it in the 'conversationId' field of your output.
     5.  **Extract Timestamps (Conditional)**: When providing 'goodPoints' or 'areasForImprovement', you MUST look for a corresponding timestamp in the transcript (e.g., [00:01:23] or a similar format). If you find a relevant timestamp, you must extract it and place it in the 'timestamp' field. For the 'justification' field in the 'scores' array, you MUST NOT include a timestamp.
     6.  **Timestamp Uniqueness**: Avoid referencing the exact same timestamp multiple times within the same list (e.g., in 'goodPoints' or 'areasForImprovement'), unless it is to highlight a completely different aspect of the interaction. Each reference should ideally provide new value.
     7.  **Justification Rule**: The 'justification' text must explain the reasoning for the score by referencing specific parts of the conversation. It must NOT include the score number itself (e.g., do not write "Score: 4/5" in the justification).
@@ -87,8 +87,8 @@ const nonBiasedReviewPrompt = ai.definePrompt({
 
     **Call Data:**
     Agent's Name (to be used): {{agentName}}
-    {{#if interactionId}}
-    Interaction ID (to be used): {{interactionId}}
+    {{#if conversationId}}
+    Conversation ID (to be used): {{conversationId}}
     {{/if}}
     {{#if audioDataUri}}
     Audio Recording:
@@ -138,7 +138,7 @@ const generateNonBiasedReviewFlow = ai.defineFlow(
           return {
             ...output,
             agentName: output.agentName,
-            interactionId: input.interactionId, // Ensure interactionId is passed through
+            conversationId: input.conversationId, // Ensure conversationId is passed through
             overallScore: overallScore,
           };
       }
