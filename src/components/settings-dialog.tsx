@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import {
   DialogContent,
   DialogHeader,
@@ -41,7 +41,6 @@ export function SettingsDialog({ setOpen }: SettingsDialogProps) {
   const { 
     customScoringMatrix, 
     addCustomCriterion, 
-    updateCustomCriterion, 
     removeCustomCriterion,
     resetCustomCriteria 
   } = useScoringMatrixStore();
@@ -49,6 +48,7 @@ export function SettingsDialog({ setOpen }: SettingsDialogProps) {
   // Local state for editing custom criteria
   const [localCustomMatrix, setLocalCustomMatrix] = useState<ScoringItem[]>([]);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
   const [openAccordionItems, setOpenAccordionItems] = useState<string[]>([]);
 
   useEffect(() => {
@@ -90,85 +90,111 @@ export function SettingsDialog({ setOpen }: SettingsDialogProps) {
     localCustomMatrix.forEach(item => addCustomCriterion(item));
     setOpen(false);
   };
+  
+  const handleResetToDefault = () => {
+      setLocalCustomMatrix([]);
+      setIsResetConfirmOpen(false);
+  }
 
   return (
-    <DialogContent className="max-w-3xl">
-      <DialogHeader>
-        <DialogTitle className="text-primary">Custom Scoring Criteria</DialogTitle>
-        <DialogDescription>
-          Add your own temporary criteria for this session. They will be reset when you reload the page.
-        </DialogDescription>
-      </DialogHeader>
-      
-      <div className="py-4 max-h-[60vh] overflow-y-auto pr-2">
-        {localCustomMatrix.length === 0 ? (
-          <p className="text-center text-muted-foreground">No custom criteria added.</p>
-        ) : (
-          <Accordion type="multiple" value={openAccordionItems} onValueChange={setOpenAccordionItems} className="w-full">
-              {localCustomMatrix.map((item) => (
-              <AccordionItem value={item.id} key={item.id}>
-                  <div className="flex items-center w-full gap-2">
-                      <AccordionTrigger className="flex-1 py-2 text-left pr-2">
-                          <span className='font-semibold text-primary truncate group-hover:underline'>{item.criterion}</span>
-                      </AccordionTrigger>
-                      <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-muted-foreground hover:text-destructive hover:bg-transparent rounded-full shrink-0"
-                          onClick={() => setItemToDelete(item.id)}
-                      >
-                          <Trash2 className="h-4 w-4" />
-                      </Button>
-                  </div>
-                  <AccordionContent>
-                  <div className="space-y-2 p-2">
-                      <div className="space-y-1">
-                      <Label htmlFor={`criterion-${item.id}`} className="text-primary">Criterion Name</Label>
-                      <Input
-                          id={`criterion-${item.id}`}
-                          value={item.criterion}
-                          onChange={(e) => handleMatrixChange(item.id, 'criterion', e.target.value)}
-                          className="font-semibold bg-white"
-                      />
-                      </div>
-                      <div className="space-y-1">
-                      <Label htmlFor={`description-${item.id}`} className="text-primary">Description</Label>
-                      <Textarea
-                          id={`description-${item.id}`}
-                          value={item.description}
-                          onChange={(e) => handleMatrixChange(item.id, 'description', e.target.value)}
-                          rows={3}
-                          className="bg-white"
-                      />
-                      </div>
-                  </div>
-                  </AccordionContent>
-              </AccordionItem>
-              ))}
-          </Accordion>
-        )}
-      </div>
+    <>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle className="text-primary">Custom Scoring Criteria</DialogTitle>
+          <DialogDescription>
+            Add your own temporary criteria for this session. This will be reset back to default when you reload the page.
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="py-4 max-h-[60vh] overflow-y-auto pr-2">
+          {localCustomMatrix.length === 0 ? (
+            <p className="text-center text-muted-foreground">No custom criteria added.</p>
+          ) : (
+            <Accordion type="multiple" value={openAccordionItems} onValueChange={setOpenAccordionItems} className="w-full">
+                {localCustomMatrix.map((item) => (
+                <AccordionItem value={item.id} key={item.id}>
+                    <div className="flex items-center w-full gap-2">
+                        <AccordionTrigger className="flex-1 py-2 text-left pr-2">
+                            <span className='font-semibold text-primary truncate group-hover:underline'>{item.criterion}</span>
+                        </AccordionTrigger>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-muted-foreground hover:text-destructive hover:bg-transparent rounded-full shrink-0"
+                            onClick={() => setItemToDelete(item.id)}
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </div>
+                    <AccordionContent>
+                    <div className="space-y-2 p-2">
+                        <div className="space-y-1">
+                        <Label htmlFor={`criterion-${item.id}`} className="text-primary">Criterion Name</Label>
+                        <Input
+                            id={`criterion-${item.id}`}
+                            value={item.criterion}
+                            onChange={(e) => handleMatrixChange(item.id, 'criterion', e.target.value)}
+                            className="font-semibold bg-white"
+                        />
+                        </div>
+                        <div className="space-y-1">
+                        <Label htmlFor={`description-${item.id}`} className="text-primary">Description</Label>
+                        <Textarea
+                            id={`description-${item.id}`}
+                            value={item.description}
+                            onChange={(e) => handleMatrixChange(item.id, 'description', e.target.value)}
+                            rows={3}
+                            className="bg-white"
+                        />
+                        </div>
+                    </div>
+                    </AccordionContent>
+                </AccordionItem>
+                ))}
+            </Accordion>
+          )}
+        </div>
 
-      <div className="text-center mt-4">
-          <Button onClick={addMatrixItem} variant="default">
-              <Plus className="mr-2 h-4 w-4" /> Add Custom Criterion
-          </Button>
-      </div>
-
-      <DialogFooter>
-        <div className="flex justify-end w-full gap-2">
-            <DialogClose asChild>
-            <Button type="button" variant="secondary">
-                Cancel
-            </Button>
-            </DialogClose>
-            <Button type="button" onClick={handleSaveChanges}>
-            Save Changes
+        <div className="text-center mt-4">
+            <Button onClick={addMatrixItem} variant="default">
+                <Plus className="mr-2 h-4 w-4" /> Add Custom Criterion
             </Button>
         </div>
-      </DialogFooter>
 
-      {/* Alert Dialog for deleting a criterion */}
+        <DialogFooter className="sm:justify-between">
+            <Button type="button" variant="destructive" onClick={() => setIsResetConfirmOpen(true)}>
+                Reset to Default
+            </Button>
+            <div className="flex justify-end gap-2">
+                <DialogClose asChild>
+                <Button type="button" variant="secondary">
+                    Cancel
+                </Button>
+                </DialogClose>
+                <Button type="button" onClick={handleSaveChanges}>
+                Save Changes
+                </Button>
+            </div>
+        </DialogFooter>
+      </DialogContent>
+      
+      {/* Alert Dialog for resetting all custom criteria */}
+      <AlertDialog open={isResetConfirmOpen} onOpenChange={setIsResetConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete all custom criteria you have added in this session.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleResetToDefault} className={buttonVariants({ variant: "destructive" })}>Reset</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Alert Dialog for deleting a single criterion */}
       <AlertDialog open={!!itemToDelete} onOpenChange={(isOpen) => !isOpen && setItemToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -179,11 +205,10 @@ export function SettingsDialog({ setOpen }: SettingsDialogProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setItemToDelete(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmRemoveItem}>Delete</AlertDialogAction>
+            <AlertDialogAction onClick={confirmRemoveItem} className={buttonVariants({ variant: "destructive" })}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-    </DialogContent>
+    </>
   );
 }

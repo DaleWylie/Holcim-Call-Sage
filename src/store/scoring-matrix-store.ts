@@ -12,7 +12,6 @@ interface ScoringMatrixState {
   defaultScoringMatrix: ScoringItem[];
   customScoringMatrix: ScoringItem[];
   addCustomCriterion: (criterion: Omit<ScoringItem, 'weight'>) => void;
-  updateCustomCriterion: (id: string, criterion: Partial<Omit<ScoringItem, 'id' | 'weight'>>) => void;
   removeCustomCriterion: (id: string) => void;
   resetCustomCriteria: () => void;
 }
@@ -192,11 +191,6 @@ export const useScoringMatrixStore = create<ScoringMatrixState>()(
       customScoringMatrix: [],
       addCustomCriterion: (criterion) => set((state) => ({ 
         customScoringMatrix: [...state.customScoringMatrix, { ...criterion, weight: 0 }] 
-      })),
-      updateCustomCriterion: (id, updates) => set((state) => ({
-        customScoringMatrix: state.customScoringMatrix.map(item => 
-          item.id === id ? { ...item, ...updates } : item
-        )
       })),
       removeCustomCriterion: (id) => set((state) => ({
         customScoringMatrix: state.customScoringMatrix.filter(item => item.id !== id)
