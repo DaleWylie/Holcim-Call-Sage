@@ -330,22 +330,20 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
             </div>
            </CardHeader>
            <CardContent>
-             <div className="grid grid-cols-2 gap-4">
+             <div className="flex justify-between items-end gap-4">
                 {interactionId && (
                   <div>
                     <Label className="font-medium text-muted-foreground">Interaction ID</Label>
                     <p className="font-semibold">{interactionId}</p>
                   </div>
                 )}
-             </div>
-          </CardContent>
-          <CardFooter className="flex justify-end pt-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Timer className="h-4 w-4" />
                     <span>Conversation Duration:</span>
                     <span className="font-semibold">{conversationDuration}</span>
                 </div>
-          </CardFooter>
+             </div>
+          </CardContent>
         </Card>
 
         <Card data-printable-section="true" className="mb-6">
