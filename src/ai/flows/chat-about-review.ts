@@ -61,11 +61,6 @@ const ChatAboutReviewOutputSchema = z.object({
 export type ChatAboutReviewOutput = z.infer<typeof ChatAboutReviewOutputSchema>;
 
 
-// Exported wrapper function to be called by the frontend
-export async function chatAboutReview(input: ChatAboutReviewInput): Promise<ChatAboutReviewOutput> {
-  return chatAboutReviewFlow(input);
-}
-
 // Define the tool for amending the review at the top level of the module
 const amendGeneratedReview = ai.defineTool(
     {
@@ -81,6 +76,11 @@ const amendGeneratedReview = ai.defineTool(
     }
 );
 
+// Exported wrapper function to be called by the frontend
+export async function chatAboutReview(input: ChatAboutReviewInput): Promise<ChatAboutReviewOutput> {
+  return chatAboutReviewFlow(input);
+}
+
 // Define the main Genkit flow for the chat
 const chatAboutReviewFlow = ai.defineFlow(
   {
@@ -89,11 +89,10 @@ const chatAboutReviewFlow = ai.defineFlow(
     outputSchema: ChatAboutReviewOutputSchema,
   },
   async (input) => {
-    const model = googleAI.model('gemini-2.0-flash');
-
+    
     try {
       const response = await ai.generate({
-        model,
+        model: googleAI.model('gemini-2.0-flash'),
         prompt: `
             You are an AI Quality Analyst Assistant named "Call Sage". Your task is to answer questions about a call review that has already been generated.
             
@@ -145,6 +144,10 @@ const chatAboutReviewFlow = ai.defineFlow(
         }
       });
       
+      if (!response.choices || response.choices.length === 0) {
+        throw new Error('The AI service returned a response with no choices. This may be due to safety filters or other content restrictions.');
+      }
+      
       const choice = response.choices[0];
       const toolCall = choice.toolCalls?.[0];
 
@@ -168,9 +171,9 @@ const chatAboutReviewFlow = ai.defineFlow(
           amendedReview: amendedReview,
         };
 
-      } else if (choice.message.content) {
+      } else if (choice.message.content && choice.message.content[0]?.text) {
          return {
-            answer: choice.message.content[0].text!,
+            answer: choice.message.content[0].text,
          };
       }
 
