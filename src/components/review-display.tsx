@@ -199,73 +199,79 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
     if (!mainElement) return;
 
     setIsPrinting(true);
-    
-    // Add a temporary style block for printing
-    const style = document.createElement('style');
-    style.innerHTML = `
-        @media print {
-            .printable-hidden { display: none !important; }
-            .printable-only { display: inline !important; font-weight: 600 !important; }
-        }
-        .printable-hidden { display: inline-flex; }
-        .printable-only { display: none; }
-    `;
-    document.head.appendChild(style);
 
-
-    // Temporarily modify the DOM for printing
-    const actionButtons = mainElement.querySelectorAll<HTMLElement>('.action-button');
-    actionButtons.forEach(button => (button.style.display = 'none'));
-    const checkerInput = mainElement.querySelector<HTMLInputElement>('#checkerName');
-    if (checkerInput) checkerInput.style.display = 'none';
-    const checkerText = mainElement.querySelector<HTMLParagraphElement>('#checkerNameDisplay');
-    if (checkerText) checkerText.style.display = 'block';
-
-    const pdf = new jsPDF({
-      orientation: 'p',
-      unit: 'pt',
-      format: 'a4'
-    });
-    
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const margin = 20;
-    const contentWidth = pdfWidth - margin * 2;
-    let yPos = margin;
-
-    const addElementToPdf = async (element: HTMLElement) => {
-        // Skip non-printable sections
-        if (element.getAttribute('data-printable-section') === 'false') {
-            return;
-        }
-
-        const canvas = await html2canvas(element, {
-            scale: 2,
+    try {
+        const canvas = await html2canvas(mainElement, {
+            scale: 2, // Higher scale for better quality
             useCORS: true,
-            windowWidth: element.scrollWidth,
-            windowHeight: element.scrollHeight,
             onclone: (doc) => {
-                // Apply printing classes to the cloned document for canvas rendering
-                 doc.querySelectorAll<HTMLElement>('.printable-hidden').forEach(el => el.style.display = 'none');
-                 doc.querySelectorAll<HTMLElement>('.printable-only').forEach(el => el.style.display = 'inline');
+                // This function runs on the cloned document before rendering
+                // We can use it to apply print-specific styles
+                const clonedElement = doc.querySelector<HTMLElement>(`[data-review-id="${mainElement.dataset.reviewId}"]`);
+                if (clonedElement) {
+                    // Hide non-printable elements like audio player and action buttons
+                    clonedElement.querySelectorAll('[data-printable="false"]').forEach(el => {
+                        (el as HTMLElement).style.display = 'none';
+                    });
+                    // Show elements that are only for printing
+                    clonedElement.querySelectorAll('.printable-only').forEach(el => {
+                         (el as HTMLElement).style.display = 'inline';
+                         (el as HTMLElement).style.fontWeight = '600';
+                    });
+                    // Hide the standard interactive elements
+                    clonedElement.querySelectorAll('.printable-hidden').forEach(el => {
+                        (el as HTMLElement).style.display = 'none';
+                    });
+                    // Hide checker input, show static text
+                    const checkerInput = clonedElement.querySelector<HTMLInputElement>('#checkerName');
+                    if(checkerInput) checkerInput.style.display = 'none';
+                    const checkerText = clonedElement.querySelector<HTMLParagraphElement>('#checkerNameDisplay');
+                    if (checkerText) checkerText.style.display = 'block';
+                }
             }
         });
 
         const imgData = canvas.toDataURL('image/png');
-        const imgHeight = (canvas.height * contentWidth) / canvas.width;
+        const pdf = new jsPDF({
+            orientation: 'p',
+            unit: 'pt',
+            format: 'a4'
+        });
 
-        if (yPos + imgHeight > pdf.internal.pageSize.getHeight() - margin) {
-            pdf.addPage();
-            yPos = margin;
-        }
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const canvasAspectRatio = canvasWidth / canvasHeight;
+        
+        const margin = 20;
+        let imgWidth = pdfWidth - margin * 2;
+        let imgHeight = imgWidth / canvasAspectRatio;
 
-        pdf.addImage(imgData, 'PNG', margin, yPos, contentWidth, imgHeight);
-        yPos += imgHeight + 5; // Add some padding between sections
-    };
+        // If the content is too tall, it needs to be split across pages
+        let heightLeft = imgHeight;
+        let yPos = margin;
 
-    try {
-        const sections = mainElement.querySelectorAll<HTMLElement>('[data-printable-section]');
-        for (const section of Array.from(sections)) {
-            await addElementToPdf(section);
+        while (heightLeft > 0) {
+            // Check if it's not the first page
+            if (yPos > margin) {
+                pdf.addPage();
+                yPos = margin;
+            }
+            
+            let pageHeight = pdfHeight - margin * 2;
+            let currentChunkHeight = Math.min(heightLeft, pageHeight);
+
+            pdf.addImage(
+                imgData,
+                'PNG',
+                margin, // x
+                yPos - ((imgHeight - heightLeft)), // y (this is the tricky part for slicing)
+                imgWidth,
+                imgHeight
+            );
+            
+            heightLeft -= pageHeight;
         }
 
         const safeAgentName = review.agentName.replace(/\s+/g, '-');
@@ -275,22 +281,20 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
     } catch (error) {
         console.error("Failed to generate PDF:", error);
     } finally {
-        // Restore the DOM after printing
-        actionButtons.forEach(button => (button.style.display = ''));
-        if (checkerInput) checkerInput.style.display = '';
-        if (checkerText) checkerText.style.display = 'none';
-        
-        // Remove the temporary style block
-        document.head.removeChild(style);
-
         setIsPrinting(false);
     }
   };
 
+  const reviewId = useMemo(() => `review-${conversationId}`, [conversationId]);
+
 
   return (
     <div className="relative">
-      <div ref={reviewRef} className="bg-gray-50/50 dark:bg-background/50 p-6 rounded-lg border border-border shadow-inner text-left mt-8">
+      <div 
+        ref={reviewRef} 
+        data-review-id={reviewId}
+        className="bg-gray-50/50 dark:bg-background/50 p-6 rounded-lg border border-border shadow-inner text-left mt-8"
+      >
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold text-foreground font-headline flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-accent" />
@@ -299,7 +303,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
         </div>
         
         {audioDataUri && (
-             <div data-printable-section="false" className="mb-6">
+             <div data-printable="false" className="mb-6">
                 <audio ref={audioRef} controls src={audioDataUri} className="w-full">
                     Your browser does not support the audio element.
                 </audio>
@@ -319,9 +323,9 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                 <p className="text-foreground">{review.quickSummary}</p>
               </div>
               <div className="text-center ml-4">
-                  <Label className="text-sm font-bold text-muted-foreground">Overall Score</Label>
+                  <Label className="text-sm font-bold text-muted-foreground block text-center">Overall Score</Label>
                   <div className={cn(
-                    "mt-1 flex items-center justify-center w-18 h-18 rounded-full text-white text-2xl font-bold",
+                    "mt-1 flex items-center justify-center w-16 h-16 rounded-full text-white text-xl font-bold",
                     getScoreColor(review.overallScore, 100)
                   )}>
                     {review.overallScore.toFixed(0)}%
@@ -368,7 +372,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                             <div className="flex w-full items-center gap-2 py-2">
                                 <div
                                     className={cn(
-                                    'flex h-8 w-12 shrink-0 items-center justify-center rounded-md px-2 text-sm font-bold text-white',
+                                    'flex h-7 w-12 shrink-0 items-center justify-center rounded-md px-2 text-sm font-bold text-white',
                                     getScoreColor(item.score * 20) // Multiply by 20 to map 0-5 scale to 0-100 for color
                                     )}
                                 >
@@ -380,7 +384,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                                         <span className="text-xs text-muted-foreground ml-2">(Overall Weighting: {weight}%)</span>
                                     )}
                                 </div>
-                                <div className="action-button flex items-center gap-2 ml-4 shrink-0">
+                                <div data-printable="false" className="flex items-center gap-2 ml-4 shrink-0">
                                     {editingField === `score-${index}` ? (
                                     <>
                                         <Input
@@ -436,7 +440,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                                             className="text-sm"
                                             autoFocus
                                         />
-                                        <div className="flex items-center gap-2 justify-end action-button">
+                                        <div data-printable="false" className="flex items-center gap-2 justify-end">
                                             <Button
                                                 size="icon"
                                                 variant="ghost"
@@ -464,6 +468,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                                             size="icon"
                                             variant="ghost"
                                             className="h-8 w-8 text-muted-foreground hover:bg-primary hover:text-primary-foreground action-button shrink-0"
+                                            data-printable="false"
                                             onClick={() => handleEditClick(`justification-${index}`, item.justification)}
                                         >
                                             <Pencil className="h-4 w-4" />
@@ -490,7 +495,8 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                         <Button
                             size="icon"
                             variant="ghost"
-                            className="h-8 w-8 text-muted-foreground hover:bg-primary hover:text-primary-foreground action-button"
+                            className="h-8 w-8 text-muted-foreground hover:bg-primary hover:text-primary-foreground"
+                            data-printable="false"
                             onClick={() => handleEditClick('overallSummary', review.overallSummary)}
                         >
                             <Pencil className="h-4 w-4" />
@@ -507,7 +513,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                             rows={6}
                             autoFocus
                         />
-                        <div className="flex items-center gap-2 justify-end action-button">
+                        <div data-printable="false" className="flex items-center gap-2 justify-end action-button">
                             <Button
                                 size="icon"
                                 variant="ghost"
@@ -554,7 +560,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                                     <Clock className="h-3 w-3 mr-1" />
                                     {item.timestamp}
                                 </Badge>
-                                <span className="printable-only mr-2 text-muted-foreground">{item.timestamp}</span>
+                                <span className="printable-only mr-2 text-muted-foreground" style={{ display: 'none' }}>{item.timestamp}</span>
                             </>
                         )}
                         {item.text}
@@ -586,7 +592,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
                                 <Clock className="h-3 w-3 mr-1" />
                                 {item.timestamp}
                             </Badge>
-                             <span className="printable-only mr-2 text-muted-foreground">{item.timestamp}</span>
+                             <span className="printable-only mr-2 text-muted-foreground" style={{ display: 'none' }}>{item.timestamp}</span>
                         </>
                     )}
                     {item.text}
@@ -611,7 +617,7 @@ export function ReviewDisplay({ review, setReview, audioDataUri, transcript }: R
             </CardHeader>
             <CardContent>
                  <div className="flex flex-col items-center gap-4">
-                    <div className="flex w-full items-center gap-2 action-button">
+                    <div data-printable="false" className="flex w-full items-center gap-2">
                         <Input
                             id="checkerName"
                             placeholder="Enter your name to enable printing"
