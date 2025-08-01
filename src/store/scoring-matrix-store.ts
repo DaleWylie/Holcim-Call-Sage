@@ -108,19 +108,19 @@ const defaultScoringMatrix: ScoringItem[] = [
         criterion: "5. Professionalism & Empathy",
         weight: 15,
         description: `
-- Description: The agent displayed empathy and patience throughout the call, handled frustration or difficult behaviour appropriately, and did not interrupt or speak over the caller.
+- Description: The agent displayed empathy and patience throughout the call, handled frustration or difficult behaviour appropriately, and did not interrupt or speak over the caller. This is a critical criterion.
 
 - Tool Analysis Focus:
-    o Empathy: The tool will use sentiment analysis to detect a warm and empathetic tone. It will also check for the use of specific empathetic phrases, such as "I understand how frustrating that must be," or "I'm sorry to hear that."
-    o Patience: The tool will monitor for the agent's tone and pace when the caller becomes frustrated. It will look for signs of de-escalation and a consistent, calm demeanour.
-    o Interrupting: The tool will analyse speaker turns to detect instances where the agent's speech overlaps with the caller's, flagging any interruptions.
+    o Empathy & Tone: The tool will use sentiment analysis to detect a warm, patient, and empathetic tone. It MUST flag a stern, dismissive, or rushed tone as a significant negative. It will also check for the use of specific empathetic phrases, such as "I understand how frustrating that must be," or "I'm sorry to hear that." The absence of these phrases in a situation that calls for them is a negative indicator.
+    o Patience & De-escalation: The tool will monitor for the agent's tone and pace when the caller becomes frustrated. It will look for signs of de-escalation and a consistent, calm demeanour.
+    o Interrupting: The tool will analyse speaker turns to detect instances where the agent's speech overlaps with the caller's. ANY interruption or instance of talking over the customer MUST be flagged and MUST negatively impact the score.
 
 - Scoring Criteria (0-5):
-    o 0: The agent was unprofessional and showed no empathy. They were impatient, interrupted the caller, or handled difficult behaviour poorly.
-    o 1: The agent was largely neutral. They failed to show any empathy or acknowledge the caller's emotional state, even in a suitable situation. They may have interrupted the caller.
-    o 2: The agent maintained a professional tone but lacked genuine empathy. While they didn't actively handle a difficult situation poorly, they didn't use any de-escalation techniques. They may have interrupted the caller a few times.
-    o 3: The agent was professional, patient, and did not interrupt the caller. They showed a basic level of empathy, but it could have been more expressive or consistent throughout the call.
-    o 4: The agent was consistently professional and empathetic. They listened patiently, avoided interruptions, and used empathetic language effectively, making the caller feel understood.
+    o 0: The agent was unprofessional and showed no empathy. They were impatient, frequently interrupted the caller, or handled difficult behaviour poorly.
+    o 1: The agent was largely neutral or stern. They failed to show any real empathy or acknowledge the caller's emotional state. They interrupted the caller at least once.
+    o 2: The agent maintained a professional tone but lacked genuine empathy or patience. While they didn't actively handle a difficult situation poorly, they didn't use any de-escalation techniques. They may have interrupted the caller, or their tone may have been dismissive.
+    o 3: The agent was professional, patient, and generally did not interrupt the caller. They showed a basic level of empathy, but it could have been more expressive or consistent. A single interruption might result in this score.
+    o 4: The agent was consistently professional and empathetic. They listened patiently, completely avoided interruptions, and used empathetic language effectively, making the caller feel understood.
     o 5: The agent's professionalism and empathy were exceptional. They not only avoided interruptions and showed patience, but they actively used de-escalation techniques and demonstrated a deep level of understanding, transforming a potentially difficult call into a positive experience.`
     },
     {
